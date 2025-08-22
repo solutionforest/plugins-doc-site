@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { plugins } from "@/lib/plugins";
-import { getCacheStats } from "@/lib/cache";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -18,9 +17,6 @@ export async function GET(request: NextRequest) {
         }))
       });
 
-    case 'cache-stats':
-      return NextResponse.json(getCacheStats());
-
     case 'health':
       return NextResponse.json({
         status: 'healthy',
@@ -31,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     default:
       return NextResponse.json({
-        message: 'Available actions: plugins, cache-stats, health',
+        message: 'Available actions: plugins, health',
         example: '/api/status?action=health'
       });
   }

@@ -22,8 +22,14 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# others
+# environment files
 .env*.local
+.env
+
+# deployment
 .vercel
 next-env.d.ts
 /.vscode/
+
+# static export
+/out/

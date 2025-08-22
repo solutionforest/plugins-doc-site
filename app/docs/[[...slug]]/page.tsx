@@ -19,7 +19,8 @@ export const revalidate = 7200;
 
 // Enable static generation for performance
 export const dynamic = 'force-static';
-export const dynamicParams = true;
+// Note: dynamicParams cannot be true with static export
+export const dynamicParams = false;
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -116,9 +117,23 @@ export default async function Page(props: {
 }
 
 export function generateStaticParams(): { slug?: string[] }[] {
-  // Generate static params for plugin documentation
-  // You can customize this to pre-generate specific combinations
-  return [];
+  const params: { slug?: string[] }[] = [];
+  
+  // Generate params for all plugin documentation pages
+  for (const plugin of plugins) {
+    for (const version of plugin.versions) {
+      for (const file of plugin.markdown_files) {
+        const slug = [plugin.slug, version.version, file.name.toLowerCase().replace('.md', '')];
+        params.push({ slug });
+      }
+    }
+  }
+  
+  // Add root docs page
+  params.push({ slug: undefined });
+  
+  console.log(`Generated ${params.length} static params for documentation pages`);
+  return params;
 }
 
 export async function generateMetadata(props: {
