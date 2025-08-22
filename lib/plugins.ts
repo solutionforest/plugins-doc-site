@@ -158,6 +158,21 @@ export const plugins: Plugin[] = [
       { name: "CHANGELOG.md", title: "Changelog" },
     ]
   },
+  {
+    name: 'Filament Field Group',
+    slug: 'filament-field-group',
+    description: 'Group related fields together in your Filament forms with collapsible sections and organized layouts.',
+    repository_url: 'https://github.com/solutionforest/filament-field-group',
+    latest_version: '2.x',
+    versions: [
+      { version: '1.x', github_branch: '1.x' },
+      { version: '2.x', github_branch: '2.x' },
+    ],
+    markdown_files: [
+      { name: "README.md", title: "Overview" },
+      { name: "CHANGELOG.md", title: "Changelog" },
+    ]
+  },
 ];
 
 // Helper functions
