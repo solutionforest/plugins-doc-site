@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === 'true';
+const isProd = process.env.NODE_ENV === 'production';
+
+// GitHub Pages configuration
+const basePath = isProd && isStaticExport ? '/plugins-doc-site' : '';
 
 const nextConfig = {
     reactStrictMode: true,
@@ -8,6 +12,8 @@ const nextConfig = {
         output: 'export',
         trailingSlash: true,
         skipTrailingSlashRedirect: true,
+        basePath: basePath,
+        assetPrefix: basePath,
     }),
     images: {
         unoptimized: isStaticExport, // Only unoptimize for static export

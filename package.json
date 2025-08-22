@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "build": "next build",
-        "build:static": "NEXT_STATIC_EXPORT=true next build",
+        "build:static": "NODE_ENV=production NEXT_STATIC_EXPORT=true next build",
         "dev": "next dev --turbo",
         "dev:local": "LOCAL=true next dev --turbo",
         "sync:docs": "git submodule update --init",
