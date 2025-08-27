@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "build:static": "NODE_ENV=production NEXT_STATIC_EXPORT=true next build",
     "dev": "next dev --turbo",
     "dev:local": "LOCAL=true next dev --turbo",
     "start": "next start",
     "format": "prettier . -w",
+    "deploy:static": "npm run build:static",
     "setup": "node scripts/setup.js"
   },
   "dependencies": {
