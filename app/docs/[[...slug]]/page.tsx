@@ -136,7 +136,7 @@ function createRelativeLink(repository: RepositoryConfig, version: VersionConfig
   const extractPaths = href.split('/').map((part) => getFileSlug(part)) || [];
   const existPage = null;//source.getPage([repository.repo, version.version, ...extractPaths]);
   if (existPage) {
-    return existPage.url;
+    //return existPage.url;
   }
 
   let repositoryUrl = `${repository.repository_url}/blob/${version.github_branch || version.version}/${href}`;
