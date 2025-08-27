@@ -62,7 +62,7 @@ function parseSourceBeforeCompile(filePath: string, source: string): string {
   // Extract case that have been set on repo-config
   // e.g. 
   // [xxx](CHANGELOG.md) -> [xxx]({baseUrl}/changelog)
-  console.log('**** sda', filePath);
+  //console.log('**** sda', filePath);
 
   return parsedSource;
 }
@@ -73,14 +73,6 @@ export async function compile(filePath: string, source: string) {
 
   if (cached) return cached;
   console.time(`compile md: ${filePath}`);
-
-  const isLocal = filePath.endsWith('.html');
-  if (isLocal) {
-    return {
-      source,
-      isLocal,
-    };
-  }
 
   const compiling = compiler
     .compile({
