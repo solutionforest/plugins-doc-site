@@ -87,9 +87,6 @@ export default async function Page(props: {
   }
   
   let content = await page.data.load();
-  if (content.isLocal) { // local static html
-    return <html dangerouslySetInnerHTML={{ __html: content.source }} />;
-  }
 
   if (content.source) {
     const sourcePage = source.getPage(content.source.split("/"));
