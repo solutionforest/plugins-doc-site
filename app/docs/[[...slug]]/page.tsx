@@ -134,7 +134,7 @@ function createRelativeLink(repository: RepositoryConfig, version: VersionConfig
   }
 
   const extractPaths = href.split('/').map((part) => getFileSlug(part)) || [];
-  const existPage = source.getPage([repository.repo, version.version, ...extractPaths]);
+  const existPage = null;//source.getPage([repository.repo, version.version, ...extractPaths]);
   if (existPage) {
     return existPage.url;
   }
