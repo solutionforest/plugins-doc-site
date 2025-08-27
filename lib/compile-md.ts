@@ -3,6 +3,7 @@ import type { TableOfContents } from "fumadocs-core/server";
 import type { MDXComponents } from "mdx/types";
 import type { FC } from "react";
 import { remarkCompact } from "./remark-compact";
+import { remarkImage, rehypeCode, type RemarkImageOptions } from "fumadocs-core/mdx-plugins";
 
 export interface CompiledPage {
   full?: boolean;
@@ -13,13 +14,26 @@ export interface CompiledPage {
 
   toc: TableOfContents;
   body: FC<{ components?: MDXComponents }>;
+
+  isLocal?: boolean;
 }
 
 const cache = new Map<string, Promise<CompiledPage>>();
 
 const compiler = createCompiler({
-  remarkPlugins: (v) => [remarkCompact, ...v],
-  remarkImageOptions: false,
+  remarkPlugins: (v) => [
+    remarkCompact, 
+    // remarkImage, 
+    rehypeCode,
+    ...v
+  ],
+  // remarkImageOptions: {
+  //   publicDir: 'public',
+  //   placeholder: 'blur',
+  //   onError: 'ignore' as const,
+  //   useImport: false,
+  //   external: true,
+  // },
   rehypeCodeOptions: {
     lazy: true,
     tab: false,
@@ -31,16 +45,47 @@ const compiler = createCompiler({
   },
 });
 
+function parseSourceBeforeCompile(filePath: string, source: string): string {
+  let parsedSource = source;
+
+  // Fix: <a xxx><img></a> - convert img to self-closing and keep anchor
+  parsedSource = parsedSource.replace(/<a([^>]+)>(<img[^>]+)><\/a>/g, '<a$1>$2/></a>');
+
+  // Replace <!-- xxx --> with <div class="note">xxx</div>, (CHANGELOG.md)
+  parsedSource = parsedSource.replace(/<!--\s*(.*?)\s*-->/g, '<div class="note">$1</div>');
+
+  // Replace relative links
+  // e.g. 
+  // [xxx](http://github.com/{owner}/{repo}/.github/CONTRIBUTING.md) -> [xxx](http://github.com/{owner}/{repo}/.github/CONTRIBUTING.md)
+  // [xxx](http://github.com/{owner}/{repo}/./README.md) -> [xxx](http://github.com/{owner}/{repo}/./README.md)
+  // [xxx](http://github.com/{owner}/{repo}/../LICENSE.md) -> [xxx](http://github.com/{owner}/{repo}/../LICENSE.md)
+  // Extract case that have been set on repo-config
+  // e.g. 
+  // [xxx](CHANGELOG.md) -> [xxx]({baseUrl}/changelog)
+  console.log('**** sda', filePath);
+
+  return parsedSource;
+}
+
 export async function compile(filePath: string, source: string) {
   const key = `${filePath}:${source}`;
   const cached = cache.get(key);
 
   if (cached) return cached;
   console.time(`compile md: ${filePath}`);
+
+  const isLocal = filePath.endsWith('.html');
+  if (isLocal) {
+    return {
+      source,
+      isLocal,
+    };
+  }
+
   const compiling = compiler
     .compile({
       filePath,
-      source,
+      source: parseSourceBeforeCompile(filePath, source),
     })
     .then((compiled) => ({
       body: compiled.body,

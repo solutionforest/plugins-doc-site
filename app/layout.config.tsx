@@ -1,4 +1,34 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
+import { Cards, Card } from "fumadocs-ui/components/card"
+import { repositories, getRepositorySlug, getRepositoryDisplayName } from "@/lib/repo-config";
+import type { Metadata } from "next";
+import { pageMeta } from "@/lib/meta";
+
+export function generatePluginsGrid() {
+  return (
+    <Cards>
+      {repositories.map((repo) => (
+        <Card
+          key={getRepositorySlug(repo)}
+          href={`/docs/${getRepositorySlug(repo)}`}
+          title={getRepositoryDisplayName(repo)}
+          description={repo.description}
+        />
+      ))}
+    </Cards>
+  );
+}
+
+export function generatePageMeta(title?: string, description?: string): Metadata {
+  let base = pageMeta;
+  if (title) {
+    base.title = title + " | Solution Forest";
+  }
+  if (description) {
+    base.description = description;
+  }
+  return base;
+}
 
 /**
  * Shared layout configurations
@@ -15,5 +45,11 @@ export const baseOptions: BaseLayoutProps = {
       </span>
     ),
   },
-  links: [],
+  links: [
+    {
+      text: "Documentation",
+      url: "/docs",
+      secondary: false,
+    }
+  ],
 };

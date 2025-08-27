@@ -6,6 +6,9 @@
 .content-collections
 .source
 
+# cache
+.cache/
+
 # test & build
 /coverage
 /.next/

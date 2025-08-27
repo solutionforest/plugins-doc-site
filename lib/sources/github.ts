@@ -1,0 +1,284 @@
+import type { Source, VirtualFile } from "fumadocs-core/source";
+import { Octokit } from "octokit";
+import { compile, type CompiledPage } from "../compile-md";
+import * as path from "node:path";
+import { getTitleFromFile } from "../source";
+import { fumadocMeta } from "../meta";
+import { repositories, getRepositorySlug, type RepositoryConfig, type VersionConfig, getVersionBySlug, getBaseFileName, getFileSlug } from "../repo-config";
+
+const token = process.env.GITHUB_TOKEN;
+if (!token) throw new Error(`environment variable GITHUB_TOKEN is needed.`);
+
+export const octokit = new Octokit({
+  auth: token,
+  request: {
+    fetch: (request: any, opts?: any) => {
+      return fetch(request, {
+        ...opts,
+        cache: "force-cache",
+      });
+    },
+  },
+});
+
+async function fetchBlob(url: string): Promise<string> {
+  console.time(`fetch ${url}`);
+  const res = await fetch(url, {
+    cache: "force-cache",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  const { content: base64 } = (await res.json()) as {
+    content: string;
+  };
+
+  console.timeEnd(`fetch ${url}`);
+  return Buffer.from(base64, "base64").toString();
+}
+
+/**
+ * @returns Sha code of directory in GitHub repo
+ */
+async function getDirectorySha(config: RepositoryConfig, version: VersionConfig, dirPath: string = "docs") {
+  try {
+    const out = await octokit.request(
+      "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
+      {
+        owner: config.owner,
+        repo: config.repo,
+        tree_sha: version.github_branch,
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+    );
+
+    // console.debug(`*** [getDirectorySha] |1| *** Directory listing for ${config.owner}/${config.repo} at ${version.github_branch}:`, out.data.tree);
+
+    // If docsPath is a subdirectory, we need to find it
+    // e.g., "docs/plugins"
+    if (dirPath.includes('/')) {
+      const parts = dirPath.split('/');
+      let currentTree = out.data.tree;
+      let currentSha: string|undefined = '';
+      for (const part of parts) {
+        const dir = currentTree.find((item) => item.path === part && item.type === 'tree');
+        if (!dir) {
+          console.warn(`Directory part ${part} not found in path ${dirPath}`);
+          return null;
+        }
+        currentSha = dir.sha;
+        // Skip to next if no sha found
+        if (!currentSha) {
+          console.warn(`No SHA found for directory part ${part} in path ${dirPath}`);
+          continue;
+        }
+        // Fetch the next level tree
+        const nextTreeRes = await octokit.request(
+          "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
+          {
+            owner: config.owner,
+            repo: config.repo,
+            tree_sha: currentSha,
+            headers: {
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+          },
+        );
+        currentTree = nextTreeRes.data.tree;
+      }
+
+      // console.debug(`*** [getDirectorySha] |2.1| *** Found directory ${dirPath} in ${config.owner}/${config.repo} at ${version.github_branch}:`, currentSha);
+      
+      return currentSha || null;
+
+    } else {
+
+      const directory = out.data.tree.find((item) => item.path === dirPath);
+    
+      // console.debug(`*** [getDirectorySha] |2.2| *** Found directory ${dirPath} in ${config.owner}/${config.repo} at ${version.github_branch}:`, directory);
+
+      return directory?.sha;
+      
+    }
+  } catch (error) {
+    console.warn(`Failed to get directory sha for ${config.owner}/${config.repo}/${dirPath}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Fetch a specific file from repository
+ */
+async function fetchFileFromRepo(config: RepositoryConfig, version: VersionConfig, filePath: string): Promise<string | null> {
+  try {
+    const response = await octokit.request(
+      "GET /repos/{owner}/{repo}/contents/{path}",
+      {
+        owner: config.owner,
+        repo: config.repo,
+        path: filePath,
+        ref: version.github_branch,
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+    );
+
+    if ('content' in response.data && response.data.content) {
+      return Buffer.from(response.data.content, "base64").toString();
+    }
+    return null;
+  } catch (error: any) {
+    // Handle 404 errors (file not found) gracefully
+    if (error.status === 404) {
+      console.log(`File ${filePath} not found in ${config.owner}/${config.repo} (${version.github_branch}), skipping...`);
+      return null;
+    }
+    
+    // Log other errors as warnings
+    console.warn(`Failed to fetch file ${filePath} from ${config.owner}/${config.repo} (${version.github_branch}):`, error.message || error);
+    return null;
+  }
+}
+
+async function fetchRepositoryFiles(config: RepositoryConfig, version: VersionConfig): Promise<VirtualFile[]> {
+  const repoSlug = getRepositorySlug(config);
+  const versionSlug = version.version;
+  const allFiles: VirtualFile[] = [];
+
+  // 1. Fetch limited files (README.md, CHANGELOG.md, etc.)
+  // All repositories should now have version-specific limited_files
+  const limitedFiles = version.limited_files || [];
+
+  for (const limitedFile of limitedFiles) {
+    const content = await fetchFileFromRepo(config, version, limitedFile.name);
+    if (content) {
+      const pagePath = `${repoSlug}/${versionSlug}/${limitedFile.slug}`;
+      const pageTitle = limitedFile.title || getTitleFromFile(limitedFile.name);
+
+      console.debug(`1| Adding limited file: ${pagePath} (title: ${pageTitle})`);
+
+      allFiles.push({
+        type: "page",
+        path: pagePath,
+        data: {
+          title: pageTitle,
+          repository: config,
+          version: version,
+          async load() {
+            return compile(limitedFile.name, content);
+          },
+        },
+      } satisfies VirtualFile);
+    } else {
+      console.log(`Skipping ${limitedFile.name} for ${config.owner}/${config.repo} (${version.version}) - file not found`);
+    }
+  }
+
+  // 2. Fetch docs directory if it exists
+  const docsSha = config.docsPath ? await getDirectorySha(config, version, config.docsPath) : null;
+  if (config.docsPath) {
+    // console.debug(`2| Ready to fetch docs for ${config.owner}/${config.repo} (${version.version})`, config);
+    console.debug(`2| Docs SHA for ${config.owner}/${config.repo} (${version.version}):`, docsSha);
+  }
+  if (docsSha) {
+    try {
+      const out = await octokit.request(
+        "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
+        {
+          owner: config.owner,
+          repo: config.repo,
+          tree_sha: docsSha,
+          headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+          recursive: "true",
+        },
+      );
+
+      const docsFiles = out.data.tree.flatMap((file) => {
+        if (!file.path || !file.url || file.type === "tree") return [];
+
+        if (path.extname(file.path) === ".json") {
+          console.warn(
+            "We do not handle .json files at the moment, you need to hardcode them",
+          );
+          return [];
+        }
+
+        // Only include markdown files
+        if (!['.md', '.mdx'].includes(path.extname(file.path))) return [];
+
+        const pagePath = `${repoSlug}/${versionSlug}/${file.path}`;
+        const pageTitle = getTitleFromFile(file.path);
+
+        console.debug(`2| Adding doc file: ${pagePath} (title: ${pageTitle})`);
+
+        return {
+          type: "page",
+          path: pagePath,
+          data: {
+            title: pageTitle,
+            repository: config,
+            version: version,
+
+            async load() {
+              const content = await fetchBlob(file.url as string);
+              return compile(file.path!, content);
+            },
+          },
+        } satisfies VirtualFile;
+      });
+
+      allFiles.push(...docsFiles);
+    } catch (error) {
+      console.warn(`Failed to fetch docs directory from ${config.owner}/${config.repo}:`, error);
+    }
+  }
+
+  return allFiles;
+}
+
+export async function createGitHubSource(): Promise<
+  Source<{
+    metaData: { title: string; pages: string[]; repository?: RepositoryConfig; version?: VersionConfig }; 
+    pageData: {
+      title: string;
+      repository: RepositoryConfig;
+      version: VersionConfig;
+      load: () => Promise<CompiledPage>;
+    }; 
+  }>
+> {
+  const allPages: VirtualFile[] = [];
+
+  // Fetch files from all configured repositories and versions
+  for (const config of repositories) {
+    // Skip private repositories if no token or insufficient permissions
+    if (config.is_private && !token) {
+      console.warn(`Skipping private repository ${config.owner}/${config.repo} - no GitHub token`);
+      continue;
+    }
+
+    for (const version of config.versions) {
+      try {
+        const repoPages = await fetchRepositoryFiles(config, version);
+        allPages.push(...repoPages);
+      } catch (error) {
+        console.error(`❌ Failed to fetch files from ${config.owner}/${config.repo} (${version.version}):`, error);
+      }
+    }
+  }
+
+  return {
+    files: [...allPages, ...fumadocMeta],
+  };
+}

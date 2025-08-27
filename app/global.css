@@ -1,5 +1,5 @@
 @import 'tailwindcss' source(none);
-@import 'fumadocs-ui/css/black.css';
+@import 'fumadocs-ui/css/catppuccin.css';
 @import 'fumadocs-ui/css/preset.css';
  
 @source ".";
@@ -13,36 +13,4 @@
 
 :root {
   --fd-layout-width: 1600px;
-}
-
-/* Custom primary color #007C90 */
-:root {
-  --fd-primary-h: 187;
-  --fd-primary-s: 100%;
-  --fd-primary-l: 28%;
-}
-
-/* Override primary color classes */
-.text-fd-primary {
-  color: #007C90 !important;
-}
-
-.bg-fd-primary {
-  background-color: #007C90 !important;
-}
-
-.border-fd-primary {
-  border-color: #007C90 !important;
-}
-
-.hover\:text-fd-primary:hover {
-  color: #007C90 !important;
-}
-
-.hover\:bg-fd-primary:hover {
-  background-color: #007C90 !important;
-}
-
-.group-hover\:text-fd-primary\/80:hover {
-  color: rgba(0, 124, 144, 0.8) !important;
 }

@@ -18,7 +18,19 @@ const config: NextConfig = {
     unoptimized: isStaticExport, // Only unoptimize for static export
     remotePatterns: [
       {
-        hostname: "nextjs.org",
+        hostname: 'github.com',
+      },
+      {
+        hostname: 'shields.io',
+      },
+      {
+        hostname: 'img.shields.io',
+      },
+      {
+        hostname: 'demo.solutionforest.net',
+      },
+      {
+        hostname: 'user-images.githubusercontent.com',
       },
     ],
   },

@@ -17,9 +17,23 @@ const nextConfig = {
     }),
     images: {
         unoptimized: isStaticExport, // Only unoptimize for static export
-        remotePatterns: [{
-            hostname: "nextjs.org",
-        }, ],
+        remotePatterns: [
+            {
+                hostname: 'github.com',
+            },
+            {
+                hostname: 'shields.io',
+            },
+            {
+                hostname: 'img.shields.io',
+            },
+            {
+                hostname: 'demo.solutionforest.net',
+            },
+            {
+                hostname: 'user-images.githubusercontent.com',
+            },
+        ],
     },
     logging: {
         fetches: {

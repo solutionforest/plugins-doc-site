@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { plugins } from "@/lib/plugins";
+import { repositories } from "@/lib/repo-config";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -8,12 +8,10 @@ export async function GET(request: NextRequest) {
   switch (action) {
     case 'plugins':
       return NextResponse.json({
-        plugins: plugins.map(p => ({
-          name: p.name,
-          slug: p.slug,
-          description: p.description,
-          latest_version: p.latest_version,
-          versions: p.versions.length
+        plugins: repositories.map(repo => ({
+          url: repo.repository_url,
+          latest_version: repo.latest_version,
+          versions: repo.versions.length
         }))
       });
 
@@ -21,7 +19,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         status: 'healthy',
         github_token: !!process.env.GITHUB_TOKEN,
-        plugins_count: plugins.length,
+        plugins_count: repositories.length,
         timestamp: new Date().toISOString()
       });
 
