@@ -6,7 +6,7 @@ export function Body({ children }: { children: ReactNode }) {
   // const { slug } = useParams() as { slug?: string[] };
 
   // if (!slug) return children;
-  let color: string | undefined = '#007C90';
+  let color: string | undefined = "#007C90";
 
   /* Custom primary color #007C90 */
 

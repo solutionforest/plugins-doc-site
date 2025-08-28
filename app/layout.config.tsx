@@ -1,6 +1,10 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
-import { Cards, Card } from "fumadocs-ui/components/card"
-import { repositories, getRepositorySlug, getRepositoryDisplayName } from "@/lib/repo-config";
+import { Cards, Card } from "fumadocs-ui/components/card";
+import {
+  repositories,
+  getRepositorySlug,
+  getRepositoryDisplayName,
+} from "@/lib/repo-config";
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/meta";
 
@@ -19,7 +23,10 @@ export function generatePluginsGrid() {
   );
 }
 
-export function generatePageMeta(title?: string, description?: string): Metadata {
+export function generatePageMeta(
+  title?: string,
+  description?: string,
+): Metadata {
   let base = pageMeta;
   if (title) {
     base.title = title + " | Solution Forest";
@@ -50,6 +57,6 @@ export const baseOptions: BaseLayoutProps = {
       text: "Quick Start",
       url: "/docs",
       secondary: false,
-    }
+    },
   ],
 };

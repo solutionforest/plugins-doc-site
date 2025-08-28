@@ -16,7 +16,9 @@ export default function Layout({ children }: { children: ReactNode }) {
           search={{
             enabled: false,
           }}
-        >{children}</RootProvider>
+        >
+          {children}
+        </RootProvider>
       </body>
     </html>
   );

@@ -1,9 +1,6 @@
 import { generatePageMeta } from "@/lib/meta";
+import { DocsPage, DocsBody } from "fumadocs-ui/page";
 import {
-  DocsPage,
-  DocsBody,
-} from "fumadocs-ui/page";
-import { 
   getRepositoryBySlug,
   getRepositoryDisplayName,
   repositories,
@@ -15,7 +12,7 @@ import { source } from "@/lib/source";
 import { createMdxComponents, createRelativeLink } from "@/components/mdx";
 
 type Props = {
-  params: Promise<{ plugin: string; version: string, slug: string[] }>;
+  params: Promise<{ plugin: string; version: string; slug: string[] }>;
 };
 
 export default async function Page(props: Props) {
@@ -36,11 +33,10 @@ export default async function Page(props: Props) {
 
   const fullSlug = [repoSlug, versionSlug, ...slugs];
   const page = source.getPage(fullSlug);
-  if (! page) {
+  if (!page) {
     notFound();
   }
-  
-  
+
   let content = await page.data.load();
 
   if (content.source) {
@@ -61,8 +57,13 @@ export default async function Page(props: Props) {
       <DocsBody>
         <MdxContent
           components={createMdxComponents({
-            a: ({ href, ...props}: { href: string }) => {
-              return <a href={createRelativeLink(repository, version, href)} {...props} />;
+            a: ({ href, ...props }: { href: string }) => {
+              return (
+                <a
+                  href={createRelativeLink(repository, version, href)}
+                  {...props}
+                />
+              );
             },
           })}
         />
@@ -82,37 +83,32 @@ export async function generateMetadata({ params }: Props) {
 
   const repository = getRepositoryBySlug(repoSlug);
   if (!repository) {
-      return generatePageMeta(
-        "Repository Not Found",
-      );
+    return generatePageMeta("Repository Not Found");
   }
 
   const version = getVersionBySlug(repository, versionSlug);
   if (!version) {
-    return generatePageMeta(
-      "Version Not Found",
-    );
+    return generatePageMeta("Version Not Found");
   }
 
   const fullSlug = [repoSlug, versionSlug, ...slugs];
   const page = source.getPage(fullSlug);
-  if (! page) {
+  if (!page) {
     return generatePageMeta(
       `${getRepositoryDisplayName(repository)} v${version.version}`,
-      `Documentation for ${repository.owner}/${repository.repo}`
+      `Documentation for ${repository.owner}/${repository.repo}`,
     );
   }
 
   return generatePageMeta(
     `${page.data.title} - ${getRepositoryDisplayName(repository)} v${version.version}`,
-    `Documentation for ${repository.owner}/${repository.repo}`
+    `Documentation for ${repository.owner}/${repository.repo}`,
   );
 }
 
 export async function generateStaticParams() {
-
   // Generate params for all repository and version combinations
-  const params: { plugin: string, version: string, slug: string[] }[] = [];
+  const params: { plugin: string; version: string; slug: string[] }[] = [];
 
   for (const repository of repositories) {
     const repoSlug = repository.repo;
@@ -126,10 +122,14 @@ export async function generateStaticParams() {
       // Add limited files for this version
       if (version.limited_files) {
         for (const file of version.limited_files) {
-          if (file.slug === 'index') {
+          if (file.slug === "index") {
             continue; // skip index as it's handled by [version]/page.tsx
           }
-          params.push({ plugin: repoSlug, version: versionSlug, slug: [file.slug] });
+          params.push({
+            plugin: repoSlug,
+            version: versionSlug,
+            slug: [file.slug],
+          });
         }
       }
     }

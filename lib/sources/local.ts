@@ -3,7 +3,13 @@ import { compile, type CompiledPage } from "../compile-md";
 import * as path from "node:path";
 import { getTitleFromFile } from "../source";
 import { fumadocMeta } from "../meta";
-import { repositories, getRepositorySlug, type RepositoryConfig, type VersionConfig, getBaseFileName } from "../repo-config";
+import {
+  repositories,
+  getRepositorySlug,
+  type RepositoryConfig,
+  type VersionConfig,
+  getBaseFileName,
+} from "../repo-config";
 import FastGlob from "fast-glob";
 import { readFile } from "node:fs/promises";
 
@@ -11,7 +17,12 @@ const dir = "out/docs";
 
 export async function createLocalSource(): Promise<
   Source<{
-    metaData: { title: string; pages: string[]; repository?: RepositoryConfig; version?: VersionConfig };
+    metaData: {
+      title: string;
+      pages: string[];
+      repository?: RepositoryConfig;
+      version?: VersionConfig;
+    };
     pageData: {
       title: string;
       repository?: RepositoryConfig;
@@ -35,24 +46,30 @@ export async function createLocalSource(): Promise<
     const pathParts = relativePath.split(path.sep);
     // console.debug("Local file pathParts:", pathParts);
     if (pathParts.length < 3) {
-      console.warn(`Invalid path structure: ${relativePath}. Expected: {repo}/{version}/{file}`);
+      console.warn(
+        `Invalid path structure: ${relativePath}. Expected: {repo}/{version}/{file}`,
+      );
       return [];
     }
 
     const [repoSlug, version, ...fileParts] = pathParts;
-    const fileName = fileParts.join('/');
+    const fileName = fileParts.join("/");
 
     // console.debug(`Processing local file: repo=${repoSlug}, version=${version}, file=${fileName}`);
-    
+
     // Find the repository configuration that matches this repo slug
-    const repository = repositories.find(repo => getRepositorySlug(repo) === repoSlug);
+    const repository = repositories.find(
+      (repo) => getRepositorySlug(repo) === repoSlug,
+    );
     if (!repository) {
       console.warn(`Repository not found for slug: ${repoSlug}`);
       return [];
     }
 
     // Find the version configuration
-    const versionConfig = repository.versions.find(v => v.version === version);
+    const versionConfig = repository.versions.find(
+      (v) => v.version === version,
+    );
     if (!versionConfig) {
       console.warn(`Version not found: ${version} for repository: ${repoSlug}`);
       return [];
@@ -61,7 +78,9 @@ export async function createLocalSource(): Promise<
     // Create the path for fumadocs
     const pagePath = `${repoSlug}/${version}/${getBaseFileName(fileName)}`;
 
-    console.debug(`Adding local page: ${pagePath} (title: ${getTitleFromFile(fileName)})`);
+    console.debug(
+      `Adding local page: ${pagePath} (title: ${getTitleFromFile(fileName)})`,
+    );
 
     return {
       type: "page",
@@ -73,7 +92,10 @@ export async function createLocalSource(): Promise<
 
         async load() {
           const content = await readFile(file);
-          console.debug(`### Loaded content for ${pagePath}, content: `, content);
+          console.debug(
+            `### Loaded content for ${pagePath}, content: `,
+            content,
+          );
           return compile(file, content.toString());
         },
       },
@@ -82,7 +104,7 @@ export async function createLocalSource(): Promise<
 
   // Collect unique repositories and versions from the discovered files
   const repoVersionMap = new Map<string, Set<string>>();
-  
+
   files.forEach((file) => {
     const relativePath = path.relative(dir, file);
     const pathParts = relativePath.split(path.sep);

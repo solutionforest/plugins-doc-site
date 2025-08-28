@@ -1,38 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getCacheStats, clearInMemoryCache } from '@/lib/cache';
+import { NextRequest, NextResponse } from "next/server";
+import { getCacheStats, clearInMemoryCache } from "@/lib/cache";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const action = searchParams.get('action');
+  const action = searchParams.get("action");
 
   try {
     switch (action) {
-      case 'stats':
+      case "stats":
         const stats = getCacheStats();
         return NextResponse.json(stats);
-        
-      case 'clear':
+
+      case "clear":
         clearInMemoryCache();
-        return NextResponse.json({ message: 'In-memory cache cleared successfully' });
+        return NextResponse.json({
+          message: "In-memory cache cleared successfully",
+        });
 
       default:
         return NextResponse.json({
-          message: 'Cache API',
+          message: "Cache API",
           availableActions: [
-            'stats - Get cache statistics',
-            'clear - Clear in-memory cache',
-            'revalidate - Revalidate GitHub API cache'
-          ]
+            "stats - Get cache statistics",
+            "clear - Clear in-memory cache",
+            "revalidate - Revalidate GitHub API cache",
+          ],
         });
     }
   } catch (error) {
-    console.error('Cache API error:', error);
+    console.error("Cache API error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: "Internal server error" },
+      { status: 500 },
     );
   }
 }
 
 export async function generateStaticParams() {
-    return [];
+  return [];
 }

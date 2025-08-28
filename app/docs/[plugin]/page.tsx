@@ -1,21 +1,18 @@
 import { generatePageMeta } from "@/lib/meta";
+import { DocsPage, DocsBody } from "fumadocs-ui/page";
 import {
-  DocsPage,
-  DocsBody,
-} from "fumadocs-ui/page";
-import { 
   getRepositoryBySlug,
   getRepositoryDisplayName,
   repositories,
 } from "@/lib/repo-config";
 import { notFound } from "next/navigation";
 import { DocPageHeading } from "../components";
-import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Cards, Card } from "fumadocs-ui/components/card";
 import { Star } from "lucide-react";
 
 type Props = {
   params: Promise<{ plugin: string }>;
-}
+};
 
 export default async function Page(props: Props) {
   const params = await props.params;
@@ -25,7 +22,7 @@ export default async function Page(props: Props) {
   if (!repository) {
     notFound();
   }
-  
+
   return (
     <DocsPage>
       <DocPageHeading repository={repository} />
@@ -36,7 +33,11 @@ export default async function Page(props: Props) {
               key={version.version}
               href={`/docs/${repoSlug}/${version.version}`}
               title={version.version}
-              icon={version.version === repository.latest_version ? <Star size={16} /> : null}
+              icon={
+                version.version === repository.latest_version ? (
+                  <Star size={16} />
+                ) : null
+              }
               className="flex items-center gap-2"
             />
           ))}
@@ -52,19 +53,16 @@ export async function generateMetadata({ params }: Props) {
 
   const repository = getRepositoryBySlug(repoSlug);
   if (!repository) {
-      return generatePageMeta(
-        "Repository Not Found",
-      );
+    return generatePageMeta("Repository Not Found");
   }
 
   return generatePageMeta(
     `${getRepositoryDisplayName(repository)} - Documentation`,
-    `Documentation for ${repository.owner}/${repository.repo}`
+    `Documentation for ${repository.owner}/${repository.repo}`,
   );
 }
 
 export async function generateStaticParams() {
-
   // Generate params for all repository and version combinations
   const params: { plugin: string }[] = [];
 

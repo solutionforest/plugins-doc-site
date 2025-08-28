@@ -6,9 +6,9 @@ import { NextRequest, NextResponse } from "next/server";
 //import { createLocalSource } from "@/lib/sources/local";
 
 export async function GET() {
-    return NextResponse.json({ message: "Search not implemented" });
+  return NextResponse.json({ message: "Search not implemented" });
 }
 
 export async function generateStaticParams() {
-    return [];
+  return [];
 }

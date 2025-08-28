@@ -107,7 +107,6 @@ To add a new repository, simply add to the `repositories` array in `lib/repo-con
 ## Environment Requirements
 
 1. **GitHub Token**: Required for GitHub API access
-
    - Generate at: https://github.com/settings/tokens
    - Permission needed: `public_repo`
 

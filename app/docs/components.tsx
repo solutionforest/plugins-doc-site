@@ -1,15 +1,16 @@
+import { DocsTitle, DocsDescription } from "fumadocs-ui/page";
 import {
-  DocsTitle,
-  DocsDescription,
-} from "fumadocs-ui/page";
-import { 
-  getRepositoryDisplayName, 
-  type RepositoryConfig 
+  getRepositoryDisplayName,
+  type RepositoryConfig,
 } from "@/lib/repo-config";
 import Link from "next/link";
 import { Github } from "lucide-react";
 
-export function DocPageHeading({ repository }: { repository: RepositoryConfig }) {
+export function DocPageHeading({
+  repository,
+}: {
+  repository: RepositoryConfig;
+}) {
   return (
     <>
       <DocsTitle>
@@ -30,9 +31,7 @@ export function DocPageHeading({ repository }: { repository: RepositoryConfig })
         </div>
       </DocsTitle>
       {repository.description && (
-        <DocsDescription>
-          {repository.description}
-        </DocsDescription>
+        <DocsDescription>{repository.description}</DocsDescription>
       )}
     </>
   );

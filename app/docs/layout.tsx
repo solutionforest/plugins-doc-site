@@ -7,11 +7,8 @@ import { Body } from "./layout.client";
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <Body>
-      <DocsLayout
-      tree={source.pageTree}
-      {...baseOptions}
-      >
-      {children}
+      <DocsLayout tree={source.pageTree} {...baseOptions}>
+        {children}
       </DocsLayout>
     </Body>
   );

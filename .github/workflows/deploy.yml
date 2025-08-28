@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
   repository_dispatch:
     types: [rebuild-docs]
@@ -26,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -59,8 +59,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}' }}
-          NEXT_STATIC_EXPORT: 'true'
-          NODE_ENV: 'production'
+          NEXT_STATIC_EXPORT: "true"
+          NODE_ENV: "production"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

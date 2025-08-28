@@ -78,10 +78,13 @@ class MemoryCache {
 export const cache = new MemoryCache();
 
 // Auto cleanup expired entries every 10 minutes
-if (typeof window === 'undefined') {
-  setInterval(() => {
-    cache.cleanup();
-  }, 10 * 60 * 1000);
+if (typeof window === "undefined") {
+  setInterval(
+    () => {
+      cache.cleanup();
+    },
+    10 * 60 * 1000,
+  );
 }
 
 // Rate limiting for GitHub API calls
@@ -92,38 +95,41 @@ class RateLimiter {
 
   async canMakeRequest(): Promise<boolean> {
     const now = Date.now();
-    
+
     // Remove requests older than the window
-    this.requests = this.requests.filter(time => now - time < this.windowMs);
-    
+    this.requests = this.requests.filter((time) => now - time < this.windowMs);
+
     if (this.requests.length < this.maxRequests) {
       this.requests.push(now);
       return true;
     }
-    
+
     return false;
   }
 
   async waitForSlot(): Promise<void> {
     while (!(await this.canMakeRequest())) {
       // Wait longer for rate limiting to prevent excessive polling
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
 
   // Get rate limit stats
   getStats() {
     const now = Date.now();
-    const recentRequests = this.requests.filter(time => now - time < this.windowMs);
-    
+    const recentRequests = this.requests.filter(
+      (time) => now - time < this.windowMs,
+    );
+
     return {
       requestsInWindow: recentRequests.length,
       maxRequests: this.maxRequests,
       remaining: this.maxRequests - recentRequests.length,
       windowMs: this.windowMs,
-      resetTime: recentRequests.length > 0 ? 
-        new Date(recentRequests[0] + this.windowMs) : 
-        new Date(),
+      resetTime:
+        recentRequests.length > 0
+          ? new Date(recentRequests[0] + this.windowMs)
+          : new Date(),
     };
   }
 }
@@ -133,7 +139,7 @@ export const rateLimiter = new RateLimiter();
 // Retry mechanism with exponential backoff
 export async function withRetry<T>(
   operation: () => Promise<T>,
-  maxRetries: number = MAX_RETRIES
+  maxRetries: number = MAX_RETRIES,
 ): Promise<T> {
   let lastError: Error;
 
@@ -142,14 +148,14 @@ export async function withRetry<T>(
       return await operation();
     } catch (error) {
       lastError = error as Error;
-      
+
       if (attempt === maxRetries) {
         throw lastError;
       }
 
       // Exponential backoff: 1s, 2s, 4s, etc.
       const delay = RETRY_DELAY * Math.pow(2, attempt);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
@@ -160,7 +166,7 @@ export async function withRetry<T>(
 export async function fetchWithCache<T>(
   cacheKey: string,
   fetchFn: () => Promise<T>,
-  ttlSeconds: number = CACHE_DURATION
+  ttlSeconds: number = CACHE_DURATION,
 ): Promise<T> {
   // Check cache first
   const cached = cache.get<T>(cacheKey);
@@ -184,47 +190,61 @@ export async function fetchWithCache<T>(
 }
 
 // Static export compatible GitHub API functions with fetch caching
-export async function getCachedGitHubContent(owner: string, repo: string, path: string, ref: string) {
+export async function getCachedGitHubContent(
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string,
+) {
   const cacheKey = `github-content:${owner}:${repo}:${path}:${ref}`;
-  
+
   return fetchWithCache(cacheKey, async () => {
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${ref}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-          'X-GitHub-Api-Version': '2022-11-28',
+          "X-GitHub-Api-Version": "2022-11-28",
         },
         // Use force-cache for static exports
-        cache: 'force-cache',
-      }
+        cache: "force-cache",
+      },
     );
 
     if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `GitHub API error: ${response.status} ${response.statusText}`,
+      );
     }
 
     return await response.json();
   });
 }
 
-export async function getCachedGitHubTree(owner: string, repo: string, treeSha: string, recursive = false) {
+export async function getCachedGitHubTree(
+  owner: string,
+  repo: string,
+  treeSha: string,
+  recursive = false,
+) {
   const cacheKey = `github-tree:${owner}:${repo}:${treeSha}:${recursive}`;
-  
+
   return fetchWithCache(cacheKey, async () => {
     const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/git/trees/${treeSha}${recursive ? '?recursive=1' : ''}`,
+      `https://api.github.com/repos/${owner}/${repo}/git/trees/${treeSha}${recursive ? "?recursive=1" : ""}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-          'X-GitHub-Api-Version': '2022-11-28',
+          "X-GitHub-Api-Version": "2022-11-28",
         },
-        cache: 'force-cache',
-      }
+        cache: "force-cache",
+      },
     );
 
     if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `GitHub API error: ${response.status} ${response.statusText}`,
+      );
     }
 
     return await response.json();
@@ -234,7 +254,7 @@ export async function getCachedGitHubTree(owner: string, repo: string, treeSha: 
 // Cache invalidation utilities (simplified for static export)
 export const clearInMemoryCache = () => {
   cache.clear();
-  console.log('In-memory cache cleared');
+  console.log("In-memory cache cleared");
 };
 
 // Cache monitoring utilities

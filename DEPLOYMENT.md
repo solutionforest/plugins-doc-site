@@ -5,6 +5,7 @@
 ## 📋 Prerequisites Checklist
 
 Before starting, ensure you have:
+
 - ✅ GitHub account with admin access to your repository
 - ✅ Repository pushed to GitHub
 - ✅ GitHub Personal Access Token (we'll create this)
@@ -50,6 +51,7 @@ git push origin main
    - **Expiration**: `No expiration` (or 1 year for security)
 
 4. **Select Scopes** (IMPORTANT):
+
    ```
    ✅ repo (Full control of private repositories)
    ✅ workflow (Update GitHub Action workflows)
@@ -76,7 +78,7 @@ git push origin main
    - Click **Actions**
 
 4. **Add Repository Secrets**
-   
+
    Click **New repository secret** and add these **TWO** secrets:
 
    **Secret 1:**
@@ -90,7 +92,7 @@ git push origin main
    - Click **Add secret**
 
 5. **Add Repository Variables (Optional)**
-   
+
    Click **Variables** tab, then **New repository variable**:
    - **Name**: `NEXT_PUBLIC_SITE_URL`
    - **Value**: `https://solutionforest.github.io/plugins-doc-site`
@@ -118,6 +120,7 @@ git push origin main
 Now that everything is configured, trigger your first deployment:
 
 1. **Option A: Push a Change**
+
    ```bash
    # Make a small change to trigger deployment
    echo "# Live on GitHub Pages!" >> README.md
@@ -141,9 +144,10 @@ Now that everything is configured, trigger your first deployment:
    - Click on it to see progress
 
 2. **Deployment Steps Should Show**:
+
    ```
    ✅ Checkout
-   ✅ Setup Node.js  
+   ✅ Setup Node.js
    ✅ Setup pnpm
    ✅ Install dependencies
    ✅ Build with Next.js
@@ -216,25 +220,33 @@ After deployment, verify these items:
 ## 🚨 **Troubleshooting Common Issues**
 
 ### **Problem: Build Fails**
+
 **Solution**:
+
 1. Check **Actions** tab for error logs
 2. Verify your `GITHUB_TOKEN` has correct permissions
 3. Ensure all dependencies are in `package.json`
 
 ### **Problem: Site Shows 404**
+
 **Solution**:
+
 1. Verify GitHub Pages is enabled with "GitHub Actions" source
 2. Check if deployment completed successfully
 3. Wait 5-10 minutes for GitHub CDN to update
 
 ### **Problem: Content Not Updating**
+
 **Solution**:
+
 1. Clear browser cache (Ctrl+F5 / Cmd+Shift+R)
 2. Check if new deployment actually ran
 3. Verify your changes were committed and pushed
 
 ### **Problem: Styling Broken**
+
 **Solution**:
+
 1. Check if `NEXT_PUBLIC_SITE_URL` is set correctly
 2. Verify static assets are loading from correct path
 3. Check browser console for 404 errors
@@ -244,22 +256,26 @@ After deployment, verify these items:
 ## 💡 **Pro Tips for CTO**
 
 ### **Cost Management**
+
 - ✅ **GitHub Pages**: Completely FREE
 - ✅ **GitHub Actions**: 2000 free minutes/month (plenty for docs)
 - ✅ **Storage**: 1GB free (more than enough for static site)
 
 ### **Performance Monitoring**
+
 - Monitor build times in Actions tab
 - Use GitHub Insights for traffic analytics
 - Set up Google Analytics if needed
 
 ### **Security Best Practices**
+
 - Rotate GitHub tokens annually
 - Use repository secrets (never commit tokens)
 - Enable branch protection on main branch
 - Review GitHub Actions logs regularly
 
 ### **Backup Strategy**
+
 - Your source is backed up in Git
 - GitHub Pages content is regenerated from source
 - No additional backup needed for static content
@@ -274,6 +290,6 @@ Once you've completed all steps, you'll have:
 ✅ **Global CDN delivery** with 99.9% uptime  
 ✅ **Zero hosting costs** and minimal maintenance  
 ✅ **Automatic deployments** on code changes  
-✅ **Enterprise-grade security** with GitHub infrastructure  
+✅ **Enterprise-grade security** with GitHub infrastructure
 
 Your documentation site is now **production-ready** and **enterprise-grade**!

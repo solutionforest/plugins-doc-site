@@ -1,36 +1,36 @@
 import type { NextConfig } from "next";
 
-const isStaticExport = process.env.NEXT_STATIC_EXPORT === 'true';
-const isProduction = process.env.NODE_ENV === 'production';
+const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true";
+const isProduction = process.env.NODE_ENV === "production";
 
 const config: NextConfig = {
   reactStrictMode: true,
   ...(isStaticExport && {
-    output: 'export',
+    output: "export",
     trailingSlash: true,
     skipTrailingSlashRedirect: true,
     ...(isProduction && {
-      basePath: '/plugins-doc-site',
-      assetPrefix: '/plugins-doc-site',
+      basePath: "/plugins-doc-site",
+      assetPrefix: "/plugins-doc-site",
     }),
   }),
   images: {
     unoptimized: isStaticExport, // Only unoptimize for static export
     remotePatterns: [
       {
-        hostname: 'github.com',
+        hostname: "github.com",
       },
       {
-        hostname: 'shields.io',
+        hostname: "shields.io",
       },
       {
-        hostname: 'img.shields.io',
+        hostname: "img.shields.io",
       },
       {
-        hostname: 'demo.solutionforest.net',
+        hostname: "demo.solutionforest.net",
       },
       {
-        hostname: 'user-images.githubusercontent.com',
+        hostname: "user-images.githubusercontent.com",
       },
     ],
   },
@@ -41,8 +41,8 @@ const config: NextConfig = {
   },
   // Optimize GitHub API calls with environment variables
   env: {
-    GITHUB_API_CACHE_TTL: '3600', // 1 hour
-    GITHUB_RATE_LIMIT_MAX: '50',
+    GITHUB_API_CACHE_TTL: "3600", // 1 hour
+    GITHUB_RATE_LIMIT_MAX: "50",
   },
 };
 

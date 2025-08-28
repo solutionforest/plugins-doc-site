@@ -47,7 +47,7 @@ export function getTitleFromFile(file: string) {
 
   const match = FileNameRegex.exec(name);
   let title = match ? match[1] : name;
-  
+
   // If the file have number prefix, remove it
   // e.g. 01-introduction.md -> introduction
   if (title.match(/^\d-/)) {

@@ -8,7 +8,7 @@ export const pageMeta: Metadata = {
   description: siteConfig.description,
   keywords: [
     "filament",
-    "laravel", 
+    "laravel",
     "plugins",
     "documentation",
     "solution forest",
@@ -30,7 +30,10 @@ export const pageMeta: Metadata = {
   },
 };
 
-export function generatePageMeta(title?: string, description?: string): Metadata {
+export function generatePageMeta(
+  title?: string,
+  description?: string,
+): Metadata {
   let base = pageMeta;
   if (title) {
     base.title = title + " | Solution Forest";
@@ -49,46 +52,46 @@ export const fumadocMeta: VirtualFile[] = [
       title: "Filament Documents",
       root: true,
       pages: [
-        ...repositories.map(repo => repo.repo), // Folders under repository's overview
+        ...repositories.map((repo) => repo.repo), // Folders under repository's overview
       ],
     },
   },
-  ...repositories.flatMap(repo => {
+  ...(repositories.flatMap((repo) => {
     const repoSlug = repo.repo;
     const repoName = repo.displayName ?? repo.repo;
 
     // Repository's Overview
     const repoMeta = {
-      type: 'meta' as const,
+      type: "meta" as const,
       path: `${repoSlug}/meta.json`,
       root: true,
       data: {
         title: repoName,
         description: repo.description,
         pages: [
-          ...repo.versions.map(version => version.version), // Folders under each version
+          ...repo.versions.map((version) => version.version), // Folders under each version
         ],
       },
     };
 
-    const versionsMeta = repo.versions?.map(version => {
-      const versionSlug = version.version;
-      return {
-        type: 'meta' as const,
-        path: `${repoSlug}/${versionSlug}/meta.json`,
-        data: {
-          title: `v${versionSlug}` + (repo.latest_version === versionSlug ? ' (Latest)' : ''),
-          root: false,
-          pages: [
-            `./index`, // e.g. /docs/repo-slug/3.x/ README.md
-            '...', // all other files in this version
-          ],
-        }
-      };
-    }) || [];
-    return [
-      repoMeta,
-      ...versionsMeta,
-    ];
-  }) || [],
+    const versionsMeta =
+      repo.versions?.map((version) => {
+        const versionSlug = version.version;
+        return {
+          type: "meta" as const,
+          path: `${repoSlug}/${versionSlug}/meta.json`,
+          data: {
+            title:
+              `v${versionSlug}` +
+              (repo.latest_version === versionSlug ? " (Latest)" : ""),
+            root: false,
+            pages: [
+              `./index`, // e.g. /docs/repo-slug/3.x/ README.md
+              "...", // all other files in this version
+            ],
+          },
+        };
+      }) || [];
+    return [repoMeta, ...versionsMeta];
+  }) || []),
 ];

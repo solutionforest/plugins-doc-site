@@ -12,7 +12,11 @@ interface VersionSelectorProps {
   baseUrl: string;
 }
 
-export function VersionSelector({ repository, currentVersion, baseUrl }: VersionSelectorProps) {
+export function VersionSelector({
+  repository,
+  currentVersion,
+  baseUrl,
+}: VersionSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
@@ -29,16 +33,19 @@ export function VersionSelector({ repository, currentVersion, baseUrl }: Version
         className="flex items-center gap-2 px-3 py-1.5 text-sm border border-fd-border rounded-md hover:bg-fd-muted transition-colors"
       >
         <span>v{currentVersion.version}</span>
-        <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          size={14}
+          className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
       </button>
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-40" 
+          <div
+            className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          
+
           <div className="absolute top-full left-0 mt-1 min-w-[120px] bg-fd-background border border-fd-border rounded-md shadow-lg z-50">
             <div className="py-1">
               {repository.versions.map((version) => (
@@ -71,7 +78,9 @@ export function VersionSelectorSidebar() {
   const repository = getRepositoryBySlug(repoSlug);
   if (!repository) return null;
 
-  const currentVersion = getVersionBySlug(repository, versionSlug) ?? getVersionBySlug(repository, repository.latest_version);
+  const currentVersion =
+    getVersionBySlug(repository, versionSlug) ??
+    getVersionBySlug(repository, repository.latest_version);
   if (!currentVersion) return null;
 
   const [isOpen, setIsOpen] = useState(false);
@@ -92,20 +101,20 @@ export function VersionSelectorSidebar() {
           className="flex items-center gap-2 text-sm hover:text-fd-primary transition-colors"
         >
           {currentVersion.version}
-          <ChevronDown 
-            size={14} 
-            className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          <ChevronDown
+            size={14}
+            className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
           />
         </button>
       </div>
 
       {isOpen && (
         <>
-          <div 
-            className="fixed inset-0 z-40" 
+          <div
+            className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          
+
           <div className="absolute top-full left-0 mt-1 w-full bg-fd-background border border-fd-border rounded-lg shadow-lg z-50">
             <div className="py-1">
               {repository.versions.map((version) => (

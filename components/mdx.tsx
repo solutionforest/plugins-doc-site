@@ -3,74 +3,81 @@ import { ImageZoom } from "fumadocs-ui/components/image-zoom";
 import { Tabs, Tab } from "fumadocs-ui/components/tabs";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { Check, LandPlot, X } from "lucide-react";
-import { Fragment, type ReactNode, type ReactElement, isValidElement } from "react";
-import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
-import type { MDXComponents } from 'mdx/types';
+import {
+  Fragment,
+  type ReactNode,
+  type ReactElement,
+  isValidElement,
+} from "react";
+import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
+import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
+import type { MDXComponents } from "mdx/types";
 import { siteConfig } from "@/lib/site-config";
 import { RepositoryConfig, VersionConfig } from "@/lib/repo-config";
 
-const githubCalloutRegex = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*)$/s;
+const githubCalloutRegex =
+  /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*)$/s;
 
 // Helper function to extract text content from React children
 function extractTextContent(children: any): string {
-  if (typeof children === 'string') {
+  if (typeof children === "string") {
     return children;
   }
-  if (typeof children === 'number') {
+  if (typeof children === "number") {
     return children.toString();
   }
   if (children === null || children === undefined) {
-    return '';
+    return "";
   }
   if (Array.isArray(children)) {
-    return children.map(extractTextContent).join('');
+    return children.map(extractTextContent).join("");
   }
   if (isValidElement(children)) {
     const props = children.props as any;
-    if (props && typeof props === 'object' && 'children' in props) {
+    if (props && typeof props === "object" && "children" in props) {
       return extractTextContent(props.children);
     }
   }
-  return '';
+  return "";
 }
 
 // Helper function to parse GitHub callout from text content
 function parseGitHubCallout(textContent: string) {
   const calloutMatch = textContent.match(githubCalloutRegex);
-  
+
   if (!calloutMatch) {
     return null;
   }
 
   const calloutType = calloutMatch[1].toLowerCase();
-  const contentAfterCallout = calloutMatch[2]?.trim() || '';
-  
+  const contentAfterCallout = calloutMatch[2]?.trim() || "";
+
   // Convert to title case with colon
-  const titleCaseType = calloutType.charAt(0).toUpperCase() + calloutType.slice(1).toLowerCase();
-  
+  const titleCaseType =
+    calloutType.charAt(0).toUpperCase() + calloutType.slice(1).toLowerCase();
+
   // Map GitHub callout types to component types
-  let type: 'info' | 'warn' | 'error' = 'info';
+  let type: "info" | "warn" | "error" = "info";
   let calloutTitle = `${titleCaseType}:`;
-  
+
   switch (calloutType) {
-    case 'note':
-    case 'tip':
-    case 'important':
-      type = 'info';
+    case "note":
+    case "tip":
+    case "important":
+      type = "info";
       break;
-    case 'warning':
-    case 'caution':
-      type = 'warn';
+    case "warning":
+    case "caution":
+      type = "warn";
       break;
     default:
-      type = 'info';
+      type = "info";
   }
 
   return {
     type,
     title: calloutTitle,
-    content: contentAfterCallout
+    content: contentAfterCallout,
   };
 }
 
@@ -78,21 +85,21 @@ const mdxComponents = {
   ...defaultMdxComponents,
   // blockquote: Callout,
   blockquote: ({ children }: { children: ReactNode }) => {
-    let type: 'info' | 'warn' | 'error' = 'info';
+    let type: "info" | "warn" | "error" = "info";
     let calloutContent = children;
     let calloutTitle: string | null = null;
-    
+
     try {
       if (Array.isArray(children)) {
         // Find the first paragraph element
-        const firstChild = children.find(child => 
-          isValidElement(child) && child.type === 'p'
+        const firstChild = children.find(
+          (child) => isValidElement(child) && child.type === "p",
         );
-        
+
         if (firstChild && firstChild.props.children) {
           // Extract text content using helper function
           const textContent = extractTextContent(firstChild.props.children);
-          
+
           // Parse GitHub callout format
           const calloutData = parseGitHubCallout(textContent);
 
@@ -107,8 +114,8 @@ const mdxComponents = {
                   ...firstChild,
                   props: {
                     ...firstChild.props,
-                    children: calloutData.content
-                  }
+                    children: calloutData.content,
+                  },
                 },
                 // ...children.slice(1)
               ];
@@ -123,9 +130,11 @@ const mdxComponents = {
       console.warn("### MDX Blockquote parse error:", e);
     }
 
-    return <Callout type={type} title={calloutTitle}>
-      {calloutContent}
-    </Callout>
+    return (
+      <Callout type={type} title={calloutTitle}>
+        {calloutContent}
+      </Callout>
+    );
   },
   Tabs,
   Tab,
@@ -148,7 +157,7 @@ const mdxComponents = {
     const width = props.width
       ? typeof props.width === "number"
         ? props.width
-        : parseInt(props.width) || defaultWidth  
+        : parseInt(props.width) || defaultWidth
       : defaultWidth;
     const height = props.height
       ? typeof props.height === "number"
@@ -172,7 +181,7 @@ const mdxComponents = {
   pre: ({ ...props }) => {
     try {
       const children = props.children as ReactElement;
-      let codeLang = 'plaintext';
+      let codeLang = "plaintext";
       const childProps = children.props as any;
       if (childProps?.className) {
         const match = childProps.className.match(/language-(\w+)/);
@@ -181,15 +190,19 @@ const mdxComponents = {
           codeLang = match[1];
         }
       }
-      return <DynamicCodeBlock 
-        lang={codeLang}
-        code={childProps?.children?.trim() || ''}
-        {...childProps} 
-        />;
+      return (
+        <DynamicCodeBlock
+          lang={codeLang}
+          code={childProps?.children?.trim() || ""}
+          {...childProps}
+        />
+      );
     } catch (e) {
-      return <CodeBlock {...props}>
-        <Pre>{props.children}</Pre>
-      </CodeBlock>;
+      return (
+        <CodeBlock {...props}>
+          <Pre>{props.children}</Pre>
+        </CodeBlock>
+      );
     }
   },
 };
@@ -203,16 +216,19 @@ export function createMdxComponents(components?: MDXComponents) {
   };
 }
 
-
-export function createRelativeLink(repository: RepositoryConfig, version: VersionConfig, href: string) {
+export function createRelativeLink(
+  repository: RepositoryConfig,
+  version: VersionConfig,
+  href: string,
+) {
   // Skip link creation for external URLs
-  if (href.startsWith('http') || href.startsWith('https')) {
+  if (href.startsWith("http") || href.startsWith("https")) {
     // console.debug("### Skipping relative link creation for external URL:", href);
     return href;
   }
 
   // Skip link creation for mailto:, #, and other protocols
-  if (href.startsWith('mailto:') || href.startsWith('#')) {
+  if (href.startsWith("mailto:") || href.startsWith("#")) {
     // console.debug("### Skipping relative link creation for:", href);
     return href;
   }

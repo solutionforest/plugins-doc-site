@@ -12,8 +12,9 @@ export default async function HomePage() {
           Filament Plugin Documentation
         </h1>
         <p className="text-xl text-fd-muted-foreground max-w-2xl mx-auto">
-          Comprehensive documentation for all Filament plugins by Solution Forest.
-          Explore features, installation guides, and detailed usage examples.
+          Comprehensive documentation for all Filament plugins by Solution
+          Forest. Explore features, installation guides, and detailed usage
+          examples.
         </p>
       </div>
 

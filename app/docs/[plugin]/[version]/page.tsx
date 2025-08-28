@@ -1,9 +1,6 @@
 import { generatePageMeta } from "@/lib/meta";
+import { DocsPage, DocsBody } from "fumadocs-ui/page";
 import {
-  DocsPage,
-  DocsBody,
-} from "fumadocs-ui/page";
-import { 
   getRepositoryBySlug,
   getRepositoryDisplayName,
   repositories,
@@ -43,9 +40,9 @@ export default async function Page(props: Props) {
           <p>Documentation not found for this version.</p>
         </DocsBody>
       </DocsPage>
-    )
+    );
   }
-  
+
   let content = await page.data.load();
 
   if (content.source) {
@@ -66,8 +63,13 @@ export default async function Page(props: Props) {
       <DocsBody>
         <MdxContent
           components={createMdxComponents({
-            a: ({ href, ...props}: { href: string }) => {
-              return <a href={createRelativeLink(repository, version, href)} {...props} />;
+            a: ({ href, ...props }: { href: string }) => {
+              return (
+                <a
+                  href={createRelativeLink(repository, version, href)}
+                  {...props}
+                />
+              );
             },
           })}
         />
@@ -86,28 +88,23 @@ export async function generateMetadata({ params }: Props) {
 
   const repository = getRepositoryBySlug(repoSlug);
   if (!repository) {
-      return generatePageMeta(
-        "Repository Not Found",
-      );
+    return generatePageMeta("Repository Not Found");
   }
 
   const version = getVersionBySlug(repository, versionSlug);
   if (!version) {
-    return generatePageMeta(
-      "Version Not Found",
-    );
+    return generatePageMeta("Version Not Found");
   }
 
   return generatePageMeta(
     `${getRepositoryDisplayName(repository)} v${version.version}`,
-    `Documentation for ${repository.owner}/${repository.repo}`
+    `Documentation for ${repository.owner}/${repository.repo}`,
   );
 }
 
 export async function generateStaticParams() {
-
   // Generate params for all repository and version combinations
-  const params: { plugin: string, version: string }[] = [];
+  const params: { plugin: string; version: string }[] = [];
 
   for (const repository of repositories) {
     const repoSlug = repository.repo;
