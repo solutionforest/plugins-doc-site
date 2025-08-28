@@ -125,6 +125,9 @@ export async function generateStaticParams() {
       // Add limited files for this version
       if (version.limited_files) {
         for (const file of version.limited_files) {
+          if (file.slug === 'index') {
+            continue; // skip index as it's already added
+          }
           params.push({ plugin: repoSlug, version: versionSlug, slug: [file.slug] });
         }
       }
