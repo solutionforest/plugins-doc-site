@@ -15,7 +15,7 @@ export interface CompiledPage {
   toc: TableOfContents;
   body: FC<{ components?: MDXComponents }>;
 
-  isLocal?: boolean;
+  staticHtmlSource?: string;
 }
 
 const cache = new Map<string, Promise<CompiledPage>>();
@@ -54,16 +54,6 @@ function parseSourceBeforeCompile(filePath: string, source: string): string {
   // Replace <!-- xxx --> with <div class="note">xxx</div>, (CHANGELOG.md)
   parsedSource = parsedSource.replace(/<!--\s*(.*?)\s*-->/g, '<div class="note">$1</div>');
 
-  // Replace relative links
-  // e.g. 
-  // [xxx](http://github.com/{owner}/{repo}/.github/CONTRIBUTING.md) -> [xxx](http://github.com/{owner}/{repo}/.github/CONTRIBUTING.md)
-  // [xxx](http://github.com/{owner}/{repo}/./README.md) -> [xxx](http://github.com/{owner}/{repo}/./README.md)
-  // [xxx](http://github.com/{owner}/{repo}/../LICENSE.md) -> [xxx](http://github.com/{owner}/{repo}/../LICENSE.md)
-  // Extract case that have been set on repo-config
-  // e.g. 
-  // [xxx](CHANGELOG.md) -> [xxx]({baseUrl}/changelog)
-  //console.log('**** sda', filePath);
-
   return parsedSource;
 }
 
@@ -72,6 +62,7 @@ export async function compile(filePath: string, source: string) {
   const cached = cache.get(key);
 
   if (cached) return cached;
+
   console.time(`compile md: ${filePath}`);
 
   const compiling = compiler

@@ -8,6 +8,7 @@ import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { MDXComponents } from 'mdx/types';
 import { siteConfig } from "@/lib/site-config";
+import { RepositoryConfig, VersionConfig } from "@/lib/repo-config";
 
 const githubCalloutRegex = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*)$/s;
 
@@ -191,17 +192,6 @@ const mdxComponents = {
       </CodeBlock>;
     }
   },
-  // a: ({ href, ...props }: { href: string; props: any }) => {
-  //   // Formatting relative url, e.g. "./", "../"
-  //   if (href.startsWith("./") || href.startsWith("../") || !(href.startsWith("http") || href.startsWith("https"))) {
-  //     // If have extension at the end, convert as current url format, e.g. CHANGELOG.md -> changelog
-  //     const lastDotIndex = href.lastIndexOf('.');
-  //     console.debug("### MDX Link href before:", href, lastDotIndex);
-  //     href = lastDotIndex !== -1 ? href.substring(0, lastDotIndex) : href;
-  //     href = siteConfig.baseUrl + "/docs/" + href.replace(/^\.\//, "").replace(/^\.\.\//, "");
-  //   }
-  //   return <a href={href} {...props} />;
-  // }
 };
 
 export function createMdxComponents(components?: MDXComponents) {
@@ -211,4 +201,30 @@ export function createMdxComponents(components?: MDXComponents) {
     // PagesOnly: ({ children }: { children: ReactNode }) =>
     //   <Fragment>{children}</Fragment>,
   };
+}
+
+
+export function createRelativeLink(repository: RepositoryConfig, version: VersionConfig, href: string) {
+  // Skip link creation for external URLs
+  if (href.startsWith('http') || href.startsWith('https')) {
+    // console.debug("### Skipping relative link creation for external URL:", href);
+    return href;
+  }
+
+  // Skip link creation for mailto:, #, and other protocols
+  if (href.startsWith('mailto:') || href.startsWith('#')) {
+    // console.debug("### Skipping relative link creation for:", href);
+    return href;
+  }
+
+  // const extractPaths = href.split('/').map((part) => getFileSlug(part)) || [];
+  // const existPage = null;//source.getPage([repository.repo, version.version, ...extractPaths]);
+  // if (existPage) {
+  //   //return existPage.url;
+  // }
+
+  let repositoryUrl = `${repository.repository_url}/blob/${version.github_branch || version.version}/${href}`;
+  // console.debug("### Creating relative link for:", href, repositoryUrl);
+
+  return repositoryUrl;
 }
