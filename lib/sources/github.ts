@@ -2,23 +2,15 @@ import type { Source, VirtualFile } from "fumadocs-core/source";
 import { Octokit } from "octokit";
 import { compile, type CompiledPage } from "../compile-md";
 import * as path from "node:path";
-import { getTitleFromFile } from "../source";
+import { getTitleFromFile, removeLeadingNumber } from "../source";
 import { fumadocMeta } from "../meta";
 import {
   repositories,
   getRepositorySlug,
   type RepositoryConfig,
   type VersionConfig,
-  getVersionBySlug,
-  getBaseFileName,
-  getFileSlug,
 } from "../repo-config";
-import {
-  fetchWithCache,
-  cache,
-  getCachedGitHubContent,
-  getCachedGitHubTree,
-} from "../cache";
+import { cache as reactCache } from 'react';
 
 const token = process.env.GITHUB_TOKEN;
 if (!token) throw new Error(`environment variable GITHUB_TOKEN is needed.`);
@@ -61,32 +53,19 @@ async function fetchBlob(url: string): Promise<string> {
   return Buffer.from(base64, "base64").toString();
 }
 
-/**
- * @returns Sha code of directory in GitHub repo
- */
-async function getDirectorySha(
+// Cached function for getting directory SHA
+const getCachedDirectorySha = reactCache(async (
   config: RepositoryConfig,
   version: VersionConfig,
   dirPath: string = "docs",
-) {
-  const cacheKey = `github:${config.owner}/${config.repo}:${version.github_branch}:${dirPath}`;
-
-  // Check in-memory cache first for faster access
-  const cached = cache.get<string>(cacheKey);
-  if (cached) {
-    console.log(`Cache hit for: ${cacheKey}`);
-    return cached;
-  }
-
+): Promise<string | null> => {
   try {
     // Use cached GitHub tree function for better performance
-    const treeData = await getCachedGitHubTree(
+    const treeData = await getGithubTree(
       config.owner,
       config.repo,
       version.github_branch,
     );
-
-    // console.debug(`*** [getDirectorySha] |1| *** Directory listing for ${config.owner}/${config.repo} at ${version.github_branch}:`, treeData.tree);
 
     // If docsPath is a subdirectory, we need to find it
     // e.g., "docs/plugins"
@@ -112,7 +91,7 @@ async function getDirectorySha(
           continue;
         }
         // Fetch the next level tree using cached function
-        const nextTreeData = await getCachedGitHubTree(
+        const nextTreeData = await getGithubTree(
           config.owner,
           config.repo,
           currentSha,
@@ -120,21 +99,13 @@ async function getDirectorySha(
         currentTree = nextTreeData.tree;
       }
 
-      // console.debug(`*** [getDirectorySha] |2.1| *** Found directory ${dirPath} in ${config.owner}/${config.repo} at ${version.github_branch}:`, currentSha);
-
-      if (currentSha) {
-        cache.set(cacheKey, currentSha);
-      }
       return currentSha || null;
     } else {
       const directory = treeData.tree.find(
         (item: any) => item.path === dirPath,
       );
 
-      // console.debug(`*** [getDirectorySha] |2.2| *** Found directory ${dirPath} in ${config.owner}/${config.repo} at ${version.github_branch}:`, directory);
-
       if (directory?.sha) {
-        cache.set(cacheKey, directory.sha);
         return directory.sha;
       }
 
@@ -147,28 +118,28 @@ async function getDirectorySha(
     );
     return null;
   }
-}
+});
 
 /**
- * Fetch a specific file from repository using caching
+ * @returns Sha code of directory in GitHub repo
  */
-async function fetchFileFromRepo(
+async function getDirectorySha(
+  config: RepositoryConfig,
+  version: VersionConfig,
+  dirPath: string = "docs",
+) {
+  return getCachedDirectorySha(config, version, dirPath);
+}
+
+// Cached function for fetching files from repository
+const getCachedFileFromRepo = reactCache(async (
   config: RepositoryConfig,
   version: VersionConfig,
   filePath: string,
-): Promise<string | null> {
-  const cacheKey = `github:${config.owner}/${config.repo}:${version.github_branch}:${filePath}`;
-
-  // Check in-memory cache first
-  const cached = cache.get<string>(cacheKey);
-  if (cached) {
-    console.log(`Cache hit for file: ${cacheKey}`);
-    return cached;
-  }
-
+): Promise<string | null> => {
   try {
     // Use cached GitHub content function
-    const response = await getCachedGitHubContent(
+    const response = await getGitHubContent(
       config.owner,
       config.repo,
       filePath,
@@ -177,8 +148,6 @@ async function fetchFileFromRepo(
 
     if ("content" in response && response.content) {
       const content = Buffer.from(response.content, "base64").toString();
-      // Cache in memory for faster subsequent access
-      cache.set(cacheKey, content);
       return content;
     }
     return null;
@@ -198,6 +167,72 @@ async function fetchFileFromRepo(
     );
     return null;
   }
+});
+
+// Static export compatible GitHub API functions with fetch caching
+async function getGitHubContent(
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string,
+) {
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${ref}`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      // Use force-cache for static exports
+      cache: "force-cache",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `GitHub API error: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  return await response.json();
+}
+
+async function getGithubTree(
+  owner: string,
+  repo: string,
+  treeSha: string,
+  recursive = false,
+) {
+  
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/git/trees/${treeSha}${recursive ? "?recursive=1" : ""}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+        cache: "force-cache",
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `GitHub API error: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    return await response.json();
+}
+
+/**
+ * Fetch a specific file from repository using caching
+ */
+async function fetchFileFromRepo(
+  config: RepositoryConfig,
+  version: VersionConfig,
+  filePath: string,
+): Promise<string | null> {
+  return getCachedFileFromRepo(config, version, filePath);
 }
 
 async function fetchRepositoryFiles(
@@ -243,39 +278,53 @@ async function fetchRepositoryFiles(
   const docsSha = config.docsPath
     ? await getDirectorySha(config, version, config.docsPath)
     : null;
-  if (config.docsPath) {
-    // console.debug(`2| Ready to fetch docs for ${config.owner}/${config.repo} (${version.version})`, config);
-    // console.debug(`2| Docs SHA for ${config.owner}/${config.repo} (${version.version}):`, docsSha);
-  }
   if (docsSha) {
     try {
       // Use cached GitHub tree function for better performance
-      const treeData = await getCachedGitHubTree(
+      const treeData = await getGithubTree(
         config.owner,
         config.repo,
         docsSha,
         true,
       );
 
-      const docsFiles = treeData.tree.flatMap((file: any) => {
-        if (!file.path || !file.url || file.type === "tree") return [];
+      let docsFiles: VirtualFile[] = [];
+
+      let docFolderPages = new Map<string, string[]>();
+
+      for (const file of treeData.tree) {
+        if (!file.path || !file.url || file.type === "tree") {
+          continue;
+        }
 
         if (path.extname(file.path) === ".json") {
           console.warn(
             "We do not handle .json files at the moment, you need to hardcode them",
           );
-          return [];
+          continue;
         }
 
         // Only include markdown files
-        if (![".md", ".mdx"].includes(path.extname(file.path))) return [];
+        if (![".md", ".mdx"].includes(path.extname(file.path))) {
+          continue;
+        }
 
-        const pagePath = `${repoSlug}/${versionSlug}/${file.path}`;
-        const pageTitle = getTitleFromFile(file.path);
+        // Parsing file path
+        const parsedFilePath = path.parse(file.path);
+        const pageTitle = getTitleFromFile(parsedFilePath.name);
+
+        const pagePath = `${repoSlug}/${versionSlug}/${parsedFilePath.dir}/${parsedFilePath.name}`;
+
+        if (!docFolderPages.has(parsedFilePath.dir)) {
+          docFolderPages.set(parsedFilePath.dir, []);
+        }
+        docFolderPages.get(parsedFilePath.dir)!.push(parsedFilePath.name);
+
+        // console.debug(`Docs file found: ${file.path} (Parsed: ${formattedFilePath})`);
 
         // console.debug(`2| Adding doc file: ${pagePath} (title: ${pageTitle})`);
 
-        return {
+        docsFiles.push({
           type: "page",
           path: pagePath,
           data: {
@@ -288,10 +337,40 @@ async function fetchRepositoryFiles(
               return compile(file.path!, content);
             },
           },
-        } satisfies VirtualFile;
-      });
+        } satisfies VirtualFile);
+      }
 
       allFiles.push(...docsFiles);
+
+      // console.debug(`Fetched ${docsFiles.length} docs files from ${config.owner}/${config.repo} (${version.version})`, docsFiles);
+
+      const docFolders = Array.from(docFolderPages.entries()).flatMap(([dir, pages]) => {
+        // Create folder structure
+        let folders: VirtualFile[] = [];
+        for (const segment of dir.split('/')) {
+          const formattedFolderName = getTitleFromFile(segment);
+          const folderPrefix: string = folders.length > 0 ? folders[folders.length - 1].path.replace('/meta.json', '') : `${repoSlug}/${versionSlug}`;
+          const folderPath = `${folderPrefix}/${segment}`;
+
+          const folder = {
+            type: 'meta',
+            path: `${folderPath}/meta.json`,
+            // root: false,
+            data: {
+              title: formattedFolderName,
+              pages: pages,
+            },
+          } satisfies VirtualFile;
+
+          folders.push(folder);
+        }
+        return folders; 
+      }) || [];
+
+      allFiles.push(...docFolders);
+
+      // console.debug('Document folders added:', docFolders);
+
     } catch (error) {
       console.warn(
         `Failed to fetch docs directory from ${config.owner}/${config.repo}:`,

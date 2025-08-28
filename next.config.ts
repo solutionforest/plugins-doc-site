@@ -44,6 +44,19 @@ const config: NextConfig = {
     GITHUB_API_CACHE_TTL: "3600", // 1 hour
     GITHUB_RATE_LIMIT_MAX: "50",
   },
+  webpack: (config, { isServer }) => {
+    // Prevent shiki from being externalized
+    if (!isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        shiki: 'shiki'
+      });
+    }
+    
+    return config;
+  },
+  // Alternative approach - mark shiki as not external
+  serverExternalPackages: ['shiki'],
 };
 
 export default config;

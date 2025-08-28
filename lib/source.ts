@@ -48,11 +48,7 @@ export function getTitleFromFile(file: string) {
   const match = FileNameRegex.exec(name);
   let title = match ? match[1] : name;
 
-  // If the file have number prefix, remove it
-  // e.g. 01-introduction.md -> introduction
-  if (title.match(/^\d-/)) {
-    title = title.replace(/^\d-/, "");
-  }
+  title = removeLeadingNumber(title);
 
   const segs = title.split("-");
   for (let i = 0; i < segs.length; i++) {
@@ -65,4 +61,20 @@ export function getTitleFromFile(file: string) {
 
   const out = segs.join(" ");
   return out.length > 0 ? out : "Overview";
+}
+
+
+/**
+ * Remove leading number and slash from file path
+ * e.g. 1-foo/bar.md -> foo/bar.md
+ */
+export function removeLeadingNumber(file: string): string {
+
+  // If the file have number prefix, remove it
+  // e.g. 01-introduction.md -> introduction
+  if (file.match(/^\d-/)) {
+    file = file.replace(/^\d-/, "");
+  }
+
+  return file;
 }

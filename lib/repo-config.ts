@@ -31,6 +31,7 @@ function parseRepositoryUrl(url: string): { owner: string; repo: string } {
 }
 
 // Sample repositories from your JSON
+
 const rawRepositories = [
   {
     description:
@@ -44,7 +45,7 @@ const rawRepositories = [
         version: "1.x",
         github_branch: "1.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
           { name: "Documentation.md", title: "Documentation", slug: "docs" },
         ],
       },
@@ -52,7 +53,7 @@ const rawRepositories = [
         version: "2.x",
         github_branch: "2.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
           { name: "Documentation.md", title: "Documentation", slug: "docs" },
         ],
       },
@@ -60,42 +61,42 @@ const rawRepositories = [
         version: "3.x",
         github_branch: "3.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
           { name: "Documentation.md", title: "Documentation", slug: "docs" },
         ],
       },
     ],
   },
-  // {
-  //   description: 'Effortlessly manage your newsletters with our Filament Newsletter package, designed for seamless integration with the Filament Admin Panel. Enjoy flexible and user-friendly email marketing directly within your admin panel.',
-  //   repository_url: 'https://github.com/solutionforest/filaletter',
-  //   latest_version: '3.x',
-  //   is_private: true,
-  //   versions: [
-  //     {
-  //       version: '2.x',
-  //       github_branch: 'v2.x',
-  //       limited_files: [
-  //         { name: "README.md", title: "Overview", slug: "index" },
-  //       ]
-  //     },
-  //     {
-  //       version: '3.x',
-  //       github_branch: 'v3.x',
-  //       limited_files: [
-  //         { name: "README.md", title: "Overview", slug: "index" },
-  //       ]
-  //     },
-  //     {
-  //       version: '4.x',
-  //       github_branch: 'v4.x',
-  //       limited_files: [
-  //         { name: "README.md", title: "Overview", slug: "index" },
-  //       ]
-  //     },
-  //   ],
-  //   docsPath: "filaletter/public/docs", // include docs
-  // },
+  {
+    description: 'Effortlessly manage your newsletters with our Filament Newsletter package, designed for seamless integration with the Filament Admin Panel. Enjoy flexible and user-friendly email marketing directly within your admin panel.',
+    repository_url: 'https://github.com/solutionforest/filaletter',
+    latest_version: '3.x',
+    is_private: true,
+    versions: [
+      {
+        version: '2.x',
+        github_branch: 'v2.x',
+        limited_files: [
+          { name: "README.md", title: "Overview", slug: "overview" },
+        ]
+      },
+      {
+        version: '3.x',
+        github_branch: 'v3.x',
+        limited_files: [
+          { name: "README.md", title: "Overview", slug: "overview" },
+        ]
+      },
+      {
+        version: '4.x',
+        github_branch: 'v4.x',
+        limited_files: [
+          { name: "README.md", title: "Overview", slug: "overview" },
+        ]
+      },
+    ],
+    docsPath: "filaletter/public/docs", // include docs
+  },
   {
     description:
       "A powerful tree structure management plugin for Filament with drag-and-drop functionality and hierarchical data organization.",
@@ -106,21 +107,21 @@ const rawRepositories = [
         version: "1.x",
         github_branch: "1.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
       {
         version: "2.x",
         github_branch: "2.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
       {
         version: "3.x",
         github_branch: "3.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
     ],
@@ -135,21 +136,21 @@ const rawRepositories = [
         version: "1.x",
         github_branch: "1.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
       {
         version: "2.x",
         github_branch: "2.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
       {
         version: "3.x",
         github_branch: "3.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
     ],
@@ -165,14 +166,14 @@ const rawRepositories = [
         version: "1.x",
         github_branch: "1.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
       {
         version: "2.x",
         github_branch: "2.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
     ],
@@ -187,7 +188,7 @@ const rawRepositories = [
         version: "1.x",
         github_branch: "main",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
     ],
@@ -202,14 +203,14 @@ const rawRepositories = [
         version: "0.x",
         github_branch: "main",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
       {
         version: "1.x",
         github_branch: "main",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
     ],
@@ -224,14 +225,14 @@ const rawRepositories = [
         version: "0.x",
         github_branch: "main",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
       {
         version: "2.x",
         github_branch: "main",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
     ],
@@ -246,14 +247,14 @@ const rawRepositories = [
         version: "1.x",
         github_branch: "1.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
       {
         version: "2.x",
         github_branch: "2.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
     ],
@@ -269,14 +270,14 @@ const rawRepositories = [
         version: "1.x",
         github_branch: "1.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
       {
         version: "2.x",
         github_branch: "2.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
     ],
@@ -291,14 +292,14 @@ const rawRepositories = [
         version: "1.x",
         github_branch: "1.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
       {
         version: "2.x",
         github_branch: "2.x",
         limited_files: [
-          { name: "README.md", title: "Overview", slug: "index" },
+          { name: "README.md", title: "Overview", slug: "overview" },
         ],
       },
     ],

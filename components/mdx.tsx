@@ -165,10 +165,15 @@ const mdxComponents = {
         : parseInt(props.height) || defaultHeight
       : defaultHeight;
 
+    let url = props.src;
+    // if (url.startsWith('./') || url.startsWith('../')) {
+    //   url = siteConfig.baseUrl + '/' + url;
+    // }
+
     return (
       <div className="not-prose my-6 rounded-xl p-1 bg-gradient-to-br from-white/10 to-black/10 border shadow-lg">
         <ImageZoom
-          src={props.src}
+          src={url}
           height={height}
           width={width}
           loading="lazy"

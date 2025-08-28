@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 import { DocPageHeading } from "../../components";
 import { source } from "@/lib/source";
 import { createMdxComponents, createRelativeLink } from "@/components/mdx";
+import { Cards, Card } from "fumadocs-ui/components/card";
 
 type Props = {
   params: Promise<{ plugin: string; version: string }>;
@@ -30,14 +31,23 @@ export default async function Page(props: Props) {
     notFound();
   }
 
-  const fullSlug = [repoSlug, versionSlug];
+  const fullSlug = [repoSlug, versionSlug, 'overview'];
   const page = source.getPage(fullSlug);
   if (!page) {
     return (
       <DocsPage>
         <DocPageHeading repository={repository} />
         <DocsBody>
-          <p>Documentation not found for this version.</p>
+        <Cards>
+          {version.limited_files?.map((file) => (
+            <Card
+              key={file.slug}
+              href={`/docs/${repoSlug}/${versionSlug}/${file.slug}`}
+              title={file.title}
+              className="flex items-center gap-2"
+            />
+          ))}
+        </Cards>
         </DocsBody>
       </DocsPage>
     );
@@ -73,9 +83,6 @@ export default async function Page(props: Props) {
             },
           })}
         />
-        {/* {page.file.name === "index" && (
-          <DocsCategory page={page} from={source} />
-        )} */}
       </DocsBody>
     </DocsPage>
   );

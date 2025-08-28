@@ -86,7 +86,7 @@ export const fumadocMeta: VirtualFile[] = [
               (repo.latest_version === versionSlug ? " (Latest)" : ""),
             root: false,
             pages: [
-              `./index`, // e.g. /docs/repo-slug/3.x/ README.md
+              `./index`, // e.g. /docs/repo-slug/3.x/ 
               "...", // all other files in this version
             ],
           },

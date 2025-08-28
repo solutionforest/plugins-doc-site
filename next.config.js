@@ -40,6 +40,19 @@ const nextConfig = {
       fullUrl: true,
     },
   },
+  webpack: (config, { isServer }) => {
+    // Prevent shiki from being externalized
+    if (!isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        shiki: 'shiki'
+      });
+    }
+    
+    return config;
+  },
+  // Alternative approach - mark shiki as not external
+  serverExternalPackages: ['shiki'],
 };
 
 module.exports = nextConfig;

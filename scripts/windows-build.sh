@@ -1,0 +1,1 @@
+$env:NEXT_STATIC_EXPORT="true"; pnpm build

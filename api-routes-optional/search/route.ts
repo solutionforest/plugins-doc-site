@@ -5,10 +5,10 @@ import { NextRequest, NextResponse } from "next/server";
 //import { source } from '@/lib/source';
 //import { createLocalSource } from "@/lib/sources/local";
 
-export async function GET() {
+export default async function GET() {
   return NextResponse.json({ message: "Search not implemented" });
 }
 
-export async function generateStaticParams() {
-  return [];
-}
+// export async function generateStaticParams() {
+//   return [];
+// }

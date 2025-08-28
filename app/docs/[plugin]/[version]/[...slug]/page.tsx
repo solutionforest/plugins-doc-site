@@ -16,6 +16,7 @@ type Props = {
 };
 
 export default async function Page(props: Props) {
+
   const resolvedParams = await props.params;
   const repoSlug = resolvedParams.plugin;
   const versionSlug = resolvedParams.version;
@@ -67,9 +68,6 @@ export default async function Page(props: Props) {
             },
           })}
         />
-        {/* {page.file.name === "index" && (
-          <DocsCategory page={page} from={source} />
-        )} */}
       </DocsBody>
     </DocsPage>
   );
@@ -107,33 +105,86 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export async function generateStaticParams() {
-  // Generate params for all repository and version combinations
+  // Generate params for all repository and version combinations with their actual pages
   const params: { plugin: string; version: string; slug: string[] }[] = [];
+
+  // console.debug("### Repositories length:", repositories.length);
 
   for (const repository of repositories) {
     const repoSlug = repository.repo;
+    // console.debug("### Processing repo:", repoSlug);
 
     for (const version of repository.versions) {
       const versionSlug = version.version;
+      // console.debug("### Processing version:", versionSlug);
 
-      // Skip empty slug - that's handled by [version]/page.tsx
-      // params.push({ plugin: repoSlug, version: versionSlug, slug: [] });
+      // Get limited files for this version
+      const limitedFiles = version.limited_files || [];
+      // console.debug("### Limited files:", limitedFiles);
 
-      // Add limited files for this version
-      if (version.limited_files) {
-        for (const file of version.limited_files) {
-          if (file.slug === "index") {
-            continue; // skip index as it's handled by [version]/page.tsx
+      for (const file of limitedFiles) {
+        // console.debug("### Processing file:", file);
+        
+        // Skip files with slug "index" as they are handled by [version]/page.tsx
+        if (file.slug === "index") {
+          // console.debug("### Skipping index file");
+          continue;
+        }
+        
+        // Create the slug array for this file
+        const slug = [file.slug];
+        
+        // console.debug("### Adding param:", { plugin: repoSlug, version: versionSlug, slug });
+        
+        params.push({
+          plugin: repoSlug,
+          version: versionSlug,
+          slug: slug,
+        });
+      }
+
+      if (repository.docsPath) {
+        // Search the pages
+        const docsPages = source.getPages()
+          .filter(p => p.url.startsWith(`/docs/${repoSlug}/${versionSlug}/`));
+
+        // console.debug("### Found doc pages:", docsPages);
+
+        for (const docPage of docsPages) {
+          
+          const docPageSlug = docPage.slugs.slice(2); // Skip repo/version
+
+          if (docPageSlug.length === 0) {
+            // Skip empty slugs
+            continue;
           }
+
+          if (params.some(p => p.plugin === repoSlug && p.version === versionSlug && arraysEqual(p.slug, docPageSlug))) {
+            // Skip existing params
+            continue;
+          }
+
+          // Create a param for each doc page
           params.push({
             plugin: repoSlug,
             version: versionSlug,
-            slug: [file.slug],
+            slug: docPageSlug,
           });
         }
       }
     }
   }
 
+  // console.debug("### Final static params:", params);
+
   return params;
+}
+
+
+function arraysEqual(a: any[], b: any[]) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
