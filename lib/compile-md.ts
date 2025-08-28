@@ -63,7 +63,7 @@ export async function compile(filePath: string, source: string) {
 
   if (cached) return cached;
 
-  console.time(`compile md: ${filePath}`);
+  // console.time(`compile md: ${filePath}`);
 
   const compiling = compiler
     .compile({
@@ -106,7 +106,7 @@ export async function compile(filePath: string, source: string) {
       };
     })
     .finally(() => {
-      console.timeEnd(`compile md: ${filePath}`);
+      // console.timeEnd(`compile md: ${filePath}`);
     });
 
   cache.set(key, compiling);

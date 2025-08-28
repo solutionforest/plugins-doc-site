@@ -1,116 +1,222 @@
-## Multi-Repository Documentation with Fumadocs
+# My Plugin Documentation Site
 
-View documentation from multiple GitHub repositories in one unified interface powered by Fumadocs.
-This project supports fetching and displaying documentation from multiple GitHub repositories simultaneously.
+A modern documentation website for showcasing plugin documentation with automatic GitHub integration, built with Next.js and Fumadocs.
 
-https://nextjs-fumadocs.vercel.app
+## � Quick Start
 
-### Features
+### Prerequisites
 
-- **Multi-Repository Support**: Browse documentation from multiple GitHub repositories
-- **Dynamic Repository Configuration**: Easily add/remove repositories via configuration
-- **GitHub API Integration**: Fetch content directly from GitHub repositories
-- **Local Development Mode**: Preview content locally without GitHub API calls
-- **Repository Identification**: Clear indication of which repository each document comes from
-- **Unified Navigation**: Browse all repositories through a single interface
+- Node.js 18+ or higher
+- npm, yarn, or pnpm
+- GitHub Personal Access Token
 
-### Repository Configuration
+### 1. Installation
 
-Configure repositories in `lib/repo-config.ts`. Each repository supports multiple versions with version-specific files:
+```bash
+# Clone the repository
+git clone <your-repository-url>
+cd nextjs-fumadocs
+
+# Install dependencies
+npm install
+# or
+pnpm install
+# or
+yarn install
+```
+
+### 2. Environment Setup
+
+Create a `.env.local` file in the root directory:
+
+```env
+GITHUB_TOKEN=your_github_personal_access_token_here
+NEXT_PUBLIC_SITE_URL=http://localhost:3001
+```
+
+#### Getting a GitHub Token
+
+1. Go to [GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens)
+2. Click "Generate new token (classic)"
+3. Give it a descriptive name like "Plugin Docs Site"
+4. Select scopes:
+   - `public_repo` (for public repositories)
+   - `repo` (if you need access to private repositories)
+5. Copy the generated token and add it to your `.env.local` file
+
+### 3. Configure Your Plugins
+
+Edit `lib/plugins.ts` to add your plugins:
 
 ```typescript
-export const repositories: RepositoryConfig[] = [
+export const plugins: Plugin[] = [
   {
-    repository_url: "https://github.com/owner/repo-name",
-    latest_version: "3.x",
+    name: "Your Plugin Name",
+    slug: "your-plugin-slug",
+    description: "Description of what your plugin does",
+    repository_url: "https://github.com/your-username/your-plugin",
+    latest_version: "2.x",
+    is_private: false, // Set to true for private repositories
     versions: [
-      {
-        version: "1.x",
-        github_branch: "1.x",
-        limited_files: [
-          { name: "README.md", title: "Overview" },
-          // Only include files that exist in this version
-        ],
-      },
-      {
-        version: "2.x",
-        github_branch: "2.x",
-        limited_files: [
-          { name: "README.md", title: "Overview" },
-          { name: "CHANGELOG.md", title: "Changelog" },
-        ],
-      },
+      { version: "1.x", github_branch: "1.x" },
+      { version: "2.x", github_branch: "2.x" },
     ],
   },
-  // Add more repositories as needed
+  // Add more plugins here...
 ];
 ```
 
-**Key Features:**
-
-- **Version-Specific Files**: Each version can have different available files
-- **Error Prevention**: Only files that exist in each version are configured
-- **Flexible Configuration**: Easy to add/remove files per version
-
-For detailed configuration instructions, see [REPOSITORY_CONFIG.md](./REPOSITORY_CONFIG.md).
-
-### Environment Setup
-
-1. Copy `.env.example` to `.env.local`
-2. Add your GitHub Personal Access Token:
+### 4. Run Development Server
 
 ```bash
-GITHUB_TOKEN=your_github_token_here
-```
-
-Generate a token at: https://github.com/settings/tokens
-Required permissions: `public_repo` (for public repositories)
-
-### Development Mode
-
-For development with GitHub API:
-
-```bash
+npm run dev
+# or
 pnpm dev
+# or
+yarn dev
 ```
 
-For local development without GitHub API:
+Open [http://localhost:3001](http://localhost:3001) in your browser.
+
+### 5. Build for Production
 
 ```bash
-pnpm sync:docs
-LOCAL=true pnpm dev
+npm run build
+npm start
+# or
+pnpm build && pnpm start
 ```
 
-This will use local files from the `next.js/docs` directory instead of GitHub API.
+## 📁 Project Structure
 
-### Production Mode
-
-```bash
-pnpm build
-pnpm start
+```
+├── app/
+│   ├── (home)/              # Homepage with plugin listings
+│   ├── docs/                # Documentation pages
+│   │   ├── layout.tsx       # Docs layout with sidebar
+│   │   └── [[...slug]]/     # Dynamic plugin documentation
+│   ├── api/                 # API endpoints
+│   └── layout.tsx           # Root layout
+├── lib/
+│   ├── plugins.ts           # Plugin configuration (EDIT THIS)
+│   ├── sources/             # GitHub integration
+│   ├── cache.ts             # Performance optimizations
+│   └── compile-md.ts        # Markdown processing
+├── components/              # React components
+└── public/                  # Static assets
 ```
 
-In production, the app will use GitHub API to fetch the latest documentation content with ISR (Incremental Static Regeneration).
+## ⚙️ Features
 
-### URL Structure
+### Plugin Documentation
 
-- `/docs` - Main repository overview page
-- `/docs/{owner}-{repo}` - Repository-specific documentation
-- `/docs/{owner}-{repo}/{path}` - Specific document within a repository
+The site automatically fetches and displays documentation from your GitHub repositories:
 
-Example:
+- **README.md** → Overview page
+- **DOCUMENTATION.md** → Detailed documentation
+- **CHANGELOG.md** → Version history
 
-- `/docs/vercel-next.js/app/getting-started` - Next.js App Router getting started guide
-- `/docs/facebook-react/hooks/useState` - React useState hook documentation
+### Version Management
 
-### Adding New Repositories
+Each plugin can have multiple versions mapped to different GitHub branches:
 
-1. Edit `lib/repo-config.ts`
-2. Add a new repository configuration to the `repositories` array
-3. The repository will automatically appear in the navigation and be accessible via the URL structure
+```typescript
+versions: [
+  { version: "1.x", github_branch: "1.x" },
+  { version: "2.x", github_branch: "2.x" },
+  { version: "3.x", github_branch: "main" },
+];
+```
 
-### Troubleshooting
+### Performance Features
 
-- **Bad credentials error**: Check your `GITHUB_TOKEN` in `.env.local`
-- **Repository not found**: Verify the repository exists and is public
-- **Empty documentation**: Check that the repository has a docs folder at the specified `docsPath`
+- **Caching**: Intelligent caching system for GitHub API calls
+- **ISR**: Incremental Static Regeneration for optimal performance
+- **Rate Limiting**: Respects GitHub API limits
+- **Error Handling**: Graceful fallbacks for missing content
+
+## 🔧 Customization
+
+### Adding New Plugins
+
+1. Add plugin configuration to `lib/plugins.ts`
+2. Ensure your GitHub repository has documentation files
+3. The site will automatically generate pages for each version
+
+### Private Repositories
+
+For private repositories, set `is_private: true` in the plugin configuration. This will:
+
+- Hide GitHub repository links in the UI
+- Require proper token permissions
+- Show appropriate fallback content if access is denied
+
+### Styling and Branding
+
+- Update `app/layout.config.tsx` for site configuration
+- Modify `app/global.css` for custom styles
+- Colors are defined using CSS custom properties
+
+### API Endpoints
+
+- `/api/status?action=health` - Site health check
+- `/api/status?action=plugins` - List all configured plugins
+- `/api/status?action=cache-stats` - Cache performance stats
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Connect repository to Vercel
+3. Add environment variables in Vercel dashboard:
+   - `GITHUB_TOKEN`
+   - `NEXT_PUBLIC_SITE_URL`
+4. Deploy automatically
+
+### Other Platforms
+
+1. Build the project: `npm run build`
+2. Serve the generated files
+3. Set environment variables on your hosting platform
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+**"No documentation found"**
+
+- Check if README.md exists in your repository
+- Verify GitHub token has correct permissions
+- Check if the branch name matches your configuration
+
+**"Rate limit exceeded"**
+
+- The site includes rate limiting, wait a few minutes
+- Consider caching in production environment
+
+**"Build fails"**
+
+- Ensure all environment variables are set
+- Check if GitHub token is valid
+- Verify plugin configurations in `lib/plugins.ts`
+
+### Debug Mode
+
+Check the browser console for detailed error messages. The site logs:
+
+- Cache hits/misses
+- GitHub API calls
+- Compilation errors
+
+## 📝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test locally
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - see LICENSE file for details.

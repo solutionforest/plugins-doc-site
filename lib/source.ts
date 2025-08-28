@@ -15,7 +15,7 @@ export const source = loader({
   baseUrl: "/docs",
   // source: await createLocalSource(),
   source: await createGitHubSource(),
-  // source: isLocal ? await createGitHubSource() : await createLocalSource(),
+  // source: isLocal ? await createLocalSource() : await createGitHubSource(),
   slugs(info) {
     try {
       const segments = info.path

@@ -5,6 +5,7 @@ import * as path from "node:path";
 import { getTitleFromFile } from "../source";
 import { fumadocMeta } from "../meta";
 import { repositories, getRepositorySlug, type RepositoryConfig, type VersionConfig, getVersionBySlug, getBaseFileName, getFileSlug } from "../repo-config";
+import { fetchWithCache, cache, getCachedGitHubContent, getCachedGitHubTree } from "../cache";
 
 const token = process.env.GITHUB_TOKEN;
 if (!token) throw new Error(`environment variable GITHUB_TOKEN is needed.`);
@@ -15,24 +16,28 @@ export const octokit = new Octokit({
     fetch: (request: any, opts?: any) => {
       return fetch(request, {
         ...opts,
-        cache: "force-cache",
+        // Use force-cache for static exports
+        cache: 'force-cache',
       });
     },
   },
 });
 
+// Updated fetchBlob to use force-cache for static exports
 async function fetchBlob(url: string): Promise<string> {
   console.time(`fetch ${url}`);
+  
+  // Use force-cache for static exports
   const res = await fetch(url, {
-    cache: "force-cache",
     headers: {
       Authorization: `Bearer ${token}`,
       "X-GitHub-Api-Version": "2022-11-28",
     },
+    cache: 'force-cache',
   });
 
   if (!res.ok) {
-    throw new Error(await res.text());
+    throw new Error(`Failed to fetch blob: ${res.status} ${res.statusText}`);
   }
 
   const { content: base64 } = (await res.json()) as {
@@ -47,29 +52,30 @@ async function fetchBlob(url: string): Promise<string> {
  * @returns Sha code of directory in GitHub repo
  */
 async function getDirectorySha(config: RepositoryConfig, version: VersionConfig, dirPath: string = "docs") {
-  try {
-    const out = await octokit.request(
-      "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
-      {
-        owner: config.owner,
-        repo: config.repo,
-        tree_sha: version.github_branch,
-        headers: {
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      },
-    );
+  const cacheKey = `github:${config.owner}/${config.repo}:${version.github_branch}:${dirPath}`;
 
-    // console.debug(`*** [getDirectorySha] |1| *** Directory listing for ${config.owner}/${config.repo} at ${version.github_branch}:`, out.data.tree);
+  // Check in-memory cache first for faster access
+  const cached = cache.get<string>(cacheKey);
+  if (cached) {
+    console.log(`Cache hit for: ${cacheKey}`);
+    return cached;
+  }
+
+  try {
+    // Use cached GitHub tree function for better performance
+    const treeData = await getCachedGitHubTree(config.owner, config.repo, version.github_branch);
+
+    // console.debug(`*** [getDirectorySha] |1| *** Directory listing for ${config.owner}/${config.repo} at ${version.github_branch}:`, treeData.tree);
 
     // If docsPath is a subdirectory, we need to find it
     // e.g., "docs/plugins"
     if (dirPath.includes('/')) {
       const parts = dirPath.split('/');
-      let currentTree = out.data.tree;
+      let currentTree = treeData.tree;
       let currentSha: string|undefined = '';
+      
       for (const part of parts) {
-        const dir = currentTree.find((item) => item.path === part && item.type === 'tree');
+        const dir = currentTree.find((item: any) => item.path === part && item.type === 'tree');
         if (!dir) {
           console.warn(`Directory part ${part} not found in path ${dirPath}`);
           return null;
@@ -80,33 +86,29 @@ async function getDirectorySha(config: RepositoryConfig, version: VersionConfig,
           console.warn(`No SHA found for directory part ${part} in path ${dirPath}`);
           continue;
         }
-        // Fetch the next level tree
-        const nextTreeRes = await octokit.request(
-          "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
-          {
-            owner: config.owner,
-            repo: config.repo,
-            tree_sha: currentSha,
-            headers: {
-              "X-GitHub-Api-Version": "2022-11-28",
-            },
-          },
-        );
-        currentTree = nextTreeRes.data.tree;
+        // Fetch the next level tree using cached function
+        const nextTreeData = await getCachedGitHubTree(config.owner, config.repo, currentSha);
+        currentTree = nextTreeData.tree;
       }
 
       // console.debug(`*** [getDirectorySha] |2.1| *** Found directory ${dirPath} in ${config.owner}/${config.repo} at ${version.github_branch}:`, currentSha);
       
+      if (currentSha) {
+        cache.set(cacheKey, currentSha);
+      }
       return currentSha || null;
 
     } else {
-
-      const directory = out.data.tree.find((item) => item.path === dirPath);
+      const directory = treeData.tree.find((item: any) => item.path === dirPath);
     
       // console.debug(`*** [getDirectorySha] |2.2| *** Found directory ${dirPath} in ${config.owner}/${config.repo} at ${version.github_branch}:`, directory);
 
-      return directory?.sha;
+      if (directory?.sha) {
+        cache.set(cacheKey, directory.sha);
+        return directory.sha;
+      }
       
+      return null;
     }
   } catch (error) {
     console.warn(`Failed to get directory sha for ${config.owner}/${config.repo}/${dirPath}:`, error);
@@ -115,30 +117,32 @@ async function getDirectorySha(config: RepositoryConfig, version: VersionConfig,
 }
 
 /**
- * Fetch a specific file from repository
+ * Fetch a specific file from repository using caching
  */
 async function fetchFileFromRepo(config: RepositoryConfig, version: VersionConfig, filePath: string): Promise<string | null> {
-  try {
-    const response = await octokit.request(
-      "GET /repos/{owner}/{repo}/contents/{path}",
-      {
-        owner: config.owner,
-        repo: config.repo,
-        path: filePath,
-        ref: version.github_branch,
-        headers: {
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      },
-    );
+  const cacheKey = `github:${config.owner}/${config.repo}:${version.github_branch}:${filePath}`;
+  
+  // Check in-memory cache first
+  const cached = cache.get<string>(cacheKey);
+  if (cached) {
+    console.log(`Cache hit for file: ${cacheKey}`);
+    return cached;
+  }
 
-    if ('content' in response.data && response.data.content) {
-      return Buffer.from(response.data.content, "base64").toString();
+  try {
+    // Use cached GitHub content function
+    const response = await getCachedGitHubContent(config.owner, config.repo, filePath, version.github_branch);
+
+    if ('content' in response && response.content) {
+      const content = Buffer.from(response.content, "base64").toString();
+      // Cache in memory for faster subsequent access
+      cache.set(cacheKey, content);
+      return content;
     }
     return null;
   } catch (error: any) {
     // Handle 404 errors (file not found) gracefully
-    if (error.status === 404) {
+    if (error.message.includes('404')) {
       console.log(`File ${filePath} not found in ${config.owner}/${config.repo} (${version.github_branch}), skipping...`);
       return null;
     }
@@ -164,7 +168,7 @@ async function fetchRepositoryFiles(config: RepositoryConfig, version: VersionCo
       const pagePath = `${repoSlug}/${versionSlug}/${limitedFile.slug}`;
       const pageTitle = limitedFile.title || getTitleFromFile(limitedFile.name);
 
-      console.debug(`1| Adding limited file: ${pagePath} (title: ${pageTitle})`);
+      // console.debug(`1| Adding limited file: ${pagePath} (title: ${pageTitle})`);
 
       allFiles.push({
         type: "page",
@@ -187,24 +191,14 @@ async function fetchRepositoryFiles(config: RepositoryConfig, version: VersionCo
   const docsSha = config.docsPath ? await getDirectorySha(config, version, config.docsPath) : null;
   if (config.docsPath) {
     // console.debug(`2| Ready to fetch docs for ${config.owner}/${config.repo} (${version.version})`, config);
-    console.debug(`2| Docs SHA for ${config.owner}/${config.repo} (${version.version}):`, docsSha);
+    // console.debug(`2| Docs SHA for ${config.owner}/${config.repo} (${version.version}):`, docsSha);
   }
   if (docsSha) {
     try {
-      const out = await octokit.request(
-        "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
-        {
-          owner: config.owner,
-          repo: config.repo,
-          tree_sha: docsSha,
-          headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-          },
-          recursive: "true",
-        },
-      );
+      // Use cached GitHub tree function for better performance
+      const treeData = await getCachedGitHubTree(config.owner, config.repo, docsSha, true);
 
-      const docsFiles = out.data.tree.flatMap((file) => {
+      const docsFiles = treeData.tree.flatMap((file: any) => {
         if (!file.path || !file.url || file.type === "tree") return [];
 
         if (path.extname(file.path) === ".json") {
@@ -220,7 +214,7 @@ async function fetchRepositoryFiles(config: RepositoryConfig, version: VersionCo
         const pagePath = `${repoSlug}/${versionSlug}/${file.path}`;
         const pageTitle = getTitleFromFile(file.path);
 
-        console.debug(`2| Adding doc file: ${pagePath} (title: ${pageTitle})`);
+        // console.debug(`2| Adding doc file: ${pagePath} (title: ${pageTitle})`);
 
         return {
           type: "page",

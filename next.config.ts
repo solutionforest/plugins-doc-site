@@ -39,6 +39,11 @@ const config: NextConfig = {
       fullUrl: true,
     },
   },
+  // Optimize GitHub API calls with environment variables
+  env: {
+    GITHUB_API_CACHE_TTL: '3600', // 1 hour
+    GITHUB_RATE_LIMIT_MAX: '50',
+  },
 };
 
 export default config;
