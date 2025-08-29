@@ -4,7 +4,7 @@ const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true";
 const isProd = process.env.NODE_ENV === "production";
 
 // GitHub Pages configuration
-const basePath = isProd && isStaticExport ? "/plugins-doc-site" : "";
+const basePath = isProd && isStaticExport ? (process.env.NEXT_PUBLIC_BASE_PATH || "/plugins-doc-site") : "";
 
 const nextConfig = {
   reactStrictMode: true,
@@ -40,19 +40,19 @@ const nextConfig = {
       fullUrl: true,
     },
   },
-  webpack: (config, { isServer }) => {
-    // Prevent shiki from being externalized
-    if (!isServer) {
-      config.externals = config.externals || [];
-      config.externals.push({
-        shiki: 'shiki'
-      });
-    }
+  // webpack: (config, { isServer }) => {
+  //   // Prevent shiki from being externalized
+  //   if (!isServer) {
+  //     config.externals = config.externals || [];
+  //     config.externals.push({
+  //       shiki: 'shiki'
+  //     });
+  //   }
     
-    return config;
-  },
-  // Alternative approach - mark shiki as not external
-  serverExternalPackages: ['shiki'],
+  //   return config;
+  // },
+  // // Alternative approach - mark shiki as not external
+  // serverExternalPackages: ['shiki'],
 };
 
 module.exports = nextConfig;

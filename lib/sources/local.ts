@@ -1,6 +1,7 @@
 import type { Source, VirtualFile } from "fumadocs-core/source";
 import { compile, type CompiledPage } from "../compile-md";
 import * as path from "node:path";
+import fs from 'fs';
 import { getTitleFromFile } from "../source";
 import { fumadocMeta } from "../meta";
 import {
@@ -13,7 +14,7 @@ import {
 import FastGlob from "fast-glob";
 import { readFile } from "node:fs/promises";
 
-const dir = "out/docs";
+const dir = "fi-plugins/docs";
 
 export async function createLocalSource(): Promise<
   Source<{
@@ -31,7 +32,7 @@ export async function createLocalSource(): Promise<
     };
   }>
 > {
-  const files = await FastGlob(`${dir}/**/*.{md,mdx,json,html}`);
+  const files = await FastGlob(`${dir}/**/*.{md,mdx,json}`);
 
   const pages = files.flatMap((file) => {
     const relativePath = path.relative(dir, file);
@@ -79,7 +80,7 @@ export async function createLocalSource(): Promise<
     const pagePath = `${repoSlug}/${version}/${getBaseFileName(fileName)}`;
 
     console.debug(
-      `Adding local page: ${pagePath} (title: ${getTitleFromFile(fileName)})`,
+      `Read local page: ${pagePath} (title: ${getTitleFromFile(fileName)})`,
     );
 
     return {
@@ -92,10 +93,10 @@ export async function createLocalSource(): Promise<
 
         async load() {
           const content = await readFile(file);
-          console.debug(
-            `### Loaded content for ${pagePath}, content: `,
-            content,
-          );
+          // console.debug(
+          //   `### Loaded content for ${pagePath}, content: `,
+          //   content,
+          // );
           return compile(file, content.toString());
         },
       },
@@ -120,4 +121,25 @@ export async function createLocalSource(): Promise<
   return {
     files: [...pages, ...fumadocMeta],
   };
+}
+
+
+export async function buildMarkdownFileToLocal(files: Map<string,string>): Promise<void> {
+  for (const [filePath, content] of files) {
+    try {
+
+      const realPath = path.join(dir, filePath + ".md");
+      console.info("Writing local file:", realPath);
+
+      // Ensure the directory exists before writing the file
+      fs.mkdirSync(path.dirname(realPath), { recursive: true });
+
+      // Here you would write the markdown content to a local file
+      fs.writeFileSync(realPath, content);
+      // fs.writeFileSync(realPath, content, { encoding: "utf-8", mode: 0o644, flag: "w" });
+
+    } catch (error) {
+      console.error(`Failed to write local file for ${filePath}:`, error);
+    }
+  }
 }

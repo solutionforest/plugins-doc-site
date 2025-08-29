@@ -8,7 +8,7 @@ import {
 } from "@/lib/repo-config";
 import { notFound } from "next/navigation";
 import { DocPageHeading } from "../../../components";
-import { source } from "@/lib/source";
+import { source, isLocal } from "@/lib/source";
 import { createMdxComponents, createRelativeLink } from "@/components/mdx";
 
 type Props = {
@@ -105,6 +105,11 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export async function generateStaticParams() {
+  // if (isLocal) {
+  //   const localParams = source.generateParams();
+  //   // console.debug("### Local params:", localParams);
+  //   return localParams;
+  // }
   // Generate params for all repository and version combinations with their actual pages
   const params: { plugin: string; version: string; slug: string[] }[] = [];
 

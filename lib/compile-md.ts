@@ -18,8 +18,6 @@ export interface CompiledPage {
 
   toc: TableOfContents;
   body: FC<{ components?: MDXComponents }>;
-
-  staticHtmlSource?: string;
 }
 
 // Create a cached compile function using React cache

@@ -67,36 +67,36 @@ const rawRepositories = [
       },
     ],
   },
-  {
-    description: 'Effortlessly manage your newsletters with our Filament Newsletter package, designed for seamless integration with the Filament Admin Panel. Enjoy flexible and user-friendly email marketing directly within your admin panel.',
-    repository_url: 'https://github.com/solutionforest/filaletter',
-    latest_version: '3.x',
-    is_private: true,
-    versions: [
-      {
-        version: '2.x',
-        github_branch: 'v2.x',
-        limited_files: [
-          { name: "README.md", title: "Overview", slug: "overview" },
-        ]
-      },
-      {
-        version: '3.x',
-        github_branch: 'v3.x',
-        limited_files: [
-          { name: "README.md", title: "Overview", slug: "overview" },
-        ]
-      },
-      {
-        version: '4.x',
-        github_branch: 'v4.x',
-        limited_files: [
-          { name: "README.md", title: "Overview", slug: "overview" },
-        ]
-      },
-    ],
-    docsPath: "filaletter/public/docs", // include docs
-  },
+  // {
+  //   description: 'Effortlessly manage your newsletters with our Filament Newsletter package, designed for seamless integration with the Filament Admin Panel. Enjoy flexible and user-friendly email marketing directly within your admin panel.',
+  //   repository_url: 'https://github.com/solutionforest/filaletter',
+  //   latest_version: '3.x',
+  //   is_private: true,
+  //   versions: [
+  //     {
+  //       version: '2.x',
+  //       github_branch: 'v2.x',
+  //       limited_files: [
+  //         { name: "README.md", title: "Overview", slug: "overview" },
+  //       ]
+  //     },
+  //     {
+  //       version: '3.x',
+  //       github_branch: 'v3.x',
+  //       limited_files: [
+  //         { name: "README.md", title: "Overview", slug: "overview" },
+  //       ]
+  //     },
+  //     {
+  //       version: '4.x',
+  //       github_branch: 'v4.x',
+  //       limited_files: [
+  //         { name: "README.md", title: "Overview", slug: "overview" },
+  //       ]
+  //     },
+  //   ],
+  //   docsPath: "filaletter/public/docs", // include docs
+  // },
   {
     description:
       "A powerful tree structure management plugin for Filament with drag-and-drop functionality and hierarchical data organization.",

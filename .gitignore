@@ -11,6 +11,7 @@
 
 # test & build
 /coverage
+/fi-plugins/
 /.next/
 /out/
 /build

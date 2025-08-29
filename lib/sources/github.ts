@@ -11,6 +11,7 @@ import {
   type VersionConfig,
 } from "../repo-config";
 import { cache as reactCache } from 'react';
+import { buildMarkdownFileToLocal } from "./local";
 
 const token = process.env.GITHUB_TOKEN;
 if (!token) throw new Error(`environment variable GITHUB_TOKEN is needed.`);
@@ -243,6 +244,8 @@ async function fetchRepositoryFiles(
   const versionSlug = version.version;
   const allFiles: VirtualFile[] = [];
 
+  const rawMarkdownFiles = new Map<string, string>();
+
   // 1. Fetch limited files (README.md, CHANGELOG.md, etc.)
   // All repositories should now have version-specific limited_files
   const limitedFiles = version.limited_files || [];
@@ -253,7 +256,9 @@ async function fetchRepositoryFiles(
       const pagePath = `${repoSlug}/${versionSlug}/${limitedFile.slug}`;
       const pageTitle = limitedFile.title || getTitleFromFile(limitedFile.name);
 
-      // console.debug(`1| Adding limited file: ${pagePath} (title: ${pageTitle})`);
+      console.debug(`1| Adding limited file: ${pagePath} (title: ${pageTitle})`);
+
+      rawMarkdownFiles.set(pagePath, content);
 
       allFiles.push({
         type: "page",
@@ -324,6 +329,10 @@ async function fetchRepositoryFiles(
 
         // console.debug(`2| Adding doc file: ${pagePath} (title: ${pageTitle})`);
 
+        const content = await fetchBlob(file.url as string);
+
+        rawMarkdownFiles.set(pagePath, content);
+
         docsFiles.push({
           type: "page",
           path: pagePath,
@@ -333,7 +342,6 @@ async function fetchRepositoryFiles(
             version: version,
 
             async load() {
-              const content = await fetchBlob(file.url as string);
               return compile(file.path!, content);
             },
           },
@@ -378,6 +386,8 @@ async function fetchRepositoryFiles(
       );
     }
   }
+
+  await buildMarkdownFileToLocal(rawMarkdownFiles);
 
   return allFiles;
 }

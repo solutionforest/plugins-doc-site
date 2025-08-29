@@ -5,17 +5,16 @@ import { createLocalSource } from "./sources/local";
 
 const FileNameRegex = /^\d\d-(.+)$/;
 
-// export const isLocal =
-//   process.env.NODE_ENV !== "production" || process.env.NEXT_PHASE === "phase-production-build";
-//   // process.env.ENV === "local" || process.env.NEXT_PHASE === "phase-production-build";
 export const isLocal =
-  process.env.LOCAL || process.env.NEXT_PHASE === "phase-production-build";
+  process.env.NEXT_DOC_SOURCE === 'local'; // || process.env.NEXT_PHASE === "phase-production-build";
+
+console.debug('#### Is Local: ', isLocal);
 
 export const source = loader({
   baseUrl: "/docs",
   // source: await createLocalSource(),
-  source: await createGitHubSource(),
-  // source: isLocal ? await createLocalSource() : await createGitHubSource(),
+  // source: await createGitHubSource(),
+  source: isLocal ? await createLocalSource() : await createGitHubSource(),
   slugs(info) {
     try {
       const segments = info.path
