@@ -8,8 +8,6 @@ const FileNameRegex = /^\d\d-(.+)$/;
 export const isLocal =
   process.env.NEXT_DOC_SOURCE === 'local'; // || process.env.NEXT_PHASE === "phase-production-build";
 
-console.debug('#### Is Local: ', isLocal);
-
 export const source = loader({
   baseUrl: "/docs",
   // source: await createLocalSource(),
@@ -19,16 +17,12 @@ export const source = loader({
     try {
       const segments = info.path
         .split("/")
-        .filter((seg) => !(seg.startsWith("(") && seg.endsWith(")")))
-        .map((seg) => {
-          const res = FileNameRegex.exec(seg);
-
-          return res ? res[1] : seg;
-        });
+        .filter((seg) => !(seg.startsWith("(") && seg.endsWith(")")));
 
       if (segments.at(-1) === "index") {
         segments.pop();
       }
+      // console.debug("Generating slugs for:", info.path, "->", segments);
 
       return segments;
     } catch (error) {

@@ -87,6 +87,7 @@ export const fumadocMeta: VirtualFile[] = [
             root: false,
             pages: [
               `./index`, // e.g. /docs/repo-slug/3.x/ 
+              `./overview`, // e.g. /docs/repo-slug/3.x/overview 
               "...", // all other files in this version
             ],
           },

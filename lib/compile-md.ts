@@ -20,6 +20,56 @@ export interface CompiledPage {
   body: FC<{ components?: MDXComponents }>;
 }
 
+// Function to clean TOC items and convert them to plain text
+function cleanTocItems(toc: TableOfContents): TableOfContents {
+  return toc.map(item => ({
+    ...item,
+    title: cleanTocTitle(item.title)
+  }));
+}
+
+// Function to convert TOC title to plain text
+function cleanTocTitle(title: any): string {
+  if (typeof title === 'string') {
+    // Remove HTML tags and decode entities
+    return title
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .trim();
+  }
+  
+  if (title && typeof title === 'object') {
+    // Handle React nodes - extract text content
+    if (title.props && title.props.children) {
+      return cleanTocTitle(title.props.children);
+    }
+    
+    if (Array.isArray(title)) {
+      return title.map(cleanTocTitle).filter(Boolean).join('');
+    }
+    
+    // If it's a React element with type and props
+    if (title.type === 'a' && title.props && title.props.children) {
+      return cleanTocTitle(title.props.children);
+    }
+    
+    // Handle other React node types
+    if (title.toString && typeof title.toString === 'function') {
+      return cleanTocTitle(title.toString());
+    }
+  }
+  
+  if (Array.isArray(title)) {
+    return title.map(cleanTocTitle).filter(Boolean).join('');
+  }
+  
+  return String(title || '').trim();
+}
+
 // Create a cached compile function using React cache
 const cachedCompile = reactCache(async (filePath: string, source: string): Promise<CompiledPage> => {
   // console.time(`compile md: ${filePath}`);
@@ -31,7 +81,7 @@ const cachedCompile = reactCache(async (filePath: string, source: string): Promi
     })
     .then((compiled) => ({
       body: compiled.body,
-      toc: compiled.toc,
+      toc: cleanTocItems(compiled.toc), // Clean TOC items to ensure plain text titles
       ...compiled.frontmatter,
     }))
     .catch((error) => {
@@ -130,11 +180,51 @@ function parseSourceBeforeCompile(filePath: string, source: string): string {
     '<div class="note">$1</div>',
   );
 
-  // Replace "style="xx" as mdx format
+  // Fix type annotations that get interpreted as HTML tags
+  // Replace array<type> with array&lt;type&gt; to prevent HTML parsing
   parsedSource = parsedSource.replace(
-    /style="([^"]+)"/g,
-    (match, p1) => {
-      return `style={{ ${p1} }}`;
+    /array<([^>]+)>/g,
+    'array&lt;$1&gt;',
+  );
+
+  // Fix standalone type annotations at start of lines or after colons/spaces
+  // This handles cases like "- `id`: int" -> "- `id`: `int`"
+  parsedSource = parsedSource.replace(
+    /(\s+- `[^`]+`):\s+(int|string|bool|float|double|object|array)(\s|$)/g,
+    '$1: `$2`$3',
+  );
+
+  // Fix type annotations in parameter lists
+  // This handles cases like "- **tags**: array<int> (optional)"
+  parsedSource = parsedSource.replace(
+    /(\*\*[^*]+\*\*):\s+(array&lt;[^&]+&gt;|int|string|bool|float|double|object|array)(\s)/g,
+    '$1: `$2`$3',
+  );
+
+  // Replace "style="xx" as mdx format  
+  // Convert CSS style attributes to JSX format
+  parsedSource = parsedSource.replace(
+    /style\s*=\s*"([^"]+)"/g,
+    (match: string, styleValue: string): string => {
+      // Parse CSS properties and convert to JSX object
+      const styles = styleValue
+        .split(';')
+        .filter((prop: string) => prop.trim())
+        .map((prop: string) => {
+          const [property, ...valueParts] = prop.split(':');
+          const value = valueParts.join(':').trim(); // Handle values with colons
+          const trimmedProperty = property.trim();
+          
+          if (!trimmedProperty || !value) return '';
+          
+          // Convert kebab-case to camelCase
+          const camelProperty = trimmedProperty.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+          return `${camelProperty}: "${value}"`;
+        })
+        .filter((prop: string) => prop)
+        .join(', ');
+      
+      return `style={{ ${styles} }}`;
     }
   );
 
@@ -143,6 +233,7 @@ function parseSourceBeforeCompile(filePath: string, source: string): string {
     /{{\s*(.*?)\s*}}/g,
     '\\{\\{$1\\}\\}',
   );
+
 
   return parsedSource;
 }

@@ -32,15 +32,24 @@ export async function createLocalSource(): Promise<
     };
   }>
 > {
-  const files = await FastGlob(`${dir}/**/*.{md,mdx,json}`);
+  const localFiles = await FastGlob(`${dir}/**/*.{md,mdx,json}`);
 
-  const pages = files.flatMap((file) => {
+  // console.debug("Local source files found:", localFiles);
+
+  const pages = localFiles.flatMap((file) => {
     const relativePath = path.relative(dir, file);
     if (path.extname(file) === ".json") {
-      console.warn(
-        "We do not handle .json files at the moment, you need to hardcode them",
-      );
-      return [];
+      const metaContent = fs.readFileSync(file, "utf-8");
+      // console.debug("Loaded JSON meta content:", metaContent);
+      return {
+        type: "meta",
+        path: relativePath,
+        data: JSON.parse(metaContent)
+      } satisfies VirtualFile;
+      // console.warn(
+      //   "We do not handle .json files at the moment, you need to hardcode them",
+      // );
+      // return [];
     }
 
     // Parse the path structure: {repo}/{version}/{file}
@@ -79,9 +88,9 @@ export async function createLocalSource(): Promise<
     // Create the path for fumadocs
     const pagePath = `${repoSlug}/${version}/${getBaseFileName(fileName)}`;
 
-    console.debug(
-      `Read local page: ${pagePath} (title: ${getTitleFromFile(fileName)})`,
-    );
+    // console.debug(
+    //   `Adding local page: ${pagePath} (filebaseName: ${getBaseFileName(fileName)}, Title: ${getTitleFromFile(fileName)})`,
+    // );
 
     return {
       type: "page",
@@ -93,30 +102,34 @@ export async function createLocalSource(): Promise<
 
         async load() {
           const content = await readFile(file);
-          // console.debug(
-          //   `### Loaded content for ${pagePath}, content: `,
-          //   content,
-          // );
+          console.debug(
+            `### Loaded content for ${pagePath}, content: `,
+            content,
+          );
           return compile(file, content.toString());
         },
       },
     } satisfies VirtualFile;
   });
 
-  // Collect unique repositories and versions from the discovered files
-  const repoVersionMap = new Map<string, Set<string>>();
+  // // Collect unique repositories and versions from the discovered files
+  // const repoVersionMap = new Map<string, Set<string>>();
 
-  files.forEach((file) => {
-    const relativePath = path.relative(dir, file);
-    const pathParts = relativePath.split(path.sep);
-    if (pathParts.length >= 3) {
-      const [repoSlug, version] = pathParts;
-      if (!repoVersionMap.has(repoSlug)) {
-        repoVersionMap.set(repoSlug, new Set());
-      }
-      repoVersionMap.get(repoSlug)!.add(version);
-    }
-  });
+  // localFiles.forEach((file) => {
+  //   const relativePath = path.relative(dir, file);
+  //   const pathParts = relativePath.split(path.sep);
+  //   if (pathParts.length >= 3) {
+  //     const [repoSlug, version] = pathParts;
+  //     if (!repoVersionMap.has(repoSlug)) {
+  //       repoVersionMap.set(repoSlug, new Set());
+  //     }
+  //     repoVersionMap.get(repoSlug)!.add(version);
+  //   }
+  // });
+
+  // console.debug("Repository and versions found in local files:", repoVersionMap);
+
+  // console.debug(`Total local pages processed: ${pages.length}`, pages.map(p => p.path));
 
   return {
     files: [...pages, ...fumadocMeta],
@@ -141,5 +154,18 @@ export async function buildMarkdownFileToLocal(files: Map<string,string>): Promi
     } catch (error) {
       console.error(`Failed to write local file for ${filePath}:`, error);
     }
+  }
+}
+
+export function buildMetaJson(files: VirtualFile[]): void {
+  for (const file of files) {
+    if (file.type !== 'meta' || !file.path.endsWith('.json')) continue;
+
+    const json = JSON.stringify(file.data, null, 2);
+    const filePath = path.join(dir, file.path);
+
+    console.info("Writing meta JSON file:", filePath);
+
+    fs.writeFileSync(filePath, json);
   }
 }

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "build:static": "NODE_ENV=production NEXT_STATIC_EXPORT=true next build",
+    "build:static": "NODE_ENV=production NEXT_STATIC_EXPORT=true NEXT_DOC_SOURCE=github next build",
     "dev": "next dev --turbo",
     "dev:local": "NEXT_DOC_SOURCE=local next dev --turbo",
     "start": "next start",

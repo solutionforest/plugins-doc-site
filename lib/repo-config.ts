@@ -40,6 +40,7 @@ const rawRepositories = [
       "https://github.com/solutionforest/filament-cms-website-plugin",
     latest_version: "3.x",
     is_private: true,
+    docsPath: "docs", // include docs
     versions: [
       {
         version: "1.x",
@@ -47,6 +48,7 @@ const rawRepositories = [
         limited_files: [
           { name: "README.md", title: "Overview", slug: "overview" },
           { name: "Documentation.md", title: "Documentation", slug: "docs" },
+          { name: "LICENSE.md", title: "License", slug: "license" },
         ],
       },
       {
@@ -55,6 +57,7 @@ const rawRepositories = [
         limited_files: [
           { name: "README.md", title: "Overview", slug: "overview" },
           { name: "Documentation.md", title: "Documentation", slug: "docs" },
+          { name: "LICENSE.md", title: "License", slug: "license" },
         ],
       },
       {
@@ -62,7 +65,7 @@ const rawRepositories = [
         github_branch: "3.x",
         limited_files: [
           { name: "README.md", title: "Overview", slug: "overview" },
-          { name: "Documentation.md", title: "Documentation", slug: "docs" },
+          { name: "LICENSE.md", title: "License", slug: "license" },
         ],
       },
     ],
@@ -71,7 +74,7 @@ const rawRepositories = [
   //   description: 'Effortlessly manage your newsletters with our Filament Newsletter package, designed for seamless integration with the Filament Admin Panel. Enjoy flexible and user-friendly email marketing directly within your admin panel.',
   //   repository_url: 'https://github.com/solutionforest/filaletter',
   //   latest_version: '3.x',
-  //   is_private: true,
+  //   is_private: false,
   //   versions: [
   //     {
   //       version: '2.x',

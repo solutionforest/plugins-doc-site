@@ -1,1 +1,1 @@
-$env:NEXT_STATIC_EXPORT="true"; pnpm build
+$env:NEXT_STATIC_EXPORT="true"; $env:NEXT_DOC_SOURCE="github"; pnpm build

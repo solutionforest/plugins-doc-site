@@ -11,7 +11,7 @@ import {
   type VersionConfig,
 } from "../repo-config";
 import { cache as reactCache } from 'react';
-import { buildMarkdownFileToLocal } from "./local";
+import { buildMarkdownFileToLocal, buildMetaJson } from "./local";
 
 const token = process.env.GITHUB_TOKEN;
 if (!token) throw new Error(`environment variable GITHUB_TOKEN is needed.`);
@@ -283,6 +283,7 @@ async function fetchRepositoryFiles(
   const docsSha = config.docsPath
     ? await getDirectorySha(config, version, config.docsPath)
     : null;
+  console.debug(`Docs SHA for ${config.owner}/${config.repo} (${version.version}) [${config.docsPath}]:`, docsSha);
   if (docsSha) {
     try {
       // Use cached GitHub tree function for better performance
@@ -317,8 +318,11 @@ async function fetchRepositoryFiles(
         // Parsing file path
         const parsedFilePath = path.parse(file.path);
         const pageTitle = getTitleFromFile(parsedFilePath.name);
+        const cleanFileRelativePath = parsedFilePath.dir.length > 0
+          ? `${parsedFilePath.dir}/${parsedFilePath.name}`
+          : parsedFilePath.name;
 
-        const pagePath = `${repoSlug}/${versionSlug}/${parsedFilePath.dir}/${parsedFilePath.name}`;
+        const pagePath = `${repoSlug}/${versionSlug}/${cleanFileRelativePath}`;
 
         if (!docFolderPages.has(parsedFilePath.dir)) {
           docFolderPages.set(parsedFilePath.dir, []);
@@ -327,7 +331,7 @@ async function fetchRepositoryFiles(
 
         // console.debug(`Docs file found: ${file.path} (Parsed: ${formattedFilePath})`);
 
-        // console.debug(`2| Adding doc file: ${pagePath} (title: ${pageTitle})`);
+        console.debug(`2| Adding doc file: ${pagePath} (title: ${pageTitle})`);
 
         const content = await fetchBlob(file.url as string);
 
@@ -388,6 +392,8 @@ async function fetchRepositoryFiles(
   }
 
   await buildMarkdownFileToLocal(rawMarkdownFiles);
+
+  buildMetaJson(allFiles);
 
   return allFiles;
 }
