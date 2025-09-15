@@ -6,7 +6,7 @@ import {
   repositories,
   getVersionBySlug,
 } from "@/lib/repo-config";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { DocPageHeading } from "../../components";
 import { source } from "@/lib/source";
 import { createMdxComponents, createRelativeLink } from "@/components/mdx";
@@ -38,54 +38,56 @@ export default async function Page(props: Props) {
       <DocsPage>
         <DocPageHeading repository={repository} />
         <DocsBody>
-        <Cards>
-          {version.limited_files?.map((file) => (
-            <Card
-              key={file.slug}
-              href={`/docs/${repoSlug}/${versionSlug}/${file.slug}`}
-              title={file.title}
-              className="flex items-center gap-2"
-            />
-          ))}
-        </Cards>
+          <Cards>
+            {version.limited_files?.map((file) => (
+              <Card
+                key={file.slug}
+                href={`/docs/${repoSlug}/${versionSlug}/${file.slug}`}
+                title={file.title}
+                className="flex items-center gap-2"
+              />
+            ))}
+          </Cards>
         </DocsBody>
       </DocsPage>
     );
   }
+  
+  redirect(`/docs/${repoSlug}/${versionSlug}/overview`);
 
-  let content = await page.data.load();
+  // let content = await page.data.load();
 
-  if (content.source) {
-    const sourcePage = source.getPage(content.source.split("/"));
+  // if (content.source) {
+  //   const sourcePage = source.getPage(content.source.split("/"));
 
-    if (!sourcePage)
-      throw new Error(
-        `unresolved source in frontmatter of ${page.file.path}: ${content.source}`,
-      );
-    content = await sourcePage.data.load();
-  }
+  //   if (!sourcePage)
+  //     throw new Error(
+  //       `unresolved source in frontmatter of ${page.file.path}: ${content.source}`,
+  //     );
+  //   content = await sourcePage.data.load();
+  // }
 
-  const MdxContent = content.body;
+  // const MdxContent = content.body;
 
-  return (
-    <DocsPage toc={content.toc} full={content.full}>
-      <DocPageHeading repository={repository} />
-      <DocsBody>
-        <MdxContent
-          components={createMdxComponents({
-            a: ({ href, ...props }: { href: string }) => {
-              return (
-                <a
-                  href={createRelativeLink(repository, version, href)}
-                  {...props}
-                />
-              );
-            },
-          })}
-        />
-      </DocsBody>
-    </DocsPage>
-  );
+  // return (
+  //   <DocsPage toc={content.toc} full={content.full}>
+  //     <DocPageHeading repository={repository} includeDocsDescription={false} />
+  //     <DocsBody>
+  //       <MdxContent
+  //         components={createMdxComponents({
+  //           a: ({ href, ...props }: { href: string }) => {
+  //             return (
+  //               <a
+  //                 href={createRelativeLink(repository, version, href)}
+  //                 {...props}
+  //               />
+  //             );
+  //           },
+  //         })}
+  //       />
+  //     </DocsBody>
+  //   </DocsPage>
+  // );
 }
 
 export async function generateMetadata({ params }: Props) {

@@ -8,15 +8,19 @@ import { Github } from "lucide-react";
 
 export function DocPageHeading({
   repository,
+  includeDocsDescription = true,
 }: {
   repository: RepositoryConfig;
+  includeDocsDescription?: boolean;
 }) {
   return (
     <>
       <DocsTitle>
         <div className="flex items-center gap-4">
-          <span>{getRepositoryDisplayName(repository)}</span>
-          <div className="flex gap-2">
+          {includeDocsDescription && (
+            <span>{getRepositoryDisplayName(repository)}</span>
+          )}
+          <div className="ml-auto flex gap-2">
             {!repository.is_private && repository.repository_url && (
               <Link
                 href={repository.repository_url}
@@ -30,7 +34,7 @@ export function DocPageHeading({
           </div>
         </div>
       </DocsTitle>
-      {repository.description && (
+      {repository.description && includeDocsDescription && (
         <DocsDescription>{repository.description}</DocsDescription>
       )}
     </>

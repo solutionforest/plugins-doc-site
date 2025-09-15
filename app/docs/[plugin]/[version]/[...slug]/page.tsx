@@ -38,6 +38,8 @@ export default async function Page(props: Props) {
     notFound();
   }
 
+  const lastSlug = slugs[slugs.length - 1];
+
   let content = await page.data.load();
 
   if (content.source) {
@@ -53,8 +55,15 @@ export default async function Page(props: Props) {
   const MdxContent = content.body;
 
   return (
-    <DocsPage toc={content.toc} full={content.full}>
-      <DocPageHeading repository={repository} />
+    <DocsPage 
+      toc={content.toc} 
+      tableOfContent={{
+        style: 'clerk',
+      }}
+      full={content.full} 
+      breadcrumb={{ enabled: true, full: true, includeRoot: false, includePage: true }}
+    >
+      <DocPageHeading repository={repository} includeDocsDescription={lastSlug !== "index" && lastSlug !== "overview"} />
       <DocsBody>
         <MdxContent
           components={createMdxComponents({
