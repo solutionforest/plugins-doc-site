@@ -248,14 +248,14 @@ export function createRelativeLink(
   let repositoryUrl = `${repository.repository_url}/blob/${version.github_branch || version.version}/${href}`;
   // console.debug("### Creating relative link for:", href, repositoryUrl);
 
-  if (isLocal) {
+  // if (isLocal) {
     // 1. limited_files take precedence
     let localPage = source.getPage([repository.repo, version.version, href.replace(/\.mdx?$/, "").toLowerCase()])
     if (!localPage &&repository.docsPath) {
       // 2. search in the docsPath
       // (replace leading 'repository.docsPath' if any)
       localPage = source.getPage([repository.repo, version.version, href.replace(new RegExp(`^${repository.docsPath}/?`), "").replace(/\.mdx?$/, "").toLowerCase()])
-    }
+    // }
     
     if (localPage) {
       console.debug("### Found local page for link:", href, "->", localPage.url);
