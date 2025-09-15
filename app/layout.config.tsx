@@ -7,6 +7,7 @@ import {
 } from "@/lib/repo-config";
 import type { Metadata } from "next";
 import { pageMeta } from "@/lib/meta";
+import { SquareArrowOutUpRightIcon } from 'lucide-react';
 
 export function generatePluginsGrid() {
   return (
@@ -56,7 +57,31 @@ export const baseOptions: BaseLayoutProps = {
     {
       text: "Quick Start",
       url: "/docs",
-      secondary: false,
+    },
+    {
+      text: "Cms Demo",
+      url: "https://filament-cms-website-demo.solutionforest.net/admin",
+      external: true,
+    },
+    {
+      type: 'menu',
+      text: 'Other Plugins',
+      items: [
+        {
+          text: 'Filaletter',
+          description: 'A comprehensive newsletter management solution for Filament',
+          url: 'http://filaletter.solutionforest.net/',
+          external: true,
+          icon: <SquareArrowOutUpRightIcon />,
+        },
+        {
+          text: 'InspireCMS',
+          description: 'A powerful content management system built with modern technologies',
+          url: 'https://inspirecms.net/',
+          external: true,
+          icon: <SquareArrowOutUpRightIcon />,
+        },
+      ],
     },
   ],
 };
