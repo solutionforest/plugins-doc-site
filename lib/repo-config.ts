@@ -307,6 +307,29 @@ const rawRepositories = [
       },
     ],
   },
+  {
+    name: "Filament Email 2FA",
+    description:
+    "Enhance security in your Filament applications with email-based two-factor authentication (2FA) for user logins.",
+    repository_url: "https://github.com/solutionforest/filament-email-2fa",
+    latest_version: "2.x",
+    versions: [
+      {
+        version: "1.x",
+        github_branch: "1.x",
+        limited_files: [
+          { name: "README.md", title: "Overview", slug: "overview" },
+        ],
+      },
+      {
+        version: "2.x",
+        github_branch: "2.x",
+        limited_files: [
+          { name: "README.md", title: "Overview", slug: "overview" },
+        ],
+      },
+    ],
+  },
 ];
 
 // Transform raw repositories to include parsed owner/repo and display names
