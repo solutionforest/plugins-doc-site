@@ -104,7 +104,7 @@ const rawRepositories = [
     description:
       "A powerful tree structure management plugin for Filament with drag-and-drop functionality and hierarchical data organization.",
     repository_url: "https://github.com/solutionforest/filament-tree",
-    latest_version: "3.x",
+    latest_version: "4.x",
     versions: [
       {
         version: "1.x",
@@ -123,6 +123,13 @@ const rawRepositories = [
       {
         version: "3.x",
         github_branch: "3.x",
+        limited_files: [
+          { name: "README.md", title: "Overview", slug: "overview" },
+        ],
+      },
+      {
+        version: "4.x",
+        github_branch: "4.x",
         limited_files: [
           { name: "README.md", title: "Overview", slug: "overview" },
         ],
@@ -133,7 +140,7 @@ const rawRepositories = [
     description:
       "Create beautiful tabbed interfaces in your Filament admin panel with this easy-to-use tab management plugin.",
     repository_url: "https://github.com/solutionforest/filament-tab-plugin",
-    latest_version: "3.x",
+    latest_version: "4.x",
     versions: [
       {
         version: "1.x",
@@ -152,6 +159,13 @@ const rawRepositories = [
       {
         version: "3.x",
         github_branch: "3.x",
+        limited_files: [
+          { name: "README.md", title: "Overview", slug: "overview" },
+        ],
+      },
+      {
+        version: "4.x",
+        github_branch: "4.x",
         limited_files: [
           { name: "README.md", title: "Overview", slug: "overview" },
         ],
@@ -267,7 +281,7 @@ const rawRepositories = [
       "Multi-language field support for Filament with easy translation management and language switching.",
     repository_url:
       "https://github.com/solutionforest/filament-translate-field",
-    latest_version: "2.x",
+    latest_version: "3.x",
     versions: [
       {
         version: "1.x",
@@ -279,6 +293,13 @@ const rawRepositories = [
       {
         version: "2.x",
         github_branch: "2.x",
+        limited_files: [
+          { name: "README.md", title: "Overview", slug: "overview" },
+        ],
+      },
+      {
+        version: "3.x",
+        github_branch: "3.x",
         limited_files: [
           { name: "README.md", title: "Overview", slug: "overview" },
         ],
@@ -289,7 +310,7 @@ const rawRepositories = [
     description:
       "Group related fields together in your Filament forms with collapsible sections and organized layouts.",
     repository_url: "https://github.com/solutionforest/filament-field-group",
-    latest_version: "2.x",
+    latest_version: "3.x",
     versions: [
       {
         version: "1.x",
@@ -301,6 +322,13 @@ const rawRepositories = [
       {
         version: "2.x",
         github_branch: "2.x",
+        limited_files: [
+          { name: "README.md", title: "Overview", slug: "overview" },
+        ],
+      },
+      {
+        version: "3.x",
+        github_branch: "3.x",
         limited_files: [
           { name: "README.md", title: "Overview", slug: "overview" },
         ],
