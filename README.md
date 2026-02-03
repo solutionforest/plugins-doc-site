@@ -40,7 +40,7 @@ Create a `.env.local` file in the root directory:
 
 ```env
 GITHUB_TOKEN=your_github_personal_access_token_here
-NEXT_PUBLIC_SITE_URL=http://localhost:3001
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 #### Getting a GitHub Token
@@ -118,32 +118,32 @@ Edit [`lib/config.ts`](lib/config.ts) and add your plugin to the `plugins` array
 export const config: Config = {
   plugins: [
     {
-      id: 'your-plugin-slug',
-      title: 'Your Plugin Name',
-      description: 'Brief description of what your plugin does',
-      repo: 'your-github-username/your-repo-name',
-      latestVersion: '3.x',
+      id: "your-plugin-slug",
+      title: "Your Plugin Name",
+      description: "Brief description of what your plugin does",
+      repo: "your-github-username/your-repo-name",
+      latestVersion: "3.x",
       versions: [
         {
-          version: '1.x',
-          github_branch: '1.x',
+          version: "1.x",
+          github_branch: "1.x",
           limited_files: [
-            { name: 'README.md', title: 'Overview', slug: 'overview' }
-          ]
+            { name: "README.md", title: "Overview", slug: "overview" },
+          ],
         },
         {
-          version: '2.x',
-          github_branch: '2.x',
+          version: "2.x",
+          github_branch: "2.x",
           limited_files: [
-            { name: 'README.md', title: 'Overview', slug: 'overview' }
-          ]
+            { name: "README.md", title: "Overview", slug: "overview" },
+          ],
         },
         {
-          version: '3.x',
-          github_branch: '3.x',
+          version: "3.x",
+          github_branch: "3.x",
           limited_files: [
-            { name: 'README.md', title: 'Overview', slug: 'overview' }
-          ]
+            { name: "README.md", title: "Overview", slug: "overview" },
+          ],
         },
       ],
     },
@@ -179,16 +179,16 @@ Products are external links shown alongside plugins on the homepage:
 ```typescript
 products: [
   {
-    id: 'your-product-id',
-    title: 'Your Product Name',
-    description: 'What your product does',
-    link: 'https://yourproduct.com',
+    id: "your-product-id",
+    title: "Your Product Name",
+    description: "What your product does",
+    link: "https://yourproduct.com",
     badge: {
-      text: 'External',
-      color: 'green'
+      text: "External",
+      color: "green",
     },
   },
-]
+];
 ```
 
 ### Advanced: Complex Documentation Structure
@@ -233,6 +233,7 @@ For plugins with multiple documentation files organized in folders:
 ### Initial Setup
 
 1. **Push your code to GitHub**:
+
    ```bash
    git add .
    git commit -m "Initial commit"
@@ -259,6 +260,7 @@ For plugins with multiple documentation files organized in folders:
 ### Automatic Deployment
 
 The GitHub Actions workflow automatically:
+
 - ✅ Triggers on every push to `main` branch
 - ✅ Fetches latest documentation from configured repos
 - ✅ Builds the static site
@@ -267,6 +269,7 @@ The GitHub Actions workflow automatically:
 ### Manual Deployment
 
 You can also trigger deployment manually:
+
 1. Go to Actions tab in your repository
 2. Select "Deploy to GitHub Pages" workflow
 3. Click "Run workflow"
@@ -274,6 +277,7 @@ You can also trigger deployment manually:
 ### Rebuild Documentation
 
 To rebuild docs without code changes:
+
 ```bash
 # Locally trigger a repository dispatch event
 curl -X POST \
@@ -312,11 +316,13 @@ npm run start            # Serve the production build locally
 #### "No documentation found"
 
 **Causes**:
+
 - README.md doesn't exist in the specified GitHub repository/branch
 - GitHub token lacks proper permissions
 - Branch name doesn't match configuration
 
 **Solutions**:
+
 1. Verify the file exists: `https://github.com/[owner]/[repo]/blob/[branch]/README.md`
 2. Check your GitHub token has access to the repository
 3. Ensure `github_branch` in `lib/config.ts` matches the actual branch name
@@ -327,6 +333,7 @@ npm run start            # Serve the production build locally
 **Cause**: GitHub API rate limiting (60 requests/hour without token, 5000 with token)
 
 **Solutions**:
+
 1. Add a GitHub token to `.env.local`
 2. Use cached documentation: `npm run build:cache`
 3. Wait for the rate limit to reset (check headers in error)
@@ -334,6 +341,7 @@ npm run start            # Serve the production build locally
 #### Build fails with "Cannot find module"
 
 **Solutions**:
+
 1. Delete `node_modules` and reinstall: `rm -rf node_modules && npm install`
 2. Clear Next.js cache: `rm -rf .next`
 3. Ensure all dependencies are installed: `npm install`
@@ -341,11 +349,13 @@ npm run start            # Serve the production build locally
 #### Images not loading
 
 **Causes**:
+
 - Images not in `public/images/` directory
 - Incorrect image paths in markdown
 - Base path not configured correctly
 
 **Solutions**:
+
 1. Ensure images are in `public/images/[plugin-name]/`
 2. Use relative paths in markdown: `![alt](./image.png)`
 3. Check `basePath` configuration in `next.config.mjs`
@@ -353,11 +363,11 @@ npm run start            # Serve the production build locally
 #### GitHub Actions deployment fails
 
 **Common issues**:
-1. **Permissions error**: 
+
+1. **Permissions error**:
    - Go to Settings → Actions → General
    - Scroll to "Workflow permissions"
    - Select "Read and write permissions"
-   
 2. **Pages not enabled**:
    - Go to Settings → Pages
    - Set source to "GitHub Actions"
@@ -370,6 +380,7 @@ npm run start            # Serve the production build locally
 #### Cache issues during development
 
 **Solutions**:
+
 ```bash
 # Clear all caches
 rm -rf .next .cache node_modules/.cache
@@ -381,6 +392,7 @@ npm run build
 ### Debug Mode
 
 Enable verbose logging by checking:
+
 1. Browser console for client-side errors
 2. Terminal output for build-time errors
 3. `.cache/` directory for fetched files
@@ -397,6 +409,7 @@ Enable verbose logging by checking:
 ### Styling and Branding
 
 **Update site colors** in [`app/global.css`](app/global.css):
+
 ```css
 :root {
   --primary: 220 90% 56%;
@@ -406,10 +419,11 @@ Enable verbose logging by checking:
 ```
 
 **Update navigation** in [`lib/layout.shared.tsx`](lib/layout.shared.tsx):
+
 ```typescript
 export const baseOptions: HomeLayoutProps = {
   nav: {
-    title: 'Your Site Name',
+    title: "Your Site Name",
   },
   links: [
     // Add custom navigation links
@@ -418,6 +432,7 @@ export const baseOptions: HomeLayoutProps = {
 ```
 
 **Customize MDX components** in [`mdx-components.tsx`](mdx-components.tsx):
+
 ```typescript
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -448,17 +463,23 @@ This project is open source. Please check the repository for license details.
 ---
 
 Built with ❤️ using [Next.js](https://nextjs.org/) and [Fumadocs](https://fumadocs.dev)
+
 # Development server
+
 npm run dev
 
 # Type checking
+
 npm run types:check
 
 # Build for production
+
 npm run build
 
 # Preview production build
+
 npm run start
+
 ```
 
 ## Contributing
@@ -471,3 +492,4 @@ npm run start
 ## License
 
 [Add your license here]
+```
