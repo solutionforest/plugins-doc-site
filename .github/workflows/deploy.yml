@@ -45,6 +45,13 @@ jobs:
           NEXT_STATIC_EXPORT: "true"
           NODE_ENV: "production"
 
+      - name: Verify output directory
+        run: |
+          if [ ! -d "./out" ]; then
+            echo "Error: Output directory './out' does not exist."
+            exit 1
+          fi
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

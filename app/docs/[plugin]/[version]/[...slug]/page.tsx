@@ -5,31 +5,22 @@ import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 import { createCustomRelativeLink } from '@/lib/mdx-link';
 import Link from 'next/link';
-import { ViewOptions } from '../components/page-actions';
+import { ViewOptions, generateMetadataForPlugin } from '@/app/docs/components';
 
-export default async function Page(props: PageProps<'/docs/[...slug]'>) {
+type CurrentPageProps = PageProps<'/docs/[plugin]/[version]/[...slug]'>;
+
+export default async function Page(props: CurrentPageProps) {
   const params = await props.params;
+  const pluginName = params.plugin;
+  const version = params.version;
   const slugs = params.slug || [];
-  const pluginName = slugs[0];
-  const version = slugs[1] ?? null;
-  const restSlugs = version ? slugs.slice(2) : slugs.slice(1);
-
-  // If version is not specified, try redirect to latest version
-  if (!version) {
-    const latestVersion = getLatestVersion(pluginName);
-    if (!latestVersion) {
-      // Plugin doesn't exist, show 404
-      return notFound();
-    }
-    return redirect(`/docs/${[pluginName, latestVersion].join('/')}`);
-  }
 
   // If missing which page to load, default to 'overview'
-  if (restSlugs.length === 0) {
+  if (slugs.length === 0) {
     return redirect(`/docs/${[pluginName, version, 'overview'].join('/')}`);
   }
 
-  const finalSlugs = [pluginName, version, ...restSlugs];
+  const finalSlugs = [pluginName, version, ...slugs];
   const page = source.getPage(finalSlugs);
 
   // console.debug('Resolved final slugs for page:', finalSlugs, { pageExists: !!page });
@@ -72,24 +63,36 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  const slugs = source.generateParams();
+  const params: { plugin: string, version: string, slug: string[] }[] = [];
+
+  Array.from(slugs).forEach((array) => {
+    const slugArray = array['slug'];
+    const plugin = slugArray[0];
+    const version = slugArray[1];
+    const rest = slugArray.slice(2);
+    params.push({ plugin, version, slug: rest });
+  });
+
+  return params;
 }
 
-export async function generateMetadata(props: PageProps<'/docs/[...slug]'>): Promise<Metadata> {
+export async function generateMetadata(props: CurrentPageProps): Promise<Metadata> {
   const params = await props.params;
-  const slugs = params.slug || [];
-  const pluginName = slugs[0];
-  const page = source.getPage(slugs);
-  if (!page) notFound();
+  const pluginName = params.plugin;
 
-  return {
-    title: page.data.title,
-    description: page.data.description,
-    openGraph: {
-      images: [
-        getPluginImage(pluginName).url, 
-        // getPageImage(page).url,
-      ],
-    },
-  };
+  return generateMetadataForPlugin(pluginName) ?? notFound();
+  // const page = source.getPage([pluginName, version, ...slugs]);
+  // if (!page) notFound();
+
+  // return {
+  //   title: page.data.title,
+  //   description: page.data.description,
+  //   openGraph: {
+  //     images: [
+  //       getPluginImage(pluginName).url, 
+  //       // getPageImage(page).url,
+  //     ],
+  //   },
+  // };
 }

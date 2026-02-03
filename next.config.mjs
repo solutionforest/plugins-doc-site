@@ -5,6 +5,10 @@ const withMDX = createMDX();
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true";
 const isProd = process.env.NODE_ENV === "production";
 
+console.debug("Next.js Configuration:");
+console.debug(`  isProd: ${isProd}`);
+console.debug(`  isStaticExport: ${isStaticExport}`);
+
 // GitHub Pages configuration
 const basePath =
   isProd && isStaticExport
