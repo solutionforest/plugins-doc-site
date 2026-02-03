@@ -3,9 +3,7 @@ import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { config } from '../lib/config';
 
-const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
-});
+const octokit = new Octokit();
 
 // Parse command line arguments
 // Usage: tsx scripts/fetch-docs.ts [--cache-only|--offline]
