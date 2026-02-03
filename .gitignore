@@ -5,6 +5,7 @@
 .contentlayer
 .content-collections
 .source
+/content/docs/
 
 # cache
 .cache/

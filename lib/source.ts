@@ -1,73 +1,57 @@
-import { loader } from "fumadocs-core/source";
-import * as path from "node:path";
-import { createGitHubSource } from "./sources/github";
-import { createLocalSource } from "./sources/local";
+import { docs } from 'fumadocs-mdx:collections/server';
+import { type InferPageType, loader } from 'fumadocs-core/source';
+import { config } from './config';
 
-const FileNameRegex = /^\d\d-(.+)$/;
-
-export const isLocal =
-  process.env.NEXT_DOC_SOURCE === 'local'; // || process.env.NEXT_PHASE === "phase-production-build";
-
+// See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
-  baseUrl: "/docs",
-  // source: await createLocalSource(),
-  // source: await createGitHubSource(),
-  source: isLocal ? await createLocalSource() : await createGitHubSource(),
-  slugs(info) {
-    try {
-      const segments = info.path
-        .split("/")
-        .filter((seg) => !(seg.startsWith("(") && seg.endsWith(")")));
-
-      if (segments.at(-1) === "index") {
-        segments.pop();
-      }
-      // console.debug("Generating slugs for:", info.path, "->", segments);
-
-      return segments;
-    } catch (error) {
-      return [];
-    }
-  },
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+  plugins: [],
 });
 
-export function getTitleFromFile(file: string) {
-  const acronyms = ["css", "ui", "cli"];
-  const connectives = ["and"];
-  const parsed = path.parse(file);
-  const name =
-    parsed.name === "index" ? path.basename(parsed.dir) : parsed.name;
+export function getPageImage(page: InferPageType<typeof source>) {
+  const segments = [...page.slugs, 'image.png'];
 
-  const match = FileNameRegex.exec(name);
-  let title = match ? match[1] : name;
-
-  title = removeLeadingNumber(title);
-
-  const segs = title.split("-");
-  for (let i = 0; i < segs.length; i++) {
-    if (acronyms.includes(segs[i])) {
-      segs[i] = segs[i].toUpperCase();
-    } else if (!connectives.includes(segs[i])) {
-      segs[i] = segs[i].slice(0, 1).toUpperCase() + segs[i].slice(1);
-    }
-  }
-
-  const out = segs.join(" ");
-  return out.length > 0 ? out : "Overview";
+  return {
+    segments,
+    url: `/og/docs/${segments.join('/')}`,
+  };
 }
 
-
-/**
- * Remove leading number and slash from file path
- * e.g. 1-foo/bar.md -> foo/bar.md
- */
-export function removeLeadingNumber(file: string): string {
-
-  // If the file have number prefix, remove it
-  // e.g. 01-introduction.md -> introduction
-  if (file.match(/^\d-/)) {
-    file = file.replace(/^\d-/, "");
-  }
-
-  return file;
+export function getPluginImage(pluginName: string) {
+  return {
+    segments: [pluginName, 'image.png'],
+    url: `/og/plugins/${pluginName}/image.png`,
+  };
 }
+
+export async function getLLMText(page: InferPageType<typeof source>) {
+  const processed = await page.data.getText('processed');
+
+  return `# ${page.data.title}
+
+${processed}`;
+}
+
+export function getAvailableVersions(pluginName: string) {
+  const plugin = config.plugins.find((p) => p.id === pluginName);
+  if (!plugin) return [];
+
+  return plugin.versions.map((v) => v.version);
+};
+
+export function getLatestVersion(pluginName: string) {
+  const plugin = config.plugins.find((p) => p.id === pluginName);
+  if (!plugin) return null;
+
+  return plugin.latestVersion;
+};
+
+export function getPluginGithubRepoUrl(pluginName: string) {
+  const plugin = config.plugins.find((p) => p.id === pluginName);
+  if (!plugin) return null;
+
+  const repo = plugin.repo;
+
+  return `https://github.com/${repo}`;
+};

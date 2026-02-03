@@ -1,4 +1,4 @@
-@import "tailwindcss" source(none);
+@import "tailwindcss";
 @import "fumadocs-ui/css/catppuccin.css";
 @import "fumadocs-ui/css/preset.css";
 
@@ -9,9 +9,10 @@
 @theme {
   --default-font-family: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-primary: var(--color-fd-primary);
 }
 
 :root {
   --fd-layout-width: 1600px;
-  --color-fd-primary: #007C90;
+  --color-fd-primary: #007c90;
 }
