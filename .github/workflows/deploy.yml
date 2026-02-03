@@ -38,7 +38,7 @@ jobs:
           static_site_generator: next
 
       - name: Build with Next.js
-        run: npm run build:static
+        run: npm run build
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
           NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}' }}

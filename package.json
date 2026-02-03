@@ -5,7 +5,6 @@
   "scripts": {
     "build": "npm run fetch-docs && next build",
     "build:cache": "npm run fetch-docs:cache && next build",
-    "build:static": "npm run fetch-docs && next build",
     "dev": "next dev",
     "start": "serve out",
     "fetch-docs": "tsx scripts/fetch-docs.ts",

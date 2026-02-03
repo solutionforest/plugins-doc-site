@@ -13,10 +13,9 @@ const basePath =
 
 /** @type {import('next').NextConfig} */
 const config = {
-  output: process.env.NODE_ENV === "production" ? "export" : undefined,
+  output: isProd || isStaticExport ? "export" : undefined,
   reactStrictMode: true,
   ...(isStaticExport && {
-    // output: "export",
     trailingSlash: true,
     skipTrailingSlashRedirect: true,
     basePath: basePath,
