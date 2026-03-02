@@ -37,11 +37,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Fetch Docs
-        env:
-          # Use GITHUB_TOKEN for fetching from public/internal repos if needed
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run fetch-docs
+      # - name: Fetch Docs
+      #   env:
+      #     # Use GITHUB_TOKEN for fetching from public/internal repos if needed
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: npm run fetch-docs
 
       - name: Build with Next.js
         env:
