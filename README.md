@@ -63,14 +63,14 @@ Since GitHub Actions may hit API limits easily, we recommend building locally an
 1. **Build locally**: This generates the `out/` folder.
    ```bash
    npm run build
+   # (Check for errors locally)
    ```
 2. **Commit and Push**:
    ```bash
-   git add out
-   git commit -m "Update docs and static build"
-   git push
+   git add .
+   git commit -m "Update docs"
+   git push origin main
    ```
-   The GitHub Action will now automatically deploy the `out/` folder from your commit to GitHub Pages.
 
 # Install dependencies
 

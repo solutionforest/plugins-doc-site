@@ -339,12 +339,12 @@ async function fetchPluginDocs() {
     rootMetaPages.push(plugin.id);
     rootMetaTitles[plugin.id] = plugin.title;
 
-    // Create plugin _meta.json
+    // Create plugin meta.json
     const rootMeta = {
       title: plugin.title, // Use title here ensures proper casing (e.g. "Filament Access Management")
       pages: plugin.versions.map(v => v.version),
     };
-    writeFileSync(join(pluginDir, '_meta.json'), JSON.stringify(rootMeta, null, 2));
+    writeFileSync(join(pluginDir, 'meta.json'), JSON.stringify(rootMeta, null, 2));
 
     for (const version of plugin.versions) {
       const versionDir = join('content', 'docs', plugin.id, version.version);
@@ -359,23 +359,23 @@ async function fetchPluginDocs() {
         const imagesDir = join('public', 'images', plugin.id);
         mkdirSync(imagesDir, { recursive: true });
 
-      // Create version _meta.json
+      // Create version meta.json
       const versionMeta = {
-        title: `${plugin.title} ${version.version}`,
+        title: `${version.version}`,
         pages: plugin.sections.map(s => s.slug),
       };
-      writeFileSync(join(versionDir, '_meta.json'), JSON.stringify(versionMeta, null, 2));
+      writeFileSync(join(versionDir, 'meta.json'), JSON.stringify(versionMeta, null, 2));
 
         for (const section of plugin.sections) {
           const sectionDir = join(versionDir, section.slug);
           mkdirSync(sectionDir, { recursive: true });
 
-          // Create section _meta.json
+          // Create section meta.json
           const sectionMeta = {
             title: section.name,
             pages: section.files.map(f => f.slug),
           };
-          writeFileSync(join(sectionDir, '_meta.json'), JSON.stringify(sectionMeta, null, 2));
+          writeFileSync(join(sectionDir, 'meta.json'), JSON.stringify(sectionMeta, null, 2));
 
           for (const file of section.files) {
             const filePath = join(docsPath, file.name).replace(/\\/g, '/');
@@ -400,12 +400,12 @@ ${content}
         const imagesDir = join('public', 'images', plugin.id);
         mkdirSync(imagesDir, { recursive: true });
 
-        // Create version _meta.json with explicitly ordered pages
+        // Create version meta.json with explicitly ordered pages
         const versionMeta = {
-          title: `${plugin.title} ${version.version}`, // Use title from config for proper casing
+          title: `${version.version}`, // Use title from config for proper casing
           pages: files.map(f => f.slug), // This array defines the exact order in sidebar
         };
-        writeFileSync(join(versionDir, '_meta.json'), JSON.stringify(versionMeta, null, 2));
+        writeFileSync(join(versionDir, 'meta.json'), JSON.stringify(versionMeta, null, 2));
 
         for (const file of files) {
           let content = await fetchFileContent(owner, repoName, file.name, branch, cacheOnly);
@@ -430,19 +430,19 @@ ${content}
     }
   }
 
-  // Create root _meta.json for correct ordering and casing in sidebar
+  // Create root meta.json for correct ordering and casing in sidebar
   const rootMetaContent = {
     title: 'Plugins',
     pages: rootMetaPages
   };
 
   // Add custom titles for each page in root meta if needed, though pages array handles order.
-  // Fumadocs uses _meta.json pages array for order.
-  // Titles for folders are usually taken from the folder's _meta.json title property, 
+  // Fumadocs uses meta.json pages array for order.
+  // Titles for folders are usually taken from the folder's meta.json title property, 
   // which we already set above for each plugin.
   
-  writeFileSync(join('content', 'docs', '_meta.json'), JSON.stringify(rootMetaContent, null, 2));
-  console.log('✅ Generated content/docs/_meta.json');
+  writeFileSync(join('content', 'docs', 'meta.json'), JSON.stringify(rootMetaContent, null, 2));
+  console.log('✅ Generated content/docs/meta.json');
 }
 
 fetchPluginDocs();

@@ -1,0 +1,16 @@
+{
+  "title": "Plugins",
+  "pages": [
+    "filament-tree",
+    "filament-cms-website-plugin",
+    "filament-tab-plugin",
+    "filament-panzoom",
+    "filament-scaffold",
+    "simple-contact-form",
+    "filament-firewall",
+    "filament-translate-field",
+    "filament-field-group",
+    "filament-email-2fa",
+    "filament-access-management"
+  ]
+}
