@@ -1,0 +1,6 @@
+:HL["/_next/static/chunks/53f0d8a7ed85f66c.css","style"]
+:HL["/_next/static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/chunks/2f46520a7df96dce.css","style"]
+:HL["https://img.shields.io/packagist/v/solution-forest/tab-layout-plugin.svg","image"]
+:HL["https://img.shields.io/packagist/dt/solution-forest/tab-layout-plugin.svg","image"]
+0:{"buildId":"bvGk_wxela0_-jbUgu3mk","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"docs","paramType":null,"paramKey":"docs","hasRuntimePrefetch":false,"slots":{"children":{"name":"plugin","paramType":"d","paramKey":"filament-tab-plugin","hasRuntimePrefetch":false,"slots":{"children":{"name":"version","paramType":"d","paramKey":"2.x","hasRuntimePrefetch":false,"slots":{"children":{"name":"slug","paramType":"c","paramKey":"overview","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}

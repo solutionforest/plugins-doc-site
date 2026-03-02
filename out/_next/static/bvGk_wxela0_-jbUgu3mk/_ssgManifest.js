@@ -1,0 +1,1 @@
+self.__SSG_MANIFEST=new Set(["\u002Fdocs\u002F[plugin]","\u002Fdocs\u002F[plugin]\u002F[version]","\u002Fdocs\u002F[plugin]\u002F[version]\u002F[...slug]","\u002Fog\u002Fdocs\u002F[...slug]"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()
