@@ -30,9 +30,57 @@ cd static-plugin-doc-site-3
 
 # Install dependencies
 npm install
-# or
-pnpm install
 ```
+
+### 2. Configuration (Rate Limit Fix)
+
+To avoid GitHub API rate limits (60 requests/hour for unauthenticated users vs 5000/hour with a token), create a `.env.local` file:
+
+1. Create a Personal Access Token (PAT) on GitHub: [Settings > Developer settings > PAT](https://github.com/settings/tokens) (No special scopes needed for public repos).
+2. Create `GITHUB_TOKEN` in `.env.local` file:
+   ```bash
+   GITHUB_TOKEN=your_token_here
+   ```
+
+### 3. Usage & Deployment
+
+#### Fetch Documentation
+
+This pulls the documentation MD/MDX files from the configured GitHub repositories.
+
+```bash
+# Online: Fetch fresh content from GitHub
+npm run fetch-docs
+
+# Offline/Cached: Use local cache only (no API calls)
+npm run fetch-docs:cache
+```
+
+#### Build & Deploy
+
+Since GitHub Actions may hit API limits easily, we recommend building locally and pushing the static site.
+
+1. **Build locally**: This generates the `out/` folder.
+   ```bash
+   npm run build
+   ```
+2. **Commit and Push**:
+   ```bash
+   git add out
+   git commit -m "Update docs and static build"
+   git push
+   ```
+   The GitHub Action will now automatically deploy the `out/` folder from your commit to GitHub Pages.
+
+# Install dependencies
+
+npm install
+
+# or
+
+pnpm install
+
+````
 
 ### 2. Environment Setup (Optional)
 
@@ -41,7 +89,7 @@ Create a `.env.local` file in the root directory:
 ```env
 GITHUB_TOKEN=your_github_personal_access_token_here
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-```
+````
 
 #### Getting a GitHub Token
 

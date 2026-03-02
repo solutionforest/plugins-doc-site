@@ -1,0 +1,146 @@
+---
+title: Installation
+description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
+lastUpdated: 2026-03-02T10:21:10.373Z
+---
+
+# 🚀 Installation Guide
+
+Get your Filament CMS up and running with this comprehensive installation guide.
+
+## 📋 Requirements
+
+- **PHP**: 8.1 or higher
+- **Laravel**: 10.x or 11.x
+- **Filament**: v3.x (for plugin v2.x) or v4.x (for plugin v3.x)
+
+## 🔧 Installation Steps
+
+### Step 1: Add Repository
+
+Add the package repository to your `composer.json`:
+
+```json
+{
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://filament-cms-website-plugin.composer.sh"
+        }
+    ]
+}
+```
+
+### Step 2: Install Package
+
+```bash
+composer require solution-forest/filament-cms-website-plugin
+```
+
+### Step 3: Authentication
+
+When prompted, enter your credentials:
+- **Username**: Your email address
+- **Password**: `{license-key}:{fingerprint}`
+
+**Example:**
+```bash
+Username: your-email@example.com
+Password: 8c21df8f-6273-4932-b4ba-8bcc723ef500:anystack.sh
+```
+
+### Step 4: Setup Plugin
+
+Run the installation command:
+
+```bash
+php artisan filament-cms:install
+```
+
+This command will:
+- ✅ Publish configuration files
+- ✅ Run database migrations
+- ✅ Create default theme files
+- ✅ Set up initial page data
+
+### Step 5: Register Plugin
+
+Add the plugin to your Panel provider:
+
+```php
+<?php
+
+use SolutionForest\FilamentCms\FilamentCmsPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->plugin(FilamentCmsPlugin::make());
+}
+```
+
+## 📁 Default Structure
+
+After installation, you'll have these files:
+
+```
+views/cms/theme/default/
+├── app.blade.php      # Main layout
+├── header.blade.php   # Header component
+└── footer.blade.php   # Footer component
+
+config/
+└── filament-cms.php   # Main configuration
+
+database/migrations/
+└── [timestamp]_create_cms_*_tables.php
+```
+
+## 🏠 Homepage Configuration
+
+By default, your homepage slug is `home`. To customize:
+
+1. **Update config file** (`config/filament-cms.php`):
+   ```php
+   return [
+       'models' => [
+           'cms_page' => \App\Models\CmsPage::class,
+       ],
+   ];
+   ```
+
+2. **Modify your CmsPage model**:
+   ```php
+   class CmsPage extends BaseCmsPage
+   {
+       const HOME_SLUG = 'custom-home'; // Change this
+   }
+   ```
+
+3. **Clear cache**:
+   ```bash
+   php artisan optimize:clear
+   ```
+
+## ✅ Verification
+
+After installation, verify everything works:
+
+1. **Access Filament Admin Panel**
+2. **Navigate to CMS Pages**
+3. **Create your first page**
+4. **View it on the frontend**
+
+## 🔄 Next Steps
+
+- [📄 Create your first page](04-page-management.md)
+- [🗺️ Set up navigation](05-navigation.md)
+- [🧩 Explore templates](06-templates.md)
+
+## ⚠️ Troubleshooting
+
+**Common Issues:**
+
+- **Permission errors**: Check file permissions on `views/` directory
+- **Migration errors**: Ensure database connection is configured
+- **Cache issues**: Run `php artisan optimize:clear`

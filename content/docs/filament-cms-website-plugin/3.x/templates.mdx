@@ -1,0 +1,521 @@
+---
+title: Templates
+description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
+lastUpdated: 2026-03-02T10:21:10.373Z
+---
+
+# 🧩 Templates Guide
+
+Create powerful, reusable page structures with Filament CMS templates. Templates define both the form fields editors see and how content appears on your website.
+
+## 🎯 Understanding Templates
+
+### What Are Templates?
+
+Templates are PHP classes that define:
+- **Form fields** for content editors
+- **Data structure** for page content  
+- **Rendering logic** for frontend display
+- **Validation rules** for content
+
+### Template Concept
+
+> 💡 Based on [Dennis Koch's Filament Trick](https://filamentphp.com/tricks/template-based-forms) for dynamic form generation.
+
+**Example workflow:**
+1. **Editor selects** "Blog Post" template
+2. **Form shows** title, content, featured image, tags
+3. **Content is saved** in structured format
+4. **Frontend renders** using blog post layout
+
+## 🚀 Creating Templates
+
+### Quick Template Generation
+
+```bash
+php artisan filament-cms:page-template BlogPost
+```
+
+This creates:
+- Template class: `App\CmsPages\Templates\BlogPost`
+- View file: `resources/views/cms/templates/blog-post.blade.php`
+
+### Basic Template Structure
+
+```php
+<?php
+
+namespace App\CmsPages\Templates;
+
+use Filament\Forms;
+use SolutionForest\FilamentCms\CmsPages\Contracts\CmsPageTemplate;
+use SolutionForest\FilamentCms\CmsPages\Renderer\AtomicDesignPageRenderer;
+
+final class BlogPost implements CmsPageTemplate
+{
+    public static function title(): string
+    {
+        return 'Blog Post';
+    }
+
+    public static function schema(): array
+    {
+        return [
+            Forms\Components\Card::make()
+                ->schema([
+                    Forms\Components\TextInput::make('subtitle')
+                        ->label('Subtitle')
+                        ->maxLength(255),
+                        
+                    Forms\Components\RichEditor::make('content')
+                        ->label('Post Content')
+                        ->required(),
+                        
+                    Forms\Components\FileUpload::make('featured_image')
+                        ->label('Featured Image')
+                        ->image()
+                        ->maxSize(2048),
+                        
+                    Forms\Components\DatePicker::make('publish_date')
+                        ->label('Publish Date')
+                        ->default(now()),
+                        
+                    Forms\Components\TagsInput::make('tags')
+                        ->label('Tags')
+                        ->placeholder('Add tags...'),
+                ]),
+        ];
+    }
+
+    public static function getRenderer(): ?string
+    {
+        return AtomicDesignPageRenderer::class;
+    }
+
+    public static function hiddenOnTemplateOptions(): bool
+    {
+        return false; // Set to true to hide from template selector
+    }
+}
+```
+
+## 🎨 Template Examples
+
+### Simple Page Template
+
+Perfect for basic content pages:
+
+```php
+final class SimplePage implements CmsPageTemplate
+{
+    public static function title(): string
+    {
+        return 'Simple Page';
+    }
+
+    public static function schema(): array
+    {
+        return [
+            Forms\Components\RichEditor::make('content')
+                ->label('Page Content')
+                ->required(),
+        ];
+    }
+}
+```
+
+### Product Template
+
+For e-commerce or portfolio items:
+
+```php
+final class Product implements CmsPageTemplate
+{
+    public static function title(): string
+    {
+        return 'Product Page';
+    }
+
+    public static function schema(): array
+    {
+        return [
+            Forms\Components\Grid::make(2)
+                ->schema([
+                    Forms\Components\TextInput::make('price')
+                        ->label('Price')
+                        ->numeric()
+                        ->prefix('$'),
+                        
+                    Forms\Components\Select::make('category')
+                        ->label('Category')
+                        ->options([
+                            'electronics' => 'Electronics',
+                            'clothing' => 'Clothing',
+                            'books' => 'Books',
+                        ]),
+                ]),
+                
+            Forms\Components\Textarea::make('short_description')
+                ->label('Short Description')
+                ->rows(3),
+                
+            Forms\Components\RichEditor::make('full_description')
+                ->label('Full Description'),
+                
+            Forms\Components\Repeater::make('gallery')
+                ->label('Product Gallery')
+                ->schema([
+                    Forms\Components\FileUpload::make('image')
+                        ->image()
+                        ->required(),
+                    Forms\Components\TextInput::make('alt_text')
+                        ->label('Alt Text'),
+                ])
+                ->collapsible(),
+        ];
+    }
+}
+```
+
+### Team Member Template
+
+For staff or team pages:
+
+```php
+final class TeamMember implements CmsPageTemplate
+{
+    public static function title(): string
+    {
+        return 'Team Member';
+    }
+
+    public static function schema(): array
+    {
+        return [
+            Forms\Components\Grid::make(2)
+                ->schema([
+                    Forms\Components\FileUpload::make('photo')
+                        ->label('Profile Photo')
+                        ->image()
+                        ->avatar()
+                        ->required(),
+                        
+                    Forms\Components\Group::make([
+                        Forms\Components\TextInput::make('position')
+                            ->label('Job Title')
+                            ->required(),
+                            
+                        Forms\Components\TextInput::make('email')
+                            ->label('Email')
+                            ->email(),
+                            
+                        Forms\Components\TextInput::make('phone')
+                            ->label('Phone')
+                            ->tel(),
+                    ]),
+                ]),
+                
+            Forms\Components\Textarea::make('bio')
+                ->label('Biography')
+                ->rows(4),
+                
+            Forms\Components\KeyValue::make('social_links')
+                ->label('Social Media Links')
+                ->keyLabel('Platform')
+                ->valueLabel('URL'),
+        ];
+    }
+}
+```
+
+## 🔧 Advanced Template Features
+
+### Custom Validation
+
+Add validation rules to your templates:
+
+```php
+public static function schema(): array
+{
+    return [
+        Forms\Components\TextInput::make('email')
+            ->label('Contact Email')
+            ->email()
+            ->rules(['required', 'email', 'unique:cms_pages,data->email']),
+            
+        Forms\Components\TextInput::make('price')
+            ->label('Price')
+            ->numeric()
+            ->minValue(0)
+            ->rules(['required', 'numeric', 'min:0']),
+    ];
+}
+```
+
+### Conditional Fields
+
+Show/hide fields based on other field values:
+
+```php
+Forms\Components\Select::make('type')
+    ->label('Content Type')
+    ->options([
+        'article' => 'Article',
+        'video' => 'Video',
+        'gallery' => 'Gallery',
+    ])
+    ->reactive(),
+
+Forms\Components\TextInput::make('video_url')
+    ->label('Video URL')
+    ->url()
+    ->visible(fn ($get) => $get('type') === 'video'),
+
+Forms\Components\Repeater::make('images')
+    ->label('Gallery Images')
+    ->schema([
+        Forms\Components\FileUpload::make('image')->image(),
+    ])
+    ->visible(fn ($get) => $get('type') === 'gallery'),
+```
+
+### Grouped Fields
+
+Organize complex forms with sections:
+
+```php
+public static function schema(): array
+{
+    return [
+        Forms\Components\Tabs::make('Content')
+            ->tabs([
+                Forms\Components\Tabs\Tab::make('Basic Info')
+                    ->schema([
+                        Forms\Components\TextInput::make('title')->required(),
+                        Forms\Components\Textarea::make('description'),
+                    ]),
+                    
+                Forms\Components\Tabs\Tab::make('SEO')
+                    ->schema([
+                        Forms\Components\TextInput::make('meta_title'),
+                        Forms\Components\Textarea::make('meta_description'),
+                    ]),
+                    
+                Forms\Components\Tabs\Tab::make('Advanced')
+                    ->schema([
+                        Forms\Components\KeyValue::make('custom_fields'),
+                    ]),
+            ]),
+    ];
+}
+```
+
+## 🎭 Template Renderers
+
+### Default Renderer
+
+The `AtomicDesignPageRenderer` is the default renderer that works with your theme files.
+
+### Custom Renderers
+
+Create custom renderers for advanced template logic:
+
+```bash
+php artisan filament-cms:page-template-renderer CustomRenderer
+```
+
+Example custom renderer:
+
+```php
+<?php
+
+namespace App\CmsPages\Renderers;
+
+use SolutionForest\FilamentCms\CmsPages\Contracts\Renderer;
+use SolutionForest\FilamentCms\Dto\CmsPageData;
+
+class CustomRenderer implements Renderer
+{
+    public function render(CmsPageData $page, array $layout): string
+    {
+        // Custom rendering logic
+        $data = $page->data;
+        
+        // Process template data
+        $processedData = $this->processTemplateData($data);
+        
+        // Return rendered HTML
+        return view('custom.template', [
+            'page' => $page,
+            'data' => $processedData,
+            'layout' => $layout,
+        ])->render();
+    }
+    
+    private function processTemplateData(array $data): array
+    {
+        // Add custom processing logic
+        return $data;
+    }
+}
+```
+
+Use custom renderer in your template:
+
+```php
+public static function getRenderer(): ?string
+{
+    return CustomRenderer::class;
+}
+```
+
+## 📱 Responsive Templates
+
+### Mobile-First Design
+
+Consider mobile users when designing templates:
+
+```php
+Forms\Components\Grid::make([
+    'default' => 1,     // 1 column on mobile
+    'sm' => 2,          // 2 columns on small screens
+    'lg' => 3,          // 3 columns on large screens
+])
+->schema([
+    // Your fields here
+]),
+```
+
+### Image Optimization
+
+Include responsive image handling:
+
+```php
+Forms\Components\FileUpload::make('hero_image')
+    ->label('Hero Image')
+    ->image()
+    ->imageResizeMode('cover')
+    ->imageCropAspectRatio('16:9')
+    ->imageResizeTargetWidth('1920')
+    ->imageResizeTargetHeight('1080'),
+```
+
+## 🎯 Template Best Practices
+
+### Planning Templates
+
+1. **Identify content types** your site needs
+2. **Map out required fields** for each type
+3. **Consider editor experience** when designing forms
+4. **Plan for future expansion** with flexible structures
+
+### Field Organization
+
+- **Group related fields** together
+- **Use descriptive labels** and help text
+- **Order fields logically** (most important first)
+- **Use appropriate field types** for data
+
+### Performance Considerations
+
+- **Limit repeater fields** to reasonable numbers
+- **Optimize image uploads** with size limits
+- **Use efficient field types** (avoid heavy components)
+- **Consider caching** for complex templates
+
+### Maintenance
+
+- **Document custom templates** thoroughly
+- **Version control** template changes
+- **Test templates** after updates
+- **Provide fallbacks** for missing data
+
+## 📋 Template Management
+
+### Organizing Templates
+
+Structure your templates logically:
+
+```
+app/CmsPages/Templates/
+├── Basic/
+│   ├── SimplePage.php
+│   └── ContactPage.php
+├── Blog/
+│   ├── BlogPost.php
+│   └── BlogListing.php
+├── Products/
+│   ├── Product.php
+│   └── ProductCategory.php
+└── Team/
+    └── TeamMember.php
+```
+
+### Template Inheritance
+
+Create base templates for common functionality:
+
+```php
+abstract class BaseTemplate implements CmsPageTemplate
+{
+    protected static function getCommonFields(): array
+    {
+        return [
+            Forms\Components\TextInput::make('seo_title')
+                ->label('SEO Title'),
+            Forms\Components\Textarea::make('seo_description')
+                ->label('SEO Description'),
+        ];
+    }
+}
+
+class BlogPost extends BaseTemplate
+{
+    public static function schema(): array
+    {
+        return array_merge(
+            [
+                Forms\Components\RichEditor::make('content')
+                    ->label('Post Content'),
+            ],
+            static::getCommonFields()
+        );
+    }
+}
+```
+
+## 🆘 Troubleshooting Templates
+
+### Common Issues
+
+**Template not appearing in selector:**
+- ✅ Check `hiddenOnTemplateOptions()` returns `false`
+- ✅ Verify class implements `CmsPageTemplate`
+- ✅ Clear application cache
+
+**Form validation errors:**
+- ✅ Check field validation rules
+- ✅ Verify required fields are filled
+- ✅ Test field dependencies
+
+**Rendering issues:**
+- ✅ Verify renderer class exists
+- ✅ Check template view files
+- ✅ Test with default renderer
+
+### Testing Templates
+
+```php
+// Test template in isolation
+$template = new BlogPost();
+$schema = $template::schema();
+$renderer = $template::getRenderer();
+
+// Verify template data structure
+$data = ['content' => 'Test content'];
+// Test rendering logic
+```
+
+## 🔗 Related Topics
+
+- [📄 Page Management](04-page-management.md) - Using templates with pages

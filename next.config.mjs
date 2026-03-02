@@ -10,10 +10,10 @@ console.debug(`  isProd: ${isProd}`);
 console.debug(`  isStaticExport: ${isStaticExport}`);
 
 // GitHub Pages configuration
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH !== undefined 
-  ? process.env.NEXT_PUBLIC_BASE_PATH 
-  : "/plugins-doc-site";
-
+const basePath =
+  process.env.NEXT_PUBLIC_BASE_PATH !== undefined
+    ? process.env.NEXT_PUBLIC_BASE_PATH
+    : "/plugins-doc-site";
 
 /** @type {import('next').NextConfig} */
 const config = {

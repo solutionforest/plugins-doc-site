@@ -1,0 +1,212 @@
+---
+title: Page Management
+description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
+lastUpdated: 2026-03-02T10:21:10.383Z
+---
+
+# 📄 Page Management
+
+Master the art of content creation and management with Filament CMS.
+
+## 🎯 Overview
+
+Page management is at the heart of Filament CMS. Learn how to create, edit, organize, and publish your content effectively.
+
+## 🆕 Creating Pages
+
+### Basic Page Creation
+
+1. **Access the CMS Pages section** in your Filament admin
+2. **Click "New Page"** to start creating
+3. **Fill in the essential fields**:
+   - **Title**: The display name of your page
+   - **Slug**: URL-friendly identifier (auto-generated from title)
+   - **Template**: Choose the page structure
+   - **Status**: Draft, Published, or Scheduled
+
+![Create basic draft page](https://demo.solutionforest.net/Filament/cms-plugin/create-draft-page.gif)
+
+### Page Fields Explained
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| **Title** | Display name for your page | "About Our Company" |
+| **Slug** | URL path segment | "about-our-company" |
+| **Template** | Page layout and fields | "Default", "Blog Post", "Product" |
+| **Meta Description** | SEO description | "Learn about our company history..." |
+| **Parent Page** | Creates page hierarchy | Select another page as parent |
+
+## 📊 Page States & Publishing
+
+### Understanding Page States
+
+#### 🔸 **Draft**
+- Work in progress
+- Not visible on frontend
+- Safe for experimentation
+- Can be edited freely
+
+#### 🟢 **Published**
+- Live on your website
+- Visible to visitors
+- Can still be edited
+- Changes appear immediately
+
+#### 🔵 **Scheduled**
+- Will publish automatically
+- Set specific date/time
+- Perfect for content planning
+- Converts to "Published" when time arrives
+
+### Publishing Workflow
+
+#### Publish a Draft
+![Publish draft page](https://demo.solutionforest.net/Filament/cms-plugin/publish-draft-page.gif)
+
+#### Unpublish a Page
+![Un-publish published page](https://demo.solutionforest.net/Filament/cms-plugin/unpublish-published-page.gif)
+
+#### Schedule Publishing
+![Schedule publish](https://demo.solutionforest.net/Filament/cms-plugin/248247631-810b0d45-3144-4a90-9d30-1ade821cfd7f.gif)
+
+### Scheduling Content
+
+1. **Create or edit a page**
+2. **Set "Scheduled" status**
+3. **Choose publish date/time**
+4. **Save the page**
+
+The page will automatically become published at the scheduled time.
+
+## 🗂️ Page Organization
+
+### Page Hierarchy
+
+Create nested page structures:
+
+```
+📄 About Us (Parent)
+├── 📄 Our Team (Child)
+├── 📄 Company History (Child)
+└── 📄 Careers (Child)
+    └── 📄 Open Positions (Grandchild)
+```
+
+**Benefits of hierarchy:**
+- ✅ Better URL structure (`/about-us/our-team`)
+- ✅ Improved navigation
+- ✅ Better SEO organization
+- ✅ Logical content grouping
+
+### Page Categories
+
+Organize pages using the navigation system:
+- **Main Website Pages** - Public content
+- **Blog Posts** - Articles and updates  
+- **Product Pages** - E-commerce content
+- **Legal Pages** - Privacy, Terms, etc.
+
+## 🏷️ Tagging System
+
+> **Note**: Tags must be enabled in your configuration
+
+### Enable Page Tags
+
+```php
+// config/filament-cms.php
+return [
+    'enable_page_tags' => true,
+];
+```
+
+### Using Tags
+
+1. **Create tags** in the Tags management section
+2. **Assign tags** when editing pages
+3. **Filter pages** by tags in the admin
+4. **Display tags** on the frontend
+
+![Tag example 1](https://demo.solutionforest.net/Filament/cms-plugin/tag-1.png)
+
+**Tag examples:**
+- `featured` - Highlight important content
+- `blog` - Blog-related pages
+- `product-news` - Product announcements
+- `seasonal` - Holiday or seasonal content
+
+## 🔍 Page Management Features
+
+### Bulk Operations
+
+Select multiple pages to:
+- ✅ **Bulk publish/unpublish**
+- ✅ **Bulk delete**
+- ✅ **Bulk tag assignment**
+- ✅ **Bulk status changes**
+
+### Search & Filtering
+
+Find pages quickly using:
+- **Text search** - Search titles and content
+- **Status filters** - Draft, Published, Scheduled
+- **Tag filters** - Filter by assigned tags
+- **Date ranges** - Find pages by creation/update date
+- **Template filters** - Find pages using specific templates
+
+### Preview & Testing
+
+Before publishing:
+1. **Use Preview** to see how pages look
+2. **Test responsiveness** on different devices  
+3. **Check navigation** links and menus
+4. **Verify SEO** meta tags and descriptions
+
+## 📝 Content Editing Best Practices
+
+### Draft-First Workflow
+
+1. **Always start with drafts** for new content
+2. **Review and edit** before publishing
+3. **Use preview** to check appearance
+4. **Publish when ready**
+
+### Content Planning
+
+- **Use scheduled publishing** for planned content
+- **Create content calendars** using scheduled dates
+- **Batch create** multiple pages as drafts
+- **Review regularly** and update outdated content
+
+### SEO Optimization
+
+- **Write descriptive titles** (50-60 characters)
+- **Create compelling meta descriptions** (150-160 characters)
+- **Use hierarchical page structure** for better organization
+- **Implement internal linking** between related pages
+
+## 🔄 Advanced Page Management
+
+### Custom Page Templates
+
+Learn more about creating custom templates in our [Templates Guide](06-templates.md).
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+**Page not appearing on frontend:**
+- ✅ Check page status (must be Published)
+- ✅ Verify slug doesn't conflict with routes
+- ✅ Clear application cache
+- ✅ Check navigation menu inclusion
+
+**Slug conflicts:**
+- ✅ Use unique, descriptive slugs
+- ✅ Avoid reserved Laravel route names
+- ✅ Check for duplicate slugs
+
+**Publishing issues:**
+- ✅ Verify user permissions
+- ✅ Check for validation errors
+- ✅ Ensure required fields are filled
+

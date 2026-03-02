@@ -1,9 +1,14 @@
 import { Octokit } from '@octokit/rest';
-import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
+import { writeFileSync, mkdirSync, existsSync, readFileSync, rmSync } from 'fs';
 import { join, dirname } from 'path';
+import * as dotenv from 'dotenv';
 import { config } from '../lib/config';
 
-const octokit = new Octokit();
+dotenv.config({ path: '.env.local' });
+
+const octokit = new Octokit({
+  auth: process.env.GITHUB_TOKEN,
+});
 
 // Parse command line arguments
 // Usage: tsx scripts/fetch-docs.ts [--cache-only|--offline]
@@ -62,14 +67,24 @@ async function fetchFileContent(owner: string, repo: string, path: string, ref: 
   return content;
 }
 
-async function downloadImage(owner: string, repo: string, imagePath: string, ref: string, localPath: string, cacheOnly: boolean = false): Promise<void> {
+async function downloadImage(owner: string, repo: string, imagePath: string, ref: string, localPath: string, cacheOnly: boolean = false): Promise<boolean> {
   if (existsSync(localPath)) {
-    return;
+    return true;
+  }
+
+  // Try to find image in cache first
+  const cachePath = getCachePath(owner, repo, ref, imagePath);
+  if (existsSync(cachePath)) {
+    const content = readFileSync(cachePath);
+    // Ensure directory exists
+    mkdirSync(dirname(localPath), { recursive: true });
+    writeFileSync(localPath, content);
+    return true;
   }
 
   if (cacheOnly) {
-    console.warn(`⚠️ Image ${imagePath} not in cache but running in cache-only mode. Skipping...`);
-    return;
+    console.warn(`⚠️ Image ${imagePath} not in cache (${cachePath}) but running in cache-only mode. Skipping...`);
+    return false;
   }
 
   try {
@@ -77,14 +92,16 @@ async function downloadImage(owner: string, repo: string, imagePath: string, ref
     if ('content' in response.data) {
       const buffer = Buffer.from(response.data.content, 'base64');
       writeFileSync(localPath, buffer);
+      return true;
     }
   } catch (error: any) {
     if (error.status === 403 && error.message.includes('rate limit')) {
       console.warn(`⚠️ GitHub API rate limit exceeded while downloading image ${imagePath}. Skipping...`);
-      return;
+      return false;
     }
     console.error(`Failed to download image ${imagePath}:`, error);
   }
+  return false;
 }
 
 async function processImages(content: string, owner: string, repo: string, branch: string, docsPath: string, localImagesDir: string, fileDir: string, pluginId: string, cacheOnly: boolean = false): Promise<string> {
@@ -136,11 +153,31 @@ async function processImages(content: string, owner: string, repo: string, branc
     mkdirSync(localImageDir, { recursive: true });
 
     try {
-      await downloadImage(owner, repo, repoImagePath, branch, localImagePath, cacheOnly);
+      const success = await downloadImage(owner, repo, repoImagePath, branch, localImagePath, cacheOnly);
+      
+      if (!success) {
+        // Create a placeholder image to prevent build errors
+        // 1x1 transparent PNG
+        const placeholder = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+        mkdirSync(localImageDir, { recursive: true });
+        writeFileSync(localImagePath, placeholder);
+        console.warn(`⚠️ Created placeholder for missing image: ${imagePath}`);
+      }
 
-      // Update the path in content to be relative to the MDX file
-      const relativePath = join(upDirs, 'images', pluginId, imagePath).replace(/\\/g, '/');
-      processedContent = processedContent.replace(new RegExp(imagePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), relativePath);
+      // Use absolute path for public images
+      const relativePath = join('/images', pluginId, imagePath).replace(/\\/g, '/');
+      const escapedImagePath = imagePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      // Use a more robust regex that handles optional title and different attribute orders if possible, 
+      // but primarily ensures we replace the path inside the parens of markdown image syntax.
+      // And also handling HTML img tags if they were mixed in.
+      
+      // Replace markdown images: ![alt](path)
+      processedContent = processedContent.replace(new RegExp(`!\\[([^\\]]*)\\]\\(${escapedImagePath}\\)`, 'g'), `![$1](${relativePath})`);
+      
+      // Replace html images: <img src="path" ... />
+      processedContent = processedContent.replace(new RegExp(`src=["']${escapedImagePath}["']`, 'g'), `src="${relativePath}"`);
+      
     } catch (error) {
       console.error(`Failed to process image ${imagePath}, replacing with placeholder`);
       // Replace with a placeholder text
@@ -258,8 +295,15 @@ function cleanupContent(source: string): string {
 }
 
 async function getLastUpdated(owner: string, repo: string, path: string, ref: string, cacheOnly: boolean = false): Promise<string> {
+  const cachePath = getCachePath(owner, repo, ref, path);
   if (cacheOnly) {
-    // In cache-only mode, return current date since we can't fetch from GitHub
+    // Try to get file stat from cache if exists
+    if (existsSync(cachePath)) {
+        // We can't trust file system mtime as it reflects when we downloaded it, not when it was committed.
+        // But running in cache-only mode means we accept some staleness.
+        // Using current date is safer than misleading old date, but let's suppress the warning if we have content.
+        return new Date().toISOString(); 
+    }
     console.warn(`⚠️ Skipping last updated fetch for ${path} in cache-only mode. Using current date.`);
     return new Date().toISOString();
   }
@@ -276,15 +320,28 @@ async function getLastUpdated(owner: string, repo: string, path: string, ref: st
 }
 
 async function fetchPluginDocs() {
+  const rootMetaPages: string[] = [];
+  const rootMetaTitles: Record<string, string> = {};
+
   for (const plugin of config.plugins) {
     const [owner, repoName] = plugin.repo.split('/');
 
     const pluginDir = join('content', 'docs', plugin.id);
+    
+    // Clean up existing directory to remove stale files
+    if (existsSync(pluginDir)) {
+      rmSync(pluginDir, { recursive: true, force: true });
+    }
+    
     mkdirSync(pluginDir, { recursive: true });
 
-    // Create root _meta.json
+    // Add to root meta
+    rootMetaPages.push(plugin.id);
+    rootMetaTitles[plugin.id] = plugin.title;
+
+    // Create plugin _meta.json
     const rootMeta = {
-      title: plugin.title,
+      title: plugin.title, // Use title here ensures proper casing (e.g. "Filament Access Management")
       pages: plugin.versions.map(v => v.version),
     };
     writeFileSync(join(pluginDir, '_meta.json'), JSON.stringify(rootMeta, null, 2));
@@ -302,12 +359,12 @@ async function fetchPluginDocs() {
         const imagesDir = join('public', 'images', plugin.id);
         mkdirSync(imagesDir, { recursive: true });
 
-        // Create version _meta.json
-        const versionMeta = {
-          title: `${plugin.title} ${version.version}`,
-          pages: plugin.sections.map(s => s.slug),
-        };
-        writeFileSync(join(versionDir, '_meta.json'), JSON.stringify(versionMeta, null, 2));
+      // Create version _meta.json
+      const versionMeta = {
+        title: `${plugin.title} ${version.version}`,
+        pages: plugin.sections.map(s => s.slug),
+      };
+      writeFileSync(join(versionDir, '_meta.json'), JSON.stringify(versionMeta, null, 2));
 
         for (const section of plugin.sections) {
           const sectionDir = join(versionDir, section.slug);
@@ -343,10 +400,10 @@ ${content}
         const imagesDir = join('public', 'images', plugin.id);
         mkdirSync(imagesDir, { recursive: true });
 
-        // Create version _meta.json
+        // Create version _meta.json with explicitly ordered pages
         const versionMeta = {
-          title: `${plugin.title} ${version.version}`,
-          pages: files.map(f => f.slug),
+          title: `${plugin.title} ${version.version}`, // Use title from config for proper casing
+          pages: files.map(f => f.slug), // This array defines the exact order in sidebar
         };
         writeFileSync(join(versionDir, '_meta.json'), JSON.stringify(versionMeta, null, 2));
 
@@ -372,6 +429,20 @@ ${content}
       console.log(`Fetched docs for ${plugin.id} ${version.version}`);
     }
   }
+
+  // Create root _meta.json for correct ordering and casing in sidebar
+  const rootMetaContent = {
+    title: 'Plugins',
+    pages: rootMetaPages
+  };
+
+  // Add custom titles for each page in root meta if needed, though pages array handles order.
+  // Fumadocs uses _meta.json pages array for order.
+  // Titles for folders are usually taken from the folder's _meta.json title property, 
+  // which we already set above for each plugin.
+  
+  writeFileSync(join('content', 'docs', '_meta.json'), JSON.stringify(rootMetaContent, null, 2));
+  console.log('✅ Generated content/docs/_meta.json');
 }
 
 fetchPluginDocs();

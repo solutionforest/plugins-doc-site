@@ -1,0 +1,12 @@
+{
+  "title": "Filament CMS Website Plugin 3.x",
+  "pages": [
+    "overview",
+    "installation",
+    "quick-start",
+    "updating",
+    "page-management",
+    "navigation",
+    "templates"
+  ]
+}

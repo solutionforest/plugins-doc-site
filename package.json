@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "npm run fetch-docs && next build",
+    "build": "next build",
+    "build:full": "npm run fetch-docs && next build",
     "build:cache": "npm run fetch-docs:cache && next build",
     "dev": "next dev",
     "start": "serve out",
@@ -14,6 +15,7 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.18",
+    "dotenv": "^17.3.1",
     "fumadocs-core": "16.4.7",
     "fumadocs-mdx": "14.2.5",
     "fumadocs-ui": "16.4.7",

@@ -66,6 +66,58 @@ export const config: Config = {
       ],
     },
     {
+      id: 'filament-cms-website-plugin',
+      is_manual: true,
+      title: 'Filament CMS Website Plugin',
+      description: 'A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.',
+      repo: 'solutionforest/filament-cms-website-plugin',
+      latestVersion: '4.x',
+      versions: [
+        { 
+          version: '1.x', 
+          github_branch: '1.x', 
+          limited_files: [
+            { name: 'README.md', title: 'Overview', slug: 'overview' }, 
+            { name: 'Documentation.md', title: 'Guide', slug: 'guide' },
+          ] 
+        },
+        { 
+          version: '2.x', 
+          github_branch: '2.x', 
+          limited_files: [
+            { name: 'README.md', title: 'Overview', slug: 'overview' }, 
+            { name: 'Documentation.md', title: 'Guide', slug: 'guide' },
+          ] 
+        },
+        { 
+          version: '3.x', 
+          github_branch: '3.x', 
+          limited_files: [
+            { name: 'README.md', title: 'Overview', slug: 'overview' },
+            { name: 'docs/01-installation.md', title: 'Installation', slug: 'installation' },
+            { name: 'docs/02-quick-start.md', title: 'Quick Start', slug: 'quick-start' },
+            { name: 'docs/03-updating.md', title: 'Updating', slug: 'updating' },
+            { name: 'docs/04-page-management.md', title: 'Page Management', slug: 'page-management' },
+            { name: 'docs/05-navigation.md', title: 'Navigation', slug: 'navigation' },
+            { name: 'docs/06-templates.md', title: 'Templates', slug: 'templates' },
+          ] 
+        },
+        { 
+          version: '4.x', 
+          github_branch: '4.x', 
+          limited_files: [
+            { name: 'README.md', title: 'Overview', slug: 'overview' },
+            { name: 'docs/01-installation.md', title: 'Installation', slug: 'installation' },
+            { name: 'docs/02-quick-start.md', title: 'Quick Start', slug: 'quick-start' },
+            { name: 'docs/03-updating.md', title: 'Updating', slug: 'updating' },
+            { name: 'docs/04-page-management.md', title: 'Page Management', slug: 'page-management' },
+            { name: 'docs/05-navigation.md', title: 'Navigation', slug: 'navigation' },
+            { name: 'docs/06-templates.md', title: 'Templates', slug: 'templates' },
+          ] 
+        },
+      ],
+    },
+    {
       id: 'filament-tab-plugin',
       title: 'Filament Tab Plugin',
       description: 'Create beautiful tabbed interfaces in your Filament admin panel with this easy-to-use tab management plugin.',
@@ -76,17 +128,6 @@ export const config: Config = {
         { version: '2.x', github_branch: '2.x', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
         { version: '3.x', github_branch: '3.x', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
         { version: '4.x', github_branch: '4.x', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
-      ],
-    },
-    {
-      id: 'filament-access-management',
-      title: 'Filament Access Management',
-      description: 'Complete user and role management solution for Filament applications with permissions, roles, and access control features.',
-      repo: 'solutionforest/filament-access-management',
-      latestVersion: '2.x',
-      versions: [
-        { version: '1.x', github_branch: '1.x', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
-        { version: '2.x', github_branch: '2.x', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
       ],
     },
     {
@@ -164,6 +205,17 @@ export const config: Config = {
       title: 'Filament Email 2FA',
       description: 'Enhance security in your Filament applications with email-based two-factor authentication (2FA) for user logins.',
       repo: 'solutionforest/filament-email-2fa',
+      latestVersion: '2.x',
+      versions: [
+        { version: '1.x', github_branch: '1.x', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
+        { version: '2.x', github_branch: '2.x', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
+      ],
+    },
+    {
+      id: 'filament-access-management',
+      title: 'Filament Access Management',
+      description: 'Complete user and role management solution for Filament applications with permissions, roles, and access control features.',
+      repo: 'solutionforest/filament-access-management',
       latestVersion: '2.x',
       versions: [
         { version: '1.x', github_branch: '1.x', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },

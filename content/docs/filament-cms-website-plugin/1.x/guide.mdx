@@ -1,0 +1,567 @@
+---
+title: Guide
+description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
+lastUpdated: 2026-03-02T10:21:10.368Z
+---
+
+## General Page
+
+Here are some examples of how to create a general page:
+
+### Create basic draft page
+
+![Create basic draft page](https://demo.solutionforest.net/Filament/cms-plugin/create-draft-page.gif)
+
+### Publish draft page
+
+![Publish draft page](https://demo.solutionforest.net/Filament/cms-plugin/publish-draft-page.gif)
+
+### Un-publish published page
+
+![Un-publish published page](https://demo.solutionforest.net/Filament/cms-plugin/unpublish-published-page.gif)
+
+### Schedule publish page
+
+![schedule-publish](https://demo.solutionforest.net/Filament/cms-plugin/248247631-810b0d45-3144-4a90-9d30-1ade821cfd7f.gif)
+
+## Navigation
+
+---
+
+### Example
+
+![Create menu](https://demo.solutionforest.net/Filament/cms-plugin/create-menu.gif)
+
+### Get the navigation
+
+You can get navigation using:
+
+```php
+\SolutionForest\FilamentCms\Facades\FilamentCms::getNavigations()
+```
+
+or
+
+```php
+\SolutionForest\FilamentCms\Facades\FilamentCms::getNavigations('main-menu')
+```
+
+### Templates
+
+---
+
+The form schema for the page data is based on the work of [Dennis Koch](https://github.com/pxlrbt). To learn more about this concept, you can refer to his [Filament Trick](https://filamentphp.com/tricks/template-based-forms), which provides detailed information on the general idea.
+
+### Create Template
+
+To create a template and its view file, run following command:
+
+```bash
+php artisan filament-cms:page-template MyTemplate
+```
+
+```php
+<?php
+
+namespace App\CmsPages\Templates;
+
+use Filament\Forms;
+use SolutionForest\FilamentCms\CmsPages\Contracts\CmsPageTemplate;
+use SolutionForest\FilamentCms\CmsPages\Renderer\AtomicDesignPageRenderer;
+
+final class MyTemplate implements CmsPageTemplate
+{
+    protected static ?string $view = null;
+
+    public static function title(): string
+    {
+        return 'MyTemplate';
+    }
+
+    public static function schema(): array
+    {
+        return [
+            Forms\Components\Card::make()
+                ->schema([
+                    Forms\Components\TextInput::make('content')
+                        ->label(__('filament-cms::filament-cms.fields.cms_page.block-template.content'))
+                ]),
+        ];
+    }
+
+    public static function getRenderer(): ?string
+    {
+        return static::$view ?? AtomicDesignPageRenderer::class;
+    }
+
+    public static function hiddenOnTemplateOptions(): bool
+    {
+        return false;
+    }
+}
+
+```
+
+### Create Template Renderer
+
+You have the option to modify the renderer as a view or implement a custom `SolutionForest\FilamentCms\CmsPages\Contracts\Renderer`.
+
+To create a Template renderer, you can run the following command:
+
+```bash
+php artisan filament-cms:page-template-renderer
+```
+
+Once you have created the template renderer, you can insert it into your Template class.
+
+## Customize front-end middleware
+
+To customize the front-end middleware for your application, you can add the middleware classes in the `config/filament-cms` file.
+
+```php
+return [
+    //...
+    'middleware' => [
+        'web' => [
+            // add here
+        ],
+    ],
+    //...
+];
+```
+
+## SEO
+
+The SEO functionality in this package is based on [ralphjsmit/laravel-seo](https://github.com/ralphjsmit/laravel-seo). To set up SEO for your website, you can configure the settings in the `config/seo.php` file.
+
+## Change Theme
+
+To change the theme, you can modify the theme parameter in the `config/filament-cms.php` file. After that, you will need to clone all of the layout files located in `views/cms/theme/default` and rename the `default` folder to your **new theme name**. Additionally, you will need to publish and clone the default template render files under your **new theme name** as well.
+
+1. Modify the config file:
+
+   ```php
+   return [
+       //...
+       // Default theme
+       'theme' => 'default',
+       //...
+   ];
+   ```
+
+2. Clone layout files located in `views/cms/theme/default`. Then, rename the `default` folder to **new theme name**:
+
+   Files location:
+
+   ```plaintext
+   views/
+   └── 📂 cms
+      └── 📂 theme
+          └── 📂 [new theme name]
+   ```
+
+3. To modify the default template render files, you can publish vendor files and clone files located in `resources/views/vendor/filament-cms/components/default`. Then, rename the `default` folder to **new theme name**:
+
+   Command:
+
+   ```bash
+    php artisan vendor:publish --tag=filament-cms-views
+   ```
+
+   Files location:
+
+   ```plaintext
+   views/
+   └── 📂 vendor
+      └── 📂 filament-cms
+         └── 📂 components
+            └── 📂 default
+                └── 📂 [new theme name]
+   ```
+
+## Data-type Page
+
+![Example](https://demo.solutionforest.net/Filament/cms-plugin/list-data-type-pages.png))
+
+The data-type page is a resource that doesn't have an associated route.
+
+For instance, if you create a 'link' data-type that includes information such as URLs and titles, you can retrieve this information from any page.
+
+To create a new data-type, you can use the following command, which will automatically generate the necessary page data, template and Filament resource:
+
+```bash
+php artisan filament-cms:data-type-page Link
+```
+
+Filament Resource:
+
+```php
+<?php
+
+namespace App\Filament\Resources\DataType;
+
+use App\Filament\Resources\DataType\LinkResource\Pages;
+use App\CmsPages\Templates\DataType\Link as Template;
+use Filament\Forms;
+use Illuminate\Database\Eloquent\Builder;
+use SolutionForest\FilamentCms\Enums\PageType;
+use SolutionForest\FilamentCms\Filament\Resources\DataTypePageBaseResource as BaseResource;
+
+class LinkResource extends BaseResource
+{
+    protected static ?int $navigationSort = null;
+
+    protected static $parentPageKey = '5';
+
+    protected static string $subSlug = 'link';
+
+    public static function getModelLabel(): string
+    {
+        return 'Link';
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListLinks::route('/'),
+            'edit' => Pages\EditLink::route('/{record:id}/edit'),
+            'create' => Pages\CreateLink::route('/create'),
+        ];
+    }
+
+    public static function getTemplate(): string
+    {
+        return Template::class;
+    }
+}
+```
+
+Template:
+
+```php
+<?php
+
+namespace App\CmsPages\Templates\DataType;
+
+use Filament\Forms;
+use SolutionForest\FilamentCms\CmsPages\Contracts\CmsPageTemplate;
+use SolutionForest\FilamentCms\CmsPages\Templates\DataTypeTemplate as BaseTemplate;
+
+class Link extends BaseTemplate implements CmsPageTemplate
+{
+    public static function schema(): array
+    {
+        return [];
+    }
+
+    public static function title(): string
+    {
+        return 'Link';
+    }
+}
+```
+
+To retrieve records under the data-type page, you can use the following code:
+
+```php
+\SolutionForest\FilamentCms\Support\Utils::getDataType('link')->get();
+```
+
+Alternatively, you can refer to the `vendor/filament-cms/demo/templates/intro.blade.php` file for an example.
+
+## Content-type Page
+
+The content-type page is a resource that is associated with routing, similar to a general page that has child pages.
+
+For instance, you can create a 'Product' content-type page with a slug ('products'), which can edit the detail view for the child pages under 'Product'. Additionally, you can retrieve all records under the 'Product' page from any page.
+
+To create a new content-type page, you can use the following command, which will automatically generate the necessary page data, template, views, and Filament resource:
+
+```bash
+php artisan filament-cms:content-type-page Product products
+```
+
+Filament Resource:
+
+```php
+<?php
+
+namespace App\Filament\Resources\ContentType;
+
+use App\Filament\Resources\ContentType\ProductResource\Pages;
+use App\CmsPages\Templates\ContentType\Product as Template;
+use Filament\Forms;
+use Illuminate\Database\Eloquent\Builder;
+use SolutionForest\FilamentCms\Enums\PageType;
+use SolutionForest\FilamentCms\Filament\Resources\ContentTypePageBaseResource as BaseResource;
+
+class ProductResource extends BaseResource
+{
+    protected static ?int $navigationSort = null;
+
+    protected static $parentPageKey = '13';
+
+    protected static string $subSlug = 'products';
+
+    public static function getModelLabel(): string
+    {
+        return 'Product';
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListProducts::route('/'),
+            'edit' => Pages\EditProduct::route('/{record:id}/edit'),
+            'create' => Pages\CreateProduct::route('/create'),
+        ];
+    }
+
+    public static function getTemplate(): string
+    {
+        return Template::class;
+    }
+}
+```
+
+Template:
+
+```php
+<?php
+
+namespace App\CmsPages\Templates\ContentType;
+
+use Filament\Forms;
+use SolutionForest\FilamentCms\CmsPages\Contracts\CmsPageTemplate;
+use SolutionForest\FilamentCms\CmsPages\Templates\ContentTypeTemplate as BaseTemplate;
+
+class Product extends BaseTemplate implements CmsPageTemplate
+{
+    public static function schema(): array
+    {
+        return [];
+    }
+
+    public static function title(): string
+    {
+        return 'Product';
+    }
+}
+```
+
+View:
+
+```php
+@props(['layout', 'page' => null])
+@php
+    use SolutionForest\FilamentCms\Facades\FilamentCms;
+
+    /** @var array $layout */
+    /** @var ?\SolutionForest\FilamentCms\Dto\CmsPageData $page */
+
+    $theme = FilamentCms::getCurrentTheme();
+@endphp
+
+<x-dynamic-component
+    component="filament-cms::\{\{$theme\}\}.page"
+    :layout="$layout">
+    <div class="note">Let all your things have their places; let each part of your business have its time. - Benjamin Franklin</div>
+</x-dynamic-component>
+```
+
+To retrieve records under the content-type page, you can use the following code:
+
+```php
+\SolutionForest\FilamentCms\Support\Utils::getContentType('products')->get();
+```
+
+## Translation
+
+This guide assumes that you have already set up your model to be translatable, as per [Spatie&#39;s documentation](https://github.com/spatie/laravel-translatable#making-a-model-translatable).
+
+1. To set the `default_locales` for all resources at once, you can publish the [package&#39;s configuration file](https://filamentphp.com/docs/2.x/spatie-laravel-translatable-plugin/installation#publishing-configuration).
+2. Next, you need to prepare your resource classes and model, and update the settings in the `config/filament-cms.php` file. Here's an example configuration:
+
+   ```php
+   return [
+       //...
+       'filament' => [
+           'resources' => [
+               'cms_page' => \App\Filament\Resources\CmsPageResource::class,
+               'cms_page_navigation_category' => \App\Filament\Resources\CmsPageNavigationCategoryResource::class,
+               'cms_tag' => \App\Filament\Resources\CmsTagResource::class,
+       ],
+       'navigation' => [
+           'icon' => [
+               \App\Filament\Resources\CmsPageResource::class => 'heroicon-o-document',
+               \App\Filament\Resources\CmsPageNavigationCategoryResource::class => 'heroicon-o-bars-3-center-left',
+               CmsTagResource::class => 'heroicon-o-tag',
+           ],
+           'sort' => [
+               \App\Filament\Resources\CmsPageResource::class => -10,
+               \App\Filament\Resources\CmsTagResource::class => -9,
+               \App\Filament\Resources\CmsPageNavigationCategoryResource::class => -8,
+           ],
+       ],
+       //...
+       'models' => [
+           'cms_page' => \App\Models\CmsPage::class,
+           'cms_published_page' => \App\Models\CmsPublishedPage::class,
+           'cms_page_navigation' => \App\Models\CmsPageNavigation::class,
+           'cms_page_navigation_category' => \App\Models\CmsPageNavigationCategory::class,
+           'cms_tag' => \App\Models\CmsTag::class,
+           'cms_taggable' => \App\Models\CmsTaggable::class,
+           'cms_tag_category' => \App\Models\CmsTagCategory::class,
+       ],
+       //...
+   ];
+   ```
+
+3. Then, you need to add the necessary trait to your model:
+
+   ```php
+    namespace App\Models;
+
+    use Illuminate\Database\Eloquent\Factories\HasFactory;
+    use SolutionForest\FilamentCms\Models\CmsPage as BaseModel;
+    use Spatie\Translatable\HasTranslations;
+
+    class CmsPage extends BaseModel
+    {
+        use HasTranslations;
+
+        public $translatable = [
+            'title',
+            'data',
+        ];
+    }
+   ```
+
+4. You also need to add the necessary trait to your Filament resource:
+
+   ```php
+    namespace App\Filament\Resources;
+
+    use App\Filament\Resources\CmsPageResource\Pages;
+
+    class CmsPageResource extends \SolutionForest\FilamentCms\Filament\Resources\CmsPageResource
+    {
+        use \Filament\Resources\Concerns\Translatable;
+
+        public static function getPages(): array
+        {
+            return [
+                'index' => Pages\ListCmsPages::route('/'),
+                'create' => Pages\CreateCmsPage::route('/create'),
+                'edit' => Pages\EditCmsPage::route('/{record}/edit'),
+            ];
+        }
+
+        public static function getTranslatableLocales(): array
+        {
+            return config('filament-spatie-laravel-translatable-plugin.default_locales') ?? config('filament-cms.locales');
+        }
+    }
+   ```
+
+5. Finally, you need to add the necessary trait to your Filament resource pages:
+
+   ```php
+   use App\Filament\Resources\CmsPageResource;
+   use Filament\Resources\Pages\ListRecords;
+
+   class ListCmsPages extends \SolutionForest\FilamentCms\Filament\Resources\CmsPageResource\Pages\ListCmsPages
+   {
+       use ListRecords\Concerns\Translatable;
+
+       protected static string $resource = CmsPageResource::class;
+
+       protected function getActions(): array
+       {
+           return array_merge([
+               $this->getActiveLocaleSelectAction(),
+           ], parent::getActions());
+       }
+   }
+   ```
+
+   ```php
+   namespace App\Filament\Resources\CmsPageResource\Pages;
+
+   use App\Filament\Resources\CmsPageResource;
+   use Filament\Resources\Pages\EditRecord;
+
+   class EditCmsPage extends \SolutionForest\FilamentCms\Filament\Resources\CmsPageResource\Pages\EditCmsPage
+   {
+       use EditRecord\Concerns\Translatable;
+
+       protected static string $resource = CmsPageResource::class;
+
+       protected function getActions(): array
+       {
+           return array_merge([
+               $this->getActiveFormLocaleSelectAction(),
+           ], parent::getActions());
+       }
+   }
+
+   ```
+
+   ```php
+   namespace App\Filament\Resources\CmsPageResource\Pages;
+
+   use App\Filament\Resources\CmsPageResource;
+   use Filament\Pages\Actions;
+   use Filament\Resources\Pages\CreateRecord;
+
+   class CreateCmsPage extends \SolutionForest\FilamentCms\Filament\Resources\CmsPageResource\Pages\CreateCmsPage
+   {
+       use CreateRecord\Concerns\Translatable;
+
+       protected static string $resource = CmsPageResource::class;
+       protected function getActions(): array
+       {
+           return array_merge([
+               $this->getActiveFormLocaleSelectAction(),
+           ], parent::getActions());
+       }
+   }
+
+   ```
+
+## Tag
+
+By default, the tagging of cms page is disable. If you wish to enable it, you can update the `enable_page_tags` as true in the `config/filament-cms.php` file.
+
+```php
+ return [
+     //...
+    'enable_page_tags' => true,
+     //...
+ ];
+```
+
+![tag-1](https://demo.solutionforest.net/Filament/cms-plugin/tag-1.png)
+
+![tag-2](https://demo.solutionforest.net/Filament/cms-plugin/tag-2.png)
+
+## Audit logs
+
+By default, the audit log of cms page is disable. If you wish to enable it, you can update the `enable_audit_log` as true in the `config/filament-cms.php` file.
+
+```php
+ return [
+     //...
+    'enable_audit_log' => true,
+     //...
+ ];
+```
+
+Additionally, you need to add the following policies for `AuditRelationManager`:
+
+- audit
+- rollbackAudit
+
+Please refer to the official documentation of the Laravel Auditing package at [owen-it/laravel-auditing](https://github.com/owen-it/laravel-auditing) for more detailed information and instructions.
+![audit-1](https://demo.solutionforest.net/Filament/cms-plugin/audit-1.png)
+

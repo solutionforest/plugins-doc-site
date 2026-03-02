@@ -1,0 +1,289 @@
+---
+title: Updating
+description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
+lastUpdated: 2026-03-02T10:21:10.373Z
+---
+
+# 🔄 Updating Your CMS
+
+Keep your Filament CMS installation current with the latest features, security updates, and improvements.
+
+## 🎯 Quick Update
+
+The simplest way to update your CMS:
+
+```bash
+php artisan filament-cms:update
+```
+
+This command handles everything automatically:
+- ✅ **Checks for updates** to the package
+- ✅ **Downloads new versions** if available
+- ✅ **Publishes new migrations** automatically
+- ✅ **Prompts for migration** confirmation
+- ✅ **Applies database changes** safely
+
+## 📋 Update Process Breakdown
+
+### What Happens During Update
+
+1. **Package Check** - Verifies current version vs latest
+2. **Dependency Resolution** - Updates related packages
+3. **File Publishing** - Adds new migration/config files
+4. **Database Migration** - Updates database schema
+5. **Cache Clearing** - Refreshes application cache
+
+### Manual Update Steps
+
+If you prefer manual control:
+
+```bash
+# 1. Update composer packages
+composer update solution-forest/filament-cms-website-plugin
+
+# 2. Publish new assets (if any)
+php artisan vendor:publish --tag=filament-cms-migrations --force
+
+# 3. Run migrations  
+php artisan migrate
+
+# 4. Clear caches
+php artisan optimize:clear
+```
+
+## ⚠️ Pre-Update Checklist
+
+### Essential Backups
+
+Before any update, always:
+
+```bash
+# 1. Backup your database
+mysqldump -u username -p database_name > backup_$(date +%Y%m%d).sql
+
+# 2. Backup your files
+tar -czf cms_backup_$(date +%Y%m%d).tar.gz /path/to/your/project
+
+# 3. Backup configuration
+cp config/filament-cms.php config/filament-cms.php.backup
+```
+
+### Environment Preparation
+
+1. **Test on staging** environment first
+2. **Check for breaking changes** in release notes
+3. **Review custom code** for compatibility
+4. **Plan for downtime** (usually minimal)
+
+### Version Compatibility
+
+Check compatibility before updating:
+
+| Your Version | Update To | Compatibility | Action Required |
+|--------------|-----------|---------------|-----------------|
+| 2.x.x | 3.x.x | ⚠️ **Breaking** | [Migration guide](#major-version-updates) |
+| 3.0.x | 3.1.x | ✅ **Safe** | Standard update |
+| 3.x.x | 3.y.x | ✅ **Safe** | Standard update |
+
+## 🚀 Major Version Updates
+
+### Updating from v2.x to v3.x
+
+Major version updates may require additional steps:
+
+#### 1. Review Breaking Changes
+
+Check the [changelog](https://changelog.anystack.sh/filament-cms-website-plugin) for:
+- API changes
+- Configuration updates
+- Template modifications
+- Dependency updates
+
+#### 2. Update Dependencies
+
+```bash
+# Update Filament to v4 (required for v3.x)
+composer require "filament/filament:^4.0"
+
+# Update CMS plugin
+composer require "solution-forest/filament-cms-website-plugin:^3.0"
+```
+
+#### 3. Configuration Updates
+
+Compare your config with the new default:
+```bash
+# Publish new config
+php artisan vendor:publish --tag=filament-cms-config --force
+
+# Compare with your backup
+diff config/filament-cms.php config/filament-cms.php.backup
+```
+
+#### 4. Template Updates
+
+Update custom templates if needed:
+```bash
+# Publish new views
+php artisan vendor:publish --tag=filament-cms-views --force
+
+# Review changes to default templates
+# Update your custom templates accordingly
+```
+
+## 🔍 Verification After Update
+
+### Test Essential Functions
+
+After updating, verify:
+
+#### Admin Panel
+- ✅ **Login successfully**
+- ✅ **Create new pages**
+- ✅ **Edit existing pages**
+- ✅ **Publish/unpublish pages**
+- ✅ **Manage navigation**
+
+#### Frontend
+- ✅ **Pages display correctly**
+- ✅ **Navigation works**
+- ✅ **Templates render properly**
+- ✅ **No broken links**
+
+#### Advanced Features
+- ✅ **Tags work (if enabled)**
+- ✅ **Audit logs function (if enabled)**
+- ✅ **Translations work (if configured)**
+- ✅ **Custom templates work**
+
+### Performance Check
+
+```bash
+# Clear all caches
+php artisan optimize:clear
+
+# Rebuild caches
+php artisan optimize
+
+# Test page load times
+# Check for any console errors
+```
+
+## 🆘 Rollback Procedures
+
+### If Update Fails
+
+#### Quick Rollback
+
+```bash
+# 1. Restore database backup
+mysql -u username -p database_name < backup_20240315.sql
+
+# 2. Restore code (if using git)
+git checkout previous_working_commit
+
+# 3. Restore composer packages
+composer install
+
+# 4. Clear caches
+php artisan optimize:clear
+```
+
+#### Detailed Recovery
+
+1. **Restore from backups** you created pre-update
+2. **Revert composer.json** to previous state
+3. **Run composer install** to restore packages
+4. **Restore configuration files** from backup
+5. **Test functionality** thoroughly
+
+### Preventing Issues
+
+- **Always backup** before updating
+- **Test on staging** first
+- **Read release notes** carefully
+- **Update during low traffic** periods
+
+## 📅 Update Schedule Recommendations
+
+### Regular Updates
+- **Minor versions**: Monthly or bi-monthly
+- **Patch versions**: As soon as available
+- **Security updates**: Immediately
+
+### Planning Updates
+- **Schedule during maintenance windows**
+- **Coordinate with content team**
+- **Plan for testing time**
+- **Have rollback plan ready**
+
+## 🔔 Staying Informed
+
+### Update Notifications
+
+Stay informed about new releases:
+
+- **Watch the GitHub repository** for releases
+- **Subscribe to changelog** RSS feed
+- **Follow Solution Forest** on social media
+- **Join the community** discussions
+
+### Release Types
+
+Understanding release semantics:
+
+- **Major (3.0.0)**: Breaking changes, new features
+- **Minor (3.1.0)**: New features, backward compatible  
+- **Patch (3.1.1)**: Bug fixes, security updates
+
+## 📋 Update Troubleshooting
+
+### Common Update Issues
+
+**Migration errors:**
+```bash
+# Reset migration status
+php artisan migrate:status
+
+# Run specific migration
+php artisan migrate --path=/database/migrations/specific_migration.php
+```
+
+**Cache issues:**
+```bash
+# Clear all caches aggressively
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+composer dump-autoload
+```
+
+**Permission errors:**
+```bash
+# Fix file permissions (adjust for your setup)
+sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chmod -R 775 storage bootstrap/cache
+```
+
+## 🎯 Best Practices
+
+### Update Workflow
+
+1. **Read release notes** thoroughly
+2. **Test on staging** environment
+3. **Backup production** completely
+4. **Update during low traffic**
+5. **Monitor post-update** for issues
+6. **Have rollback plan** ready
+
+### Automation
+
+Consider automating updates for non-breaking changes:
+```bash
+# Add to your deployment script
+if composer outdated | grep -q "solution-forest/filament-cms-website-plugin"; then
+    echo "CMS update available"
+    # Add your update logic here
+fi
+```

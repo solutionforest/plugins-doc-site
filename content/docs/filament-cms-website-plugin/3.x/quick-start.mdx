@@ -1,0 +1,127 @@
+---
+title: Quick Start
+description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
+lastUpdated: 2026-03-02T10:21:10.373Z
+---
+
+# ⚡ Quick Start Guide
+
+Get your Filament CMS running in under 10 minutes! This guide covers the essential steps to start managing content.
+
+## 🎯 What You'll Accomplish
+
+By the end of this guide, you'll have:
+- ✅ A working CMS installation
+- ✅ Your first page created and published
+- ✅ Basic navigation set up
+- ✅ Understanding of key concepts
+
+## 🚀 Step-by-Step Setup
+
+### 1. Install the Plugin (2 minutes)
+
+If you haven't already, follow the [Installation Guide](01-installation.md):
+
+```bash
+# Add repository to composer.json, then:
+composer require solution-forest/filament-cms-website-plugin
+php artisan filament-cms:install
+```
+
+### 2. Register the Plugin (1 minute)
+
+Add to your Panel provider:
+
+```php
+use SolutionForest\FilamentCms\FilamentCmsPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel->plugin(FilamentCmsPlugin::make());
+}
+```
+
+### 3. Create Your First Page (3 minutes)
+
+1. **Access Filament Admin Panel**
+2. **Navigate to "CMS Pages"**
+3. **Click "New Page"**
+4. **Fill in basic details**:
+   - **Title**: "Welcome to My Site"
+   - **Slug**: "welcome"
+   - **Template**: Select "Default"
+5. **Add content** in the template fields
+6. **Save as Draft**
+
+![Create basic draft page](https://demo.solutionforest.net/Filament/cms-plugin/create-draft-page.gif)
+
+### 4. Publish Your Page (1 minute)
+
+1. **Open your draft page**
+2. **Click "Publish"**
+3. **Confirm publication**
+
+![Publish draft page](https://demo.solutionforest.net/Filament/cms-plugin/publish-draft-page.gif)
+
+### 5. Set Up Navigation (2 minutes)
+
+1. **Go to "Page Navigation Categories"**
+2. **Create a "Main Menu"**
+3. **Add your page to the menu**
+
+![Create menu](https://demo.solutionforest.net/Filament/cms-plugin/create-menu.gif)
+
+### 6. View Your Site (1 minute)
+
+Visit your website's frontend to see your published page!
+
+## 🎉 Congratulations!
+
+You now have a working CMS! Here's what you can do next:
+
+## 🎯 Key Concepts to Understand
+
+### Pages vs Templates
+- **Pages**: Your actual content (posts, articles, etc.)
+- **Templates**: Define the structure and fields for your pages
+
+### Publishing States
+- **Draft**: Work in progress, not visible on frontend
+- **Published**: Live on your website
+- **Scheduled**: Will publish automatically at a set time
+
+### Navigation
+- **Categories**: Groups of menu items (e.g., "Main Menu", "Footer Menu")
+- **Items**: Individual links in your menus
+
+## 🔄 Common Workflows
+
+### Creating Content
+1. **Create** → **Edit** → **Preview** → **Publish**
+
+### Managing Navigation
+1. **Create Category** → **Add Items** → **Arrange Order**
+
+### Scheduling Content
+1. **Create Page** → **Set Publish Date** → **Save**
+
+## 📚 What's Next?
+
+### Immediate Next Steps
+- [📄 Learn advanced page management](04-page-management.md)
+- [🧩 Create custom templates](06-templates.md)
+- [🗺️ Master navigation systems](05-navigation.md)
+
+## 💡 Pro Tips
+
+> **🎯 Start Simple**: Begin with basic pages and gradually add complexity
+> 
+> **🔄 Use Drafts**: Always create content as drafts first
+> 
+> **📱 Test Navigation**: Verify menus work on both desktop and mobile
+> 
+> **🔍 Preview First**: Always preview before publishing
+
+## 🆘 Need Help?
+
+- **Stuck on installation?** → [Installation Guide](01-installation.md)

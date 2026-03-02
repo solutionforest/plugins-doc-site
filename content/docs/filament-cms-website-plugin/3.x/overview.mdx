@@ -1,0 +1,235 @@
+---
+title: Overview
+description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
+lastUpdated: 2026-03-02T10:21:10.373Z
+---
+
+# 🚀 Filament CMS Website Plugin
+
+**The most powerful and user-friendly CMS plugin for Filament Admin**
+
+_Transform your Filament admin into a complete content management system_
+
+[**🚀 Quick Start**](docs/02-quick-start.md) • [**💬 Support**](#-support)
+
+![Sample](https://demo.solutionforest.net/Filament/cms-plugin/list-cms-pages.png)
+
+## 📊 Version Compatibility
+
+| Filament Version | Plugin Version | Status           |
+| ---------------- | -------------- | ---------------- |
+| **v5.x**         | **4.x.x**      | ✅**Current**    |
+| v4.x             | 3.x.x          | ❌ Not Supported |
+| v3.x             | 2.x.x          | ❌ Not Supported |
+
+## 🎯 Key Features
+
+### 📄 **Advanced Page Management**
+
+- ✅ **Draft & Publish Workflow** - Safe content creation process
+- ✅ **Scheduled Publishing** - Set content to go live automatically
+- ✅ **Page Templates** - Reusable layouts and structures
+- ✅ **SEO Optimization** - Built-in meta tags and search optimization
+
+### 🗺️ **Dynamic Navigation**
+
+- ✅ **Menu Builder** - Drag-and-drop menu creation
+- ✅ **Multi-level Menus** - Nested navigation support
+- ✅ **Menu Categories** - Organize different menu types
+
+### 🧩 **Flexible Content Types**
+
+- ✅ **Custom Templates** - Build your own page structures
+- ✅ **Data-type Pages** - Reusable content blocks
+- ✅ **Content-type Pages** - Blog posts, portfolios, products
+
+### 🌍 **Multi-language Ready**
+
+- ✅ **Translation Support** - Full internationalization
+- ✅ **Locale Switching** - Easy language management
+- ✅ **RTL Support** - Right-to-left language compatibility
+
+### 🎨 **Theming & Customization**
+
+- ✅ **Custom Themes** - Brand your CMS interface
+- ✅ **Template Renderers** - Advanced layout control
+- ✅ **Middleware Support** - Custom request handling
+
+### 🔐 **Enterprise Features**
+
+- ✅ **User Permissions** - Granular access control
+- ✅ **Audit Logs** - Track all content changes
+- ✅ **Tag Management** - Organize and categorize content
+
+## 🚀 Quick Start
+
+> 💡 **New to Filament CMS?** Get started in under 10 minutes!
+
+### 1. **Install via Composer**
+
+```bash
+# Add repository
+composer config repositories.filament-cms composer https://filament-cms-website-plugin.composer.sh
+
+# Install package
+composer require solution-forest/filament-cms-website-plugin
+```
+
+### 2. **Setup the Plugin**
+
+```bash
+php artisan filament-cms:install
+```
+
+### 3. **Register in Panel Provider**
+
+```php
+use SolutionForest\FilamentCms\FilamentCmsPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel->plugin(FilamentCmsPlugin::make());
+}
+```
+
+### 4. **Start Creating!** 🎉
+
+Visit your Filament admin panel and start building your website content!
+
+> 📚 **Need detailed instructions?** Check our [Complete Installation Guide](docs/01-installation.md)
+
+## 🎬 See It In Action
+
+### Create and Publish Pages
+
+![Create basic draft page](https://demo.solutionforest.net/Filament/cms-plugin/create-draft-page.gif)
+
+### Schedule Content
+
+![Schedule publish](https://demo.solutionforest.net/Filament/cms-plugin/248247631-810b0d45-3144-4a90-9d30-1ade821cfd7f.gif)
+
+### Build Navigation
+
+![Create menu](https://demo.solutionforest.net/Filament/cms-plugin/create-menu.gif)
+
+## 📚 Documentation
+
+Our comprehensive documentation covers everything you need to know:
+
+### 🚀 **Getting Started**
+
+- [⚡ Quick Start Guide](docs/02-quick-start.md) - Get running in 10 minutes
+- [🔧 Installation Guide](docs/01-installation.md) - Detailed setup instructions
+
+### 🎯 **Core Features**
+
+- [📄 Page Management](docs/04-page-management.md) - Create and manage content
+- [🗺️ Navigation Systems](docs/05-navigation.md) - Build dynamic menus
+- [🧩 Templates &amp; Layouts](docs/06-templates.md) - Custom page structures
+- [🔄 Updating Guide](docs/03-updating.md) - Keep your CMS current
+
+### 📖 **What You'll Learn**
+
+This documentation covers everything from basic installation to advanced customization:
+
+- ✅ **Complete Setup** - From installation to first page
+- ✅ **Page Management** - Create, edit, publish, and schedule pages
+- ✅ **Custom Templates** - Build your own page structures
+- ✅ **Navigation Systems** - Dynamic menus and site structure
+- ✅ **Multi-language Support** - Internationalization setup
+- ✅ **Advanced Features** - Tags, audit logs, and permissions
+- ✅ **Customization** - Themes, middleware, and extensions
+
+### 🚀 **New to Filament CMS?**
+
+Start with our [Quick Start Guide](docs/02-quick-start.md) to get your CMS running in under 10 minutes!
+
+## 🔄 Updating Your Installation
+
+Keep your CMS up to date with a single command:
+
+```bash
+php artisan filament-cms:update
+```
+
+> ⚠️ **Always backup** your database and files before updating!
+
+## 🛠️ Configuration
+
+### Enable Optional Features
+
+```php
+// config/filament-cms.php
+return [
+    'enable_page_tags' => true,     // 🏷️ Page tagging
+    'enable_audit_log' => true,     // 📝 Change tracking
+];
+```
+
+### Publish Resources
+
+```bash
+# Customize views
+php artisan vendor:publish --tag=filament-cms-views
+
+# Customize translations
+php artisan vendor:publish --tag=filament-cms-translations
+```
+
+## 🔌 Recommended Extensions
+
+Enhance your CMS with these compatible plugins:
+
+| Plugin                                                                      | Description               | Use Case               |
+| --------------------------------------------------------------------------- | ------------------------- | ---------------------- |
+| [**Spatie Translatable**](https://github.com/lara-zeus/spatie-translatable) | Multi-language support    | International websites |
+| [**Media Library Pro**](https://filamentphp.com/plugins/media-library-pro)  | Advanced media management | Rich media content     |
+| [**Curator**](https://github.com/awcodes/filament-curator)                  | Free media manager        | Basic media needs      |
+
+## 🗺️ Roadmap
+
+Upcoming features and improvements:
+
+- [x] ✅ **Scheduled Publishing** - Automated content release
+- [x] ✅ **Tag Management** - Content organization
+- [ ] 🔄 **Asset Manager** - Advanced file management
+- [ ] 🔄 **Version Control** - Content versioning system
+- [ ] 🔄 **Block Editor** - Visual page builder
+- [ ] 🔄 **API Endpoints** - Headless CMS capabilities
+
+## 📞 Support
+
+We're here to help you succeed with Filament CMS!
+
+### 🔒 **Security Vulnerabilities**
+
+For security-related issues, please email: **info+package@solutionforest.net**
+
+> Do not post security issues in public repositories
+
+### 💡 **Need Help?**
+
+- 📖 **Documentation**: Comprehensive guides available in the docs folder
+- 💌 **Security Issues**: info+package@solutionforest.net
+
+## 📄 Legal
+
+### License
+
+This project is licensed under a **Commercial License**. See [LICENSE](LICENSE.md) for details.
+
+### Changelog
+
+Track all changes and updates at [CHANGELOG](https://changelog.anystack.sh/filament-cms-website-plugin)
+
+## 🙏 Credits & Acknowledgments
+
+**Built with ❤️ by [Solution Forest](https://solutionforest.com)**
+
+Special thanks to:
+
+- [**Filament Team**](https://github.com/filamentphp/filament) - For the amazing admin framework
+- [**Dennis Koch**](https://github.com/pxlrbt) - Template-based forms concept
+- [**Filament Pages**](https://github.com/pascalebeier/filament-pages) - Initial inspiration
+- **Our Contributors** - Thank you for making this plugin better!
+

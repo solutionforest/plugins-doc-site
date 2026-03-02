@@ -1,0 +1,196 @@
+---
+title: Overview
+description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
+lastUpdated: 2026-03-02T10:21:10.368Z
+---
+
+# Filament CMS Website Plugin
+
+The Filament CMS Website Plugin is specifically built for website owners who use Filament CMS to manage their website content through the [Filament Admin Panel](https://github.com/filamentphp/filament).
+
+![Sample](/images/filament-cms-website-plugin/assets/screenshots/list-cms-pages.png)
+
+## Getting Started
+
+### Installation via Composer
+
+To get started with the Filament CMS Website Plugin, follow these steps:
+
+1. To install the package you should add the package to your composer.json file in the repositories key:
+
+   ```bash
+   {
+       "repositories": [
+           {
+               "type": "composer",
+               "url": "https://filament-cms-website-plugin.composer.sh"
+           }
+       ],
+   }
+   ```
+
+2. Once the repository has been added to the composer.json file, they can install Filament CMS Website Plugin like any other composer package using the `composer require` command:
+
+   ```bash
+   composer require solution-forest/filament-cms-website-plugin
+   ```
+
+3. You will be prompted to provide their username and password. The username will be your email address and the password will be equal to their license key. For example, let's say we have the following licensee and license activation:
+   - Contact email: philo@anystack.sh
+   - License key: 8c21df8f-6273-4932-b4ba-8bcc723ef500
+
+   This will require your licensee to enter the following information when prompted for their credentials:
+
+   ```php
+    Loading composer repositories with package information
+    Authentication required (filament-cms-website-plugin.composer.sh):
+    Username: philo@anystack.sh
+    Password: 8c21df8f-6273-4932-b4ba-8bcc723ef500:anystack.sh
+   ```
+
+   To clarify, the license key and fingerprint should be separated by a colon (:).
+
+4. To publish the configuration files, migrations, and layout files for this plugin, as well as automatically create page data, enter the following command:
+
+   ```bash
+   php artisan filament-cms:install
+   ```
+
+   The default layout files are stored under:
+
+   ```plaintext
+   views/
+   └── 📂 cms
+       └── 📂 theme
+           └── 📂 default
+               ├── app.blade.php
+               ├── header.blade.php
+               └── footer.blade.php
+   ```
+
+5. By default, the index page of the website has a slug of **home**. If you wish to customize this slug, you can update the `models.cms_page` parameter in the `config/filament-cms.php` file and modify your CmsPage model accordingly. Specifically, you will need to change the value of the `HOME_SLUG` constant property to your desired slug. Once you have made these changes, run the `php artisan optimize:clear command` to clear the cache.
+
+   ![Custom index slug for cms page](/images/filament-cms-website-plugin/assets/screenshots/customize-cms-page-model-1.png)
+
+   ```php
+   return [
+        //...
+       'models' => [
+           'cms_page' => \App\Models\CmsPage::class,
+       ],
+       //...
+   ];
+   ```
+
+## Updating the Filament CMS Website Plugin
+
+To update the Filament CMS website plugin, you can use the command **`php artisan filament-cms:update`**. This command will check for any updates to the package and install them if necessary.
+
+If the update includes any new migration files, they will be automatically published to your application's database/migrations directory. You will then be prompted to confirm whether you want to run the migrations or not. If you confirm, the migrations will be run automatically, applying any necessary changes to your database schema.
+
+It's important to note that before running any updates, you should always backup your code and database to ensure that you can easily revert to a previous state if any issues arise. Additionally, you should review the release notes for the updated package to understand any potential breaking changes or new features that may impact your application.
+
+## Tag
+
+By default, the tagging of cms page is disable. If you wish to enable it, you can update the `enable_page_tags` as true in the `config/filament-cms.php` file.
+
+```php
+return [
+     //...
+    'enable_page_tags' => true,
+     //...
+];
+```
+
+![tag-1](https://demo.solutionforest.net/Filament/cms-plugin/tag-1.png)
+
+![tag-2](https://demo.solutionforest.net/Filament/cms-plugin/tag-2.png)
+
+## Audit logs
+
+By default, the audit log of cms page is disable. If you wish to enable it, you can update the `enable_audit_log` as true in the `config/filament-cms.php` file.
+
+```php
+return [
+     //...
+    'enable_audit_log' => true,
+     //...
+];
+```
+
+Additionally, you need to add the following policies for `AuditRelationManager`:
+
+- audit
+- rollbackAudit
+
+Please refer to the official documentation of the Laravel Auditing package at [owen-it/laravel-auditing](https://github.com/owen-it/laravel-auditing) for more detailed information and instructions.
+![audit-1](https://demo.solutionforest.net/Filament/cms-plugin/audit-1.png)
+
+## Examples
+
+### Create basic draft page
+
+![Create basic draft page](/images/filament-cms-website-plugin/assets/screenshots/create-draft-page.gif)
+
+### Publish draft page
+
+![Publish draft page](/images/filament-cms-website-plugin/assets/screenshots/publish-draft-page.gif)
+
+### Un-publish published page
+
+![Un-publish published page](/images/filament-cms-website-plugin/assets/screenshots/unpublish-published-page.gif)
+
+### Schedule publish page
+
+![schedule-publish](https://github.com/solutionforest/filament-cms-website-plugin/assets/68525320/810b0d45-3144-4a90-9d30-1ade821cfd7f)
+
+## Documentation
+
+Please see [Documentation](Documentation.md) for more information.
+
+## Publishing views
+
+```bash
+php artisan vendor:publish --tag=filament-cms-views
+```
+
+## Publishing translations
+
+```bash
+php artisan vendor:publish --tag=filament-cms-translations
+```
+
+## Recommended Plugins
+
+In addition to the core functionality of this project, we recommend the following plugins to extend its capabilities:
+
+- [Media Library Manager](https://filamentphp.com/plugins/media-library-pro) - A media manager that is compatible with Spatie MediaLibrary.
+- [Curator](https://github.com/awcodes/filament-curator) - A free media manager designed for use with Filament Admin.
+
+## Roadmap
+
+Here are some of the features and improvements we plan to implement in future releases of this project:
+
+- [x] Scheduled Publish Page
+- [ ] Asset Manager
+- [x] Tag Manager
+- [ ] Versioning
+
+Please note that this roadmap is subject to change and may be updated as we receive feedback and new feature requests from our users. We appreciate any suggestions or ideas you may have for improving this project!
+
+## Changelog
+
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+
+## Security Vulnerabilities
+
+If you discover any security related issues, please email info+package@solutionforest.net instead of using the issue tracker.
+
+## License
+
+Please see [License File](LICENSE.md) for more information.
+
+## Credits
+
+- [Filament Page](https://github.com/pascalebeier/filament-pages)
+

@@ -5,7 +5,7 @@
 .contentlayer
 .content-collections
 .source
-/content/docs/
+
 
 # cache
 .cache/
@@ -15,7 +15,6 @@
 /fi-plugins/
 /fi-plugins*/
 /.next/
-/out/
 /build
 *.tsbuildinfo
 

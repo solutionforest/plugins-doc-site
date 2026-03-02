@@ -1,0 +1,321 @@
+---
+title: Navigation
+description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
+lastUpdated: 2026-03-02T10:21:10.383Z
+---
+
+# 🗺️ Navigation Management
+
+Build dynamic, multi-level navigation systems for your website with powerful menu management tools.
+
+## 🎯 Overview
+
+Navigation is crucial for user experience. Filament CMS provides flexible tools to create and manage menus that adapt to your content structure.
+
+## 🧭 Navigation Concepts
+
+### Navigation Categories
+Think of these as different menu locations on your site:
+- **Main Menu** - Primary site navigation
+- **Footer Menu** - Links in the footer
+- **Sidebar Menu** - Secondary navigation
+- **Mobile Menu** - Mobile-specific navigation
+
+### Navigation Items
+Individual links within each category:
+- **Page Links** - Link to CMS pages
+- **External Links** - Link to external websites
+- **Custom Links** - Link to any URL
+- **Dropdown Menus** - Nested menu items
+
+## 🎬 Creating Navigation
+
+### Step 1: Create Navigation Category
+
+![Create menu](https://demo.solutionforest.net/Filament/cms-plugin/create-menu.gif)
+
+1. **Go to "Page Navigation Categories"**
+2. **Click "New Category"**
+3. **Configure the category**:
+   - **Name**: "Main Menu"
+   - **Slug**: "main-menu" 
+   - **Description**: "Primary site navigation"
+
+### Step 2: Add Navigation Items
+
+1. **Select your category**
+2. **Click "Add Navigation Item"**
+3. **Choose link type**:
+   - **CMS Page**: Link to existing pages
+   - **Custom URL**: External or custom links
+   - **Dropdown**: Container for sub-items
+
+### Step 3: Organize Menu Structure
+
+Use drag-and-drop to:
+- ✅ **Reorder items** horizontally
+- ✅ **Create nested menus** by dragging items under others
+- ✅ **Build dropdown menus** with sub-items
+
+## 🏗️ Navigation Structure Examples
+
+### Simple Navigation
+```
+Home | About | Services | Contact
+```
+
+### Multi-level Navigation
+```
+Home
+About
+├── Our Team
+├── Company History
+└── Careers
+Services
+├── Web Design
+├── Development
+└── SEO
+Contact
+```
+
+### Complex Navigation
+```
+Home
+Products
+├── Software
+│   ├── CMS Solutions
+│   └── E-commerce Tools
+├── Hardware
+│   ├── Servers
+│   └── Networking
+└── Support
+    ├── Documentation
+    └── Contact Support
+Company
+├── About Us
+├── News & Updates
+└── Careers
+```
+
+## 📱 Responsive Navigation
+
+### Mobile Considerations
+
+Your navigation automatically adapts, but consider:
+- **Keep main menu items under 7** for mobile usability
+- **Use clear, concise labels** 
+- **Test on actual devices**
+- **Consider hamburger menu** for complex structures
+
+### Accessibility Features
+
+- ✅ **Keyboard navigation** support
+- ✅ **Screen reader** compatibility  
+- ✅ **Focus indicators** for better UX
+- ✅ **Semantic HTML** structure
+
+## 🔧 Navigation Configuration
+
+### Retrieving Navigation in Code
+
+```php
+// Get all navigations
+$navigations = \SolutionForest\FilamentCms\Facades\FilamentCms::getNavigations();
+
+// Get specific navigation by slug
+$mainMenu = \SolutionForest\FilamentCms\Facades\FilamentCms::getNavigations('main-menu');
+
+// Example usage in Blade template
+@foreach($mainMenu as $item)
+    <a href="\{\{$item->url\}\}" class="nav-link">
+        \{\{$item->title\}\}
+    </a>
+    
+    @if($item->children->count() > 0)
+        <ul class="dropdown">
+            @foreach($item->children as $child)
+                <li><a href="\{\{$child->url\}\}">\{\{$child->title\}\}</a></li>
+            @endforeach
+        </ul>
+    @endif
+@endforeach
+```
+
+### Navigation in Theme Templates
+
+```php
+// In your theme template (e.g., header.blade.php)
+@php
+    $mainNav = \SolutionForest\FilamentCms\Facades\FilamentCms::getNavigations('main-menu');
+@endphp
+
+<nav class="main-navigation">
+    @foreach($mainNav as $navItem)
+        @include('cms.theme.default.nav-item', ['item' => $navItem])
+    @endforeach
+</nav>
+```
+
+## 🎨 Styling Navigation
+
+### CSS Classes
+
+Navigation items automatically include helpful CSS classes:
+```html
+<nav class="cms-navigation">
+    <a href="/" class="nav-item active">Home</a>
+    <div class="nav-item has-children">
+        <a href="/about">About</a>
+        <ul class="sub-menu">
+            <li><a href="/about/team" class="nav-item">Our Team</a></li>
+        </ul>
+    </div>
+</nav>
+```
+
+### CSS Styling Examples
+
+```css
+/* Basic navigation styling */
+.cms-navigation {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-item {
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.nav-item:hover {
+    color: #3b82f6;
+}
+
+.nav-item.active {
+    font-weight: bold;
+    color: #1d4ed8;
+}
+
+/* Dropdown styling */
+.has-children {
+    position: relative;
+}
+
+.sub-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.375rem;
+    display: none;
+}
+
+.has-children:hover .sub-menu {
+    display: block;
+}
+```
+
+## 🛠️ Advanced Navigation Features
+
+### Conditional Menu Items
+
+Show/hide navigation items based on:
+- **User authentication** status
+- **User roles** and permissions
+- **Page publication** status
+- **Custom conditions**
+
+### Dynamic Navigation
+
+Navigation automatically updates when:
+- ✅ **Pages are published/unpublished**
+- ✅ **Page titles change**
+- ✅ **Page URLs update**
+- ✅ **Page hierarchy changes**
+
+### SEO Benefits
+
+Proper navigation structure helps with:
+- ✅ **Site crawling** by search engines
+- ✅ **Internal linking** for SEO
+- ✅ **User experience** metrics
+- ✅ **Page authority** distribution
+
+## 📊 Navigation Management Best Practices
+
+### Planning Your Navigation
+
+1. **Map your content** before building menus
+2. **Group related pages** logically
+3. **Keep main navigation simple** (5-7 items max)
+4. **Use descriptive labels** that users understand
+5. **Test user flows** through your navigation
+
+### Organization Tips
+
+- **Use consistent naming** conventions
+- **Group by user intent** rather than internal structure
+- **Consider user mental models** when organizing
+- **Provide multiple paths** to important content
+
+### Performance Considerations
+
+- **Limit menu depth** to 3 levels maximum
+- **Cache navigation data** for better performance
+- **Optimize for mobile** first
+- **Test loading times** with complex menus
+
+## 🔄 Navigation Updates
+
+### Automatic Updates
+
+Navigation stays synchronized when:
+- **Page titles change** → Menu labels update
+- **Page URLs change** → Menu links update  
+- **Pages are deleted** → Menu items are removed
+- **Pages are unpublished** → Menu items become inactive
+
+### Manual Updates
+
+Manually update navigation when:
+- **Reorganizing site structure**
+- **Adding new sections**
+- **Updating external links**
+- **Changing menu labels**
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+**Navigation not appearing:**
+- ✅ Check navigation category exists
+- ✅ Verify template includes navigation code
+- ✅ Ensure navigation items are added
+- ✅ Clear application cache
+
+**Broken menu links:**
+- ✅ Verify linked pages are published
+- ✅ Check for slug conflicts
+- ✅ Update external URLs
+- ✅ Test all navigation links
+
+**Styling issues:**
+- ✅ Check CSS includes navigation classes
+- ✅ Verify theme template structure
+- ✅ Test responsive behavior
+- ✅ Validate HTML structure
+
+### Performance Issues
+
+**Slow navigation loading:**
+- ✅ Implement navigation caching
+- ✅ Reduce menu complexity
+- ✅ Optimize database queries
+- ✅ Use eager loading for relationships
+
+## 🔗 Related Topics
+
+- [📄 Page Management](04-page-management.md) - Creating pages for navigation
+- [🧩 Templates](06-templates.md) - Customizing navigation display
