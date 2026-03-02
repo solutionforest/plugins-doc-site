@@ -17,26 +17,54 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
+        # Automatically injects static_site_generator: next
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch Docs
+        env:
+          # Use GITHUB_TOKEN for fetching from public/internal repos if needed
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run fetch-docs
+
+      - name: Build with Next.js
+        env:
+          # Ensure next uses production build config
+          NODE_ENV: production
+          # Pass the repository name for base path logic if needed
+          # But next.config.mjs handles it with GITHUB_PAGES logic often
+          # We can explicitly set it here if we want to be sure
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
 
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

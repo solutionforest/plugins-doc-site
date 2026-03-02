@@ -26,7 +26,7 @@ A modern static documentation website for plugin documentation with automatic Gi
 ```bash
 # Clone the repository
 git clone <your-repository-url>
-cd static-plugin-doc-site-3
+cd plugin-doc-site
 
 # Install dependencies
 npm install

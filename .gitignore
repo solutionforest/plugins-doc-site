@@ -36,5 +36,4 @@ yarn-error.log*
 next-env.d.ts
 /.vscode/
 
-# static export
-/out/
+out/

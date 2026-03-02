@@ -10,7 +10,8 @@ export function CustomImage(props: any) {
   if (hasError) return null;
 
   // Check if the image is an SVG (which requires unoptimized prop)
-  const isSvg = props.src?.endsWith('.svg') || props.src?.includes('img.shields.io');
+  const src = typeof props.src === 'object' ? props.src.src : props.src;
+  const isSvg = typeof src === 'string' && (src.endsWith('.svg') || src.includes('img.shields.io'));
 
   // Simple fallback for now to debug panic
   return (
