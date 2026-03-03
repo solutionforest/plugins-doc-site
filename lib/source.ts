@@ -50,6 +50,7 @@ export function getLatestVersion(pluginName: string) {
 export function getPluginGithubRepoUrl(pluginName: string) {
   const plugin = config.plugins.find((p) => p.id === pluginName);
   if (!plugin) return null;
+  if (plugin.is_private) return null;
 
   const repo = plugin.repo;
 

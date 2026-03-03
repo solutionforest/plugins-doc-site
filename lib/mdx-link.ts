@@ -44,7 +44,30 @@ export function createCustomRelativeLink(page: Page) {
     
     const parts = [...currentDirSlugs];
     const hrefParts = cleanPath.split('/');
-    
+
+    // First check if the href directly matches a limited file in the version config (for better handling of casing and extensions)
+    if (hrefParts.length > 1) {
+      // console.warn(`Link with multiple parts: ${href}, skipping limited_files check due to complexity.`);
+      const matchedFile = Array.from(versionConfig.limited_files || []).find(f => f.name == href);
+      if (matchedFile) {
+        const resolvedPage = source.getPage([pluginId, versionId, matchedFile.slug]);
+        if (resolvedPage) {
+          return resolvedPage.url;
+        } 
+      }
+    }
+
+    // If the link has only one part, we can check if it matches a limited file in the current directory for better handling of casing and extensions
+    const currentIsLimitedFile = Array.from(versionConfig.limited_files || []).find(f => f.slug == page.slugs.slice(2).join('/')) || null;
+    const dir = currentIsLimitedFile?.name.split('/').slice(0, -1).join('/') || '';
+    const matchedFile = Array.from(versionConfig.limited_files || []).find(f => f.name == [dir, href].join('/')) || null;
+    if (currentIsLimitedFile && matchedFile) {
+      const resolvedPage = source.getPage([pluginId, versionId, matchedFile.slug]);
+      if (resolvedPage) {
+        return resolvedPage.url;
+      }
+    }
+
     for (const part of hrefParts) {
       if (part === '.') continue;
       if (part === '..') {
@@ -54,8 +77,11 @@ export function createCustomRelativeLink(page: Page) {
       }
     }
     
-    const resolvedSlugs = [pluginId, versionId, ...parts];
-    const resolvedPage = source.getPage(resolvedSlugs);
+    if (hrefParts.length > 0) {
+      console.warn(`Resolving link: ${href} to slugs: ${parts.join('/')}`);
+    }
+
+    const resolvedPage = source.getPage([pluginId, versionId, ...parts]);
     
     if (resolvedPage) {
       return resolvedPage.url;

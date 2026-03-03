@@ -67,6 +67,45 @@ async function fetchFileContent(owner: string, repo: string, path: string, ref: 
   return content;
 }
 
+async function downloadAssets(owner: string, repo: string, folder: string, ref: string, localFolder: string, cacheOnly: boolean = false, depth: number = 0): Promise<void> {
+  // Safety for recursive calls
+  if (depth > 5) {
+    console.warn(`⚠️ Maximum asset download depth exceeded for folder ${folder}. Skipping further recursion.`);
+    return;
+  }
+  try {
+    const response = await octokit.repos.getContent({ owner, repo, path: folder, ref });
+    // console.log(`Fetched asset list for ${folder}, processing...`, { response });
+    if (Array.isArray(response.data)) {
+      for (const item of response.data) {
+        // console.log(`Processing asset item: ${item.path} (type: ${item.type})`);
+        if (item.type === 'file') {
+          // Download file from GitHub and save to local folder
+          const localFilePath = join(localFolder, item.name);
+          console.log(`Downloading asset file ${item.path} to ${localFilePath}...`);
+          const success = await downloadImage(owner, repo, item.path, ref, localFilePath, cacheOnly);
+          if (!success) {
+            console.warn(`⚠️ Failed to download asset ${item.path}. Creating empty placeholder at ${localFilePath}.`);
+            mkdirSync(dirname(localFilePath), { recursive: true });
+            writeFileSync(localFilePath, '');
+          }
+        } else if (item.type === 'dir') {
+          // Recursively download subdirectory
+          const subLocalFolder = join(localFolder, item.name);
+          await downloadAssets(owner, repo, item.path, ref, subLocalFolder, cacheOnly, depth + 1);
+        }
+      }
+    }
+  } catch (error: any) {
+    if (error.status === 403 && error.message.includes('rate limit')) {
+      console.warn(`⚠️ GitHub API rate limit exceeded while fetching assets in ${folder}. Skipping...`);
+      return;
+    }
+    console.error(`Failed to fetch assets in ${folder}:`, error);
+    return;
+  }
+}
+
 async function downloadImage(owner: string, repo: string, imagePath: string, ref: string, localPath: string, cacheOnly: boolean = false): Promise<boolean> {
   if (existsSync(localPath)) {
     return true;
@@ -92,6 +131,12 @@ async function downloadImage(owner: string, repo: string, imagePath: string, ref
     if ('content' in response.data) {
       const buffer = Buffer.from(response.data.content, 'base64');
       writeFileSync(localPath, buffer);
+      
+      // Save to cache
+      console.debug(`🎨 Caching image ${imagePath} to ${cachePath}...`);
+      mkdirSync(dirname(cachePath), { recursive: true });
+      writeFileSync(cachePath, buffer);
+      
       return true;
     }
   } catch (error: any) {
@@ -126,9 +171,11 @@ async function processImages(content: string, owner: string, repo: string, branc
     const fileRelativeDir = fileDir.replace(join('content', 'docs'), '').split('/').filter(Boolean);
     const relativeDepth = fileRelativeDir.length;
     const upDirs = '../'.repeat(relativeDepth);
+    console.debug(`Resolving image path ${imagePath} from file directory ${fileDir} with docsPath ${docsPath}...`, {fileRelativeDir});
 
     // The image path in repo is relative to the docs root
     let repoImagePath = imagePath;
+    let cleanImagePath = imagePath;
     if (imagePath.startsWith('../')) {
       // Resolve .. relative to docsPath
       const docsParts = docsPath.split('/').filter(Boolean);
@@ -143,13 +190,16 @@ async function processImages(content: string, owner: string, repo: string, branc
         }
       }
       repoImagePath = resolvedParts.join('/');
+      cleanImagePath = repoImagePath;
     } else {
       repoImagePath = join(docsPath, imagePath).replace(/\\/g, '/');
+      cleanImagePath = repoImagePath;
     }
 
-    // Local path in public/images
-    const localImagePath = join(localImagesDir, imagePath);
-    const localImageDir = join(localImagesDir, imagePath.substring(0, imagePath.lastIndexOf('/')));
+    // Local path in public/{pluginId}/... for use in content
+    const localImagePath = join(pluginId, imagePath, cleanImagePath);
+    const localImageDir = join(pluginId, imagePath, cleanImagePath.substring(0, cleanImagePath.lastIndexOf('/')));
+    console.debug(`💠 Processing image ${imagePath}`, { repoPath: repoImagePath, cleanImagePath, localPath: localImagePath, localImageDir });
     mkdirSync(localImageDir, { recursive: true });
 
     try {
@@ -164,9 +214,10 @@ async function processImages(content: string, owner: string, repo: string, branc
         console.warn(`⚠️ Created placeholder for missing image: ${imagePath}`);
       }
 
-      // Use absolute path for public images
-      const relativePath = join('/images', pluginId, imagePath).replace(/\\/g, '/');
+      // Use absolute path for public images, format: /src="/{pluginId}/path/to/image"
+      const relativePath = join('/', pluginId, imagePath).replace(/\\/g, '/');
       const escapedImagePath = imagePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      console.debug(`🖊️ Rewriting image path ${imagePath} to ${relativePath} in content...`, {escapedImagePath});
       
       // Use a more robust regex that handles optional title and different attribute orders if possible, 
       // but primarily ensures we replace the path inside the parens of markdown image syntax.
@@ -353,76 +404,52 @@ async function fetchPluginDocs() {
       const branch = version.github_branch;
       let lastUpdated = await getLastUpdated(owner, repoName, 'README.md', branch, cacheOnly);
 
-      if (plugin.is_manual && plugin.docs_structure === 'folder_based' && version.version === plugin.latestVersion && plugin.sections) {
-        // Handle folder-based docs like Filaletter
-        const docsPath = plugin.docs_path || '';
-        const imagesDir = join('public', 'images', plugin.id);
-        mkdirSync(imagesDir, { recursive: true });
+      // Handle simple README-based docs
+      const files = version.limited_files || [{ name: 'README.md', title: plugin.title, slug: 'index' }];
+      const assetsDir = join('public', plugin.id);
+      mkdirSync(assetsDir, { recursive: true });
 
-      // Create version meta.json
+      // Create version meta.json with explicitly ordered pages
       const versionMeta = {
-        title: `${version.version}`,
-        pages: plugin.sections.map(s => s.slug),
+        title: `${version.version}`, // Use title from config for proper casing
+        pages: files.map(f => f.slug), // This array defines the exact order in sidebar
       };
       writeFileSync(join(versionDir, 'meta.json'), JSON.stringify(versionMeta, null, 2));
 
-        for (const section of plugin.sections) {
-          const sectionDir = join(versionDir, section.slug);
-          mkdirSync(sectionDir, { recursive: true });
-
-          // Create section meta.json
-          const sectionMeta = {
-            title: section.name,
-            pages: section.files.map(f => f.slug),
-          };
-          writeFileSync(join(sectionDir, 'meta.json'), JSON.stringify(sectionMeta, null, 2));
-
-          for (const file of section.files) {
-            const filePath = join(docsPath, file.name).replace(/\\/g, '/');
-            let content = await fetchFileContent(owner, repoName, filePath, branch, cacheOnly);
-            if (content) {
-              // Process images
-              content = await processImages(content, owner, repoName, branch, docsPath, imagesDir, sectionDir, plugin.id, cacheOnly);
-
-              const mdxContent = `---
-title: ${file.title}
----
-
-${content}
-`;
-              writeFileSync(join(sectionDir, `${file.slug}.mdx`), mdxContent);
-            }
+      if (version.assets) {
+        for (const asset of version.assets) {
+          const localAssetPath = join(assetsDir, asset.to);
+          console.debug(`📦 Processing asset ${asset.from} to be saved at ${localAssetPath}...`);
+          mkdirSync(dirname(localAssetPath), { recursive: true });
+          // The asset.from is relative to the docs root in the repo
+          try {
+            await downloadAssets(owner, repoName, asset.from, branch, localAssetPath, cacheOnly);
+          } catch (error) {
+            console.error(`Failed to download asset ${asset.from}, creating placeholder`, error);
+            writeFileSync(localAssetPath, '');
           }
         }
-      } else {
-        // Handle simple README-based docs
-        const files = version.limited_files || [{ name: 'README.md', title: plugin.title, slug: 'index' }];
-        const imagesDir = join('public', 'images', plugin.id);
-        mkdirSync(imagesDir, { recursive: true });
+      }
 
-        // Create version meta.json with explicitly ordered pages
-        const versionMeta = {
-          title: `${version.version}`, // Use title from config for proper casing
-          pages: files.map(f => f.slug), // This array defines the exact order in sidebar
-        };
-        writeFileSync(join(versionDir, 'meta.json'), JSON.stringify(versionMeta, null, 2));
+      for (const file of files) {
+        let content = await fetchFileContent(owner, repoName, file.name, branch, cacheOnly);
+        if (content) {
+          // Process images
+          console.debug(`=== Processing content for file ${file.name} ===`);
+          const docsPath = version.docs_path || ''; // Base path in repo for resolving images
+          content = await processImages(content, owner, repoName, branch, docsPath, assetsDir, versionDir, plugin.id, cacheOnly);
 
-        for (const file of files) {
-          let content = await fetchFileContent(owner, repoName, file.name, branch, cacheOnly);
-          if (content) {
-            // Process images
-            content = await processImages(content, owner, repoName, branch, '', imagesDir, versionDir, plugin.id, cacheOnly);
-
-            const mdxContent = `---
-title: ${file.title}
+          const mdxContent = `---
+title: ${file.title} | ${version.version}
 description: ${plugin.description}
 lastUpdated: ${lastUpdated}
 ---
 
 ${content}
 `;
-            writeFileSync(join(versionDir, `${file.slug}.mdx`), mdxContent);
-          }
+          const mdxPath = join(versionDir, `${file.slug}.mdx`);
+          mkdirSync(dirname(mdxPath), { recursive: true });
+          writeFileSync(mdxPath, mdxContent);
         }
       }
 

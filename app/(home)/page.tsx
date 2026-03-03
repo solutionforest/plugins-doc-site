@@ -1,4 +1,5 @@
 import { OtherProducts, PluginCards } from '@/components/partials/plugin-cards';
+import { Metadata } from 'next';
 
 export default function HomePage() {
   return (
@@ -16,4 +17,8 @@ export default function HomePage() {
       </section>
     </div>
   );
+}
+ 
+export const metadata: Metadata = {
+  title: 'Solution Forest Plugins',
 }

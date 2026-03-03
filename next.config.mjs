@@ -48,6 +48,9 @@ const config = {
       fullUrl: true,
     },
   },
+  devIndicators: false,
+  reactDevOverlay: false,
+  productionBrowserSourceMaps: false,
   // webpack: (config, { isServer }) => {
   //   // Prevent shiki from being externalized
   //   if (!isServer) {

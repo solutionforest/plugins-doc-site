@@ -13,10 +13,15 @@ export interface Product {
 export interface PluginVersion {
   version: string;
   github_branch: string;
+  docs_path?: string; // Base path in the GitHub repo where docs are located
   limited_files?: Array<{
     name: string;
     title: string;
     slug: string;
+  }>;
+  assets?: Array<{
+    from: string; // Path in the GitHub repo
+    to: string;   // Path in the local filesystem
   }>;
 }
 
@@ -38,9 +43,10 @@ export interface Plugin {
   repo: string; // GitHub repo, e.g., 'owner/repo'
   latestVersion: string;
   versions: PluginVersion[];
+  is_private?: boolean;
   is_manual?: boolean;
-  docs_structure?: string;
-  docs_path?: string;
+  // docs_structure?: string;
+  // docs_path?: string;
   sections?: PluginSection[];
   hidden?: boolean;
 }
@@ -67,7 +73,7 @@ export const config: Config = {
     },
     {
       id: 'filament-cms-website-plugin',
-      is_manual: true,
+      is_private: true,
       title: 'Filament CMS Website Plugin',
       description: 'A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.',
       repo: 'solutionforest/filament-cms-website-plugin',
@@ -100,7 +106,7 @@ export const config: Config = {
             { name: 'docs/04-page-management.md', title: 'Page Management', slug: 'page-management' },
             { name: 'docs/05-navigation.md', title: 'Navigation', slug: 'navigation' },
             { name: 'docs/06-templates.md', title: 'Templates', slug: 'templates' },
-          ] 
+          ],
         },
         { 
           version: '4.x', 
@@ -228,47 +234,124 @@ export const config: Config = {
     //   title: 'Filaletter',
     //   description: 'Modern self-hosted email marketing platform built specifically for Filament Admin Panel with subscriber management, email campaigns, and automation features.',
     //   repo: 'solutionforest/filaletter',
-    //   latestVersion: '3.x',
-    //   is_manual: true,
-    //   hidden: true,
-    //   docs_structure: 'folder_based',
-    //   docs_path: 'filaletter/public/docs',
+    //   latestVersion: '4.x',
     //   versions: [
+    //     {
+    //       version: '4.x',
+    //       github_branch: 'v4.x',
+    //       docs_path: 'filaletter/public/docs', // Base path in the GitHub repo where docs are located
+    //       limited_files: [
+    //         { name: 'README.md', title: 'Overview', slug: 'overview' },
+    //         { name: 'filaletter/public/docs/1-getting-started/1-introduction.md', title: 'Introduction', slug: 'getting-started/introduction' },
+    //         { name: 'filaletter/public/docs/1-getting-started/2-getting-a-license.md', title: 'Getting a License', slug: 'getting-started/getting-a-license' },
+    //         { name: 'filaletter/public/docs/1-getting-started/3-installation.md', title: 'Installation', slug: 'getting-started/installation' },
+    //         { name: 'filaletter/public/docs/1-getting-started/4-quick-start.md', title: 'Quick Start', slug: 'getting-started/quick-start' },
+    //         { name: 'filaletter/public/docs/1-getting-started/5-upgrading.md', title: 'Upgrading', slug: 'getting-started/upgrading' },
+    //         { name: 'filaletter/public/docs/2-features/1-subscribers.md', title: 'Subscribers', slug: 'features/subscribers' },
+    //         { name: 'filaletter/public/docs/2-features/2-segments.md', title: 'Segments', slug: 'features/segments' },
+    //         { name: 'filaletter/public/docs/2-features/3-templates.md', title: 'Templates', slug: 'features/templates' },
+    //         { name: 'filaletter/public/docs/2-features/4-campaigns.md', title: 'Campaigns', slug: 'features/campaigns' },
+    //         { name: 'filaletter/public/docs/2-features/5-messages.md', title: 'Messages', slug: 'features/messages' },
+    //         { name: 'filaletter/public/docs/2-features/6-workspace.md', title: 'Workspace', slug: 'features/workspace' },
+    //         { name: 'filaletter/public/docs/2-features/7-choosing-an-editor.md', title: 'Choosing an Editor', slug: 'features/choosing-an-editor' },
+    //         { name: 'filaletter/public/docs/2-features/8-custom-placeholder.md', title: 'Custom Placeholder', slug: 'features/custom-placeholder' },
+    //         { name: 'filaletter/public/docs/3-api/1-introduction.md', title: 'API Introduction', slug: 'api/introduction' },
+    //         { name: 'filaletter/public/docs/3-api/2-authentication.md', title: 'Authentication', slug: 'api/authentication' },
+    //         { name: 'filaletter/public/docs/3-api/3-templates.md', title: 'Templates', slug: 'api/templates' },
+    //         { name: 'filaletter/public/docs/3-api/4-subscribers.md', title: 'Subscribers', slug: 'api/subscribers' },
+    //         { name: 'filaletter/public/docs/3-api/5-segments.md', title: 'Segments', slug: 'api/segments' },
+    //         { name: 'filaletter/public/docs/3-api/6-segment-subscribers.md', title: 'Segment Subscribers', slug: 'api/segment-subscribers' },
+    //         { name: 'filaletter/public/docs/3-api/7-subscriber-segments.md', title: 'Subscriber Segments', slug: 'api/subscriber-segments' },
+    //         { name: 'filaletter/public/docs/3-api/8-campaigns.md', title: 'Campaigns', slug: 'api/campaigns' },
+    //         { name: 'filaletter/public/docs/4-email-services/1-aws.md', title: 'AWS', slug: 'email-services/aws' },
+    //         { name: 'filaletter/public/docs/4-email-services/2-postmark.md', title: 'Postmark', slug: 'email-services/postmark' },
+    //         { name: 'filaletter/public/docs/4-email-services/3-sendgrid.md', title: 'SendGrid', slug: 'email-services/sendgrid' },
+    //         { name: 'filaletter/public/docs/4-email-services/4-mailgun.md', title: 'Mailgun', slug: 'email-services/mailgun' },
+    //         { name: 'filaletter/public/docs/4-email-services/5-mailjet.md', title: 'Mailjet', slug: 'email-services/mailjet' },
+    //         { name: 'filaletter/public/docs/4-email-services/6-smtp.md', title: 'SMTP', slug: 'email-services/smtp' },
+    //         { name: 'filaletter/public/docs/4-email-services/7-smtp-with-tracking.md', title: 'SMTP with Tracking', slug: 'email-services/smtp-with-tracking' },
+    //       ],
+    //       assets: [
+    //         { from: 'filaletter/public/images', to: 'images' },
+    //       ]
+    //     },
     //     {
     //       version: '3.x',
     //       github_branch: 'v3.x',
-    //       limited_files: [], // Will use sections
-    //     },
-    //   ],
-    //   sections: [
-    //     {
-    //       name: 'Getting Started',
-    //       slug: '1-getting-started',
-    //       files: [
-    //         { name: '1-getting-started/1-introduction.md', title: 'Introduction', slug: 'introduction' },
+    //       docs_path: 'filaletter/public/docs', // Base path in the GitHub repo where docs are located
+    //       limited_files: [
+    //         { name: 'README.md', title: 'Overview', slug: 'overview' },
+    //         { name: 'filaletter/public/docs/1-getting-started/1-introduction.md', title: 'Introduction', slug: 'getting-started/introduction' },
+    //         { name: 'filaletter/public/docs/1-getting-started/2-getting-a-license.md', title: 'Getting a License', slug: 'getting-started/getting-a-license' },
+    //         { name: 'filaletter/public/docs/1-getting-started/3-installation.md', title: 'Installation', slug: 'getting-started/installation' },
+    //         { name: 'filaletter/public/docs/1-getting-started/4-quick-start.md', title: 'Quick Start', slug: 'getting-started/quick-start' },
+    //         { name: 'filaletter/public/docs/1-getting-started/5-upgrading.md', title: 'Upgrading', slug: 'getting-started/upgrading' },
+    //         { name: 'filaletter/public/docs/2-features/1-subscribers.md', title: 'Subscribers', slug: 'features/subscribers' },
+    //         { name: 'filaletter/public/docs/2-features/2-segments.md', title: 'Segments', slug: 'features/segments' },
+    //         { name: 'filaletter/public/docs/2-features/3-templates.md', title: 'Templates', slug: 'features/templates' },
+    //         { name: 'filaletter/public/docs/2-features/4-campaigns.md', title: 'Campaigns', slug: 'features/campaigns' },
+    //         { name: 'filaletter/public/docs/2-features/5-messages.md', title: 'Messages', slug: 'features/messages' },
+    //         { name: 'filaletter/public/docs/2-features/6-workspace.md', title: 'Workspace', slug: 'features/workspace' },
+    //         { name: 'filaletter/public/docs/2-features/7-choosing-an-editor.md', title: 'Choosing an Editor', slug: 'features/choosing-an-editor' },
+    //         { name: 'filaletter/public/docs/2-features/8-custom-placeholder.md', title: 'Custom Placeholder', slug: 'features/custom-placeholder' },
+    //         { name: 'filaletter/public/docs/3-api/1-introduction.md', title: 'API Introduction', slug: 'api/introduction' },
+    //         { name: 'filaletter/public/docs/3-api/2-authentication.md', title: 'Authentication', slug: 'api/authentication' },
+    //         { name: 'filaletter/public/docs/3-api/3-templates.md', title: 'Templates', slug: 'api/templates' },
+    //         { name: 'filaletter/public/docs/3-api/4-subscribers.md', title: 'Subscribers', slug: 'api/subscribers' },
+    //         { name: 'filaletter/public/docs/3-api/5-segments.md', title: 'Segments', slug: 'api/segments' },
+    //         { name: 'filaletter/public/docs/3-api/6-segment-subscribers.md', title: 'Segment Subscribers', slug: 'api/segment-subscribers' },
+    //         { name: 'filaletter/public/docs/3-api/7-subscriber-segments.md', title: 'Subscriber Segments', slug: 'api/subscriber-segments' },
+    //         { name: 'filaletter/public/docs/3-api/8-campaigns.md', title: 'Campaigns', slug: 'api/campaigns' },
+    //         { name: 'filaletter/public/docs/4-email-services/1-aws.md', title: 'AWS', slug: 'email-services/aws' },
+    //         { name: 'filaletter/public/docs/4-email-services/2-postmark.md', title: 'Postmark', slug: 'email-services/postmark' },
+    //         { name: 'filaletter/public/docs/4-email-services/3-sendgrid.md', title: 'SendGrid', slug: 'email-services/sendgrid' },
+    //         { name: 'filaletter/public/docs/4-email-services/4-mailgun.md', title: 'Mailgun', slug: 'email-services/mailgun' },
+    //         { name: 'filaletter/public/docs/4-email-services/5-mailjet.md', title: 'Mailjet', slug: 'email-services/mailjet' },
+    //         { name: 'filaletter/public/docs/4-email-services/6-smtp.md', title: 'SMTP', slug: 'email-services/smtp' },
+    //         { name: 'filaletter/public/docs/4-email-services/7-smtp-with-tracking.md', title: 'SMTP with Tracking', slug: 'email-services/smtp-with-tracking' },
     //       ],
+    //       assets: [
+    //         { from: 'filaletter/public/images', to: 'images' },
+    //       ]
     //     },
     //     {
-    //       name: 'Features',
-    //       slug: '2-features',
-    //       files: [
-    //         { name: '2-features/1-subscribers.md', title: 'Subscribers', slug: 'subscribers' },
-    //         { name: '2-features/7-choosing-an-editor.md', title: 'Choosing an Editor', slug: 'choosing-an-editor' },
+    //       version: '2.x',
+    //       github_branch: 'v2.x',
+    //       docs_path: 'filaletter/public/docs', // Base path in the GitHub repo where docs are located
+    //       limited_files: [
+    //         { name: 'README.md', title: 'Overview', slug: 'overview' },
+    //         { name: 'filaletter/public/docs/1-getting-started/1-introduction.md', title: 'Introduction', slug: 'getting-started/introduction' },
+    //         { name: 'filaletter/public/docs/1-getting-started/2-getting-a-license.md', title: 'Getting a License', slug: 'getting-started/getting-a-license' },
+    //         { name: 'filaletter/public/docs/1-getting-started/3-installation.md', title: 'Installation', slug: 'getting-started/installation' },
+    //         { name: 'filaletter/public/docs/1-getting-started/4-quick-start.md', title: 'Quick Start', slug: 'getting-started/quick-start' },
+    //         { name: 'filaletter/public/docs/1-getting-started/5-upgrading.md', title: 'Upgrading', slug: 'getting-started/upgrading' },
+    //         { name: 'filaletter/public/docs/2-features/1-subscribers.md', title: 'Subscribers', slug: 'features/subscribers' },
+    //         { name: 'filaletter/public/docs/2-features/2-segments.md', title: 'Segments', slug: 'features/segments' },
+    //         { name: 'filaletter/public/docs/2-features/3-templates.md', title: 'Templates', slug: 'features/templates' },
+    //         { name: 'filaletter/public/docs/2-features/4-campaigns.md', title: 'Campaigns', slug: 'features/campaigns' },
+    //         { name: 'filaletter/public/docs/2-features/5-messages.md', title: 'Messages', slug: 'features/messages' },
+    //         { name: 'filaletter/public/docs/2-features/6-workspace.md', title: 'Workspace', slug: 'features/workspace' },
+    //         { name: 'filaletter/public/docs/2-features/7-choosing-an-editor.md', title: 'Choosing an Editor', slug: 'features/choosing-an-editor' },
+    //         { name: 'filaletter/public/docs/2-features/8-custom-placeholder.md', title: 'Custom Placeholder', slug: 'features/custom-placeholder' },
+    //         { name: 'filaletter/public/docs/3-api/1-introduction.md', title: 'API Introduction', slug: 'api/introduction' },
+    //         { name: 'filaletter/public/docs/3-api/2-authentication.md', title: 'Authentication', slug: 'api/authentication' },
+    //         { name: 'filaletter/public/docs/3-api/3-templates.md', title: 'Templates', slug: 'api/templates' },
+    //         { name: 'filaletter/public/docs/3-api/4-subscribers.md', title: 'Subscribers', slug: 'api/subscribers' },
+    //         { name: 'filaletter/public/docs/3-api/5-segments.md', title: 'Segments', slug: 'api/segments' },
+    //         { name: 'filaletter/public/docs/3-api/6-segment-subscribers.md', title: 'Segment Subscribers', slug: 'api/segment-subscribers' },
+    //         { name: 'filaletter/public/docs/3-api/7-subscriber-segments.md', title: 'Subscriber Segments', slug: 'api/subscriber-segments' },
+    //         { name: 'filaletter/public/docs/3-api/8-campaigns.md', title: 'Campaigns', slug: 'api/campaigns' },
+    //         { name: 'filaletter/public/docs/4-email-services/1-aws.md', title: 'AWS', slug: 'email-services/aws' },
+    //         { name: 'filaletter/public/docs/4-email-services/2-postmark.md', title: 'Postmark', slug: 'email-services/postmark' },
+    //         { name: 'filaletter/public/docs/4-email-services/3-sendgrid.md', title: 'SendGrid', slug: 'email-services/sendgrid' },
+    //         { name: 'filaletter/public/docs/4-email-services/4-mailgun.md', title: 'Mailgun', slug: 'email-services/mailgun' },
+    //         { name: 'filaletter/public/docs/4-email-services/5-mailjet.md', title: 'Mailjet', slug: 'email-services/mailjet' },
+    //         { name: 'filaletter/public/docs/4-email-services/6-smtp.md', title: 'SMTP', slug: 'email-services/smtp' },
+    //         { name: 'filaletter/public/docs/4-email-services/7-smtp-with-tracking.md', title: 'SMTP with Tracking', slug: 'email-services/smtp-with-tracking' },
     //       ],
-    //     },
-    //     {
-    //       name: 'API',
-    //       slug: '3-api',
-    //       files: [
-    //         { name: '3-api/2-authentication.md', title: 'Authentication', slug: 'authentication' },
-    //       ],
-    //     },
-    //     {
-    //       name: 'Email Services',
-    //       slug: '4-email-services',
-    //       files: [
-    //         { name: '4-email-services/1-aws.md', title: 'AWS', slug: 'aws' },
-    //       ],
+    //       assets: [
+    //         { from: 'filaletter/public/images', to: 'images' },
+    //       ]
     //     },
     //   ],
     // },

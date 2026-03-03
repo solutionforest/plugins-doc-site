@@ -5,7 +5,7 @@ export function generateMetadataForPlugin(plugin: string) {
   const pluginConfig = config.plugins.find(p => p.id === plugin);
   if (!pluginConfig) return null;
   return {
-    title: pluginConfig.name,
+    title: `${pluginConfig.title} | Solution Forest Plugins` ,
     description: pluginConfig.description,
     // openGraph: {
     //   images: [
