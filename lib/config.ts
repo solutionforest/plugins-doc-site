@@ -137,6 +137,16 @@ export const config: Config = {
       ],
     },
     {
+      id: 'filament-simple-lightbox',
+      title: 'Filament Simple Lightbox',
+      description: 'Filament SimpleLightbox is a PHP package that provides a simple and lightweight solution for implementing a lightbox feature in your Filament admin panel. It allows you to easily preview Image, PDF and Office documents within your Filament.',
+      repo: 'solutionforest/Filament-SimpleLightBox',
+      latestVersion: '1.x',
+      versions: [
+        { version: '1.x', github_branch: 'main', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
+      ],
+    },
+    {
       id: 'filament-panzoom',
       title: 'Filament Panzoom',
       description: 'Add pan and zoom functionality to images and content in your Filament applications with smooth interactions.',
