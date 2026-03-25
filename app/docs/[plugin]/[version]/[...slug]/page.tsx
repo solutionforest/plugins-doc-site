@@ -41,7 +41,11 @@ export default async function Page(props: CurrentPageProps) {
       <DocsDescription>{page.data.description}</DocsDescription>
       {latestUpdate || githubRepoUrl ? (
         <div className="flex flex-row gap-2 items-center border-b pb-6">
-          {latestUpdate && <PageLastUpdate date={latestUpdate} />}
+          {latestUpdate && (
+            <p className="text-sm text-fd-muted-foreground">
+              Last updated {latestUpdate.toUTCString()}
+            </p>
+          )}
           {githubRepoUrl && <ViewOptions githubUrl={githubRepoUrl} />}
         </div>
       ) : null}

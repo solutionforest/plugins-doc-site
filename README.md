@@ -74,13 +74,15 @@ Since GitHub Actions may hit API limits easily, we recommend building locally an
 
 # Install dependencies
 
+```
 npm install
+```
 
-# or
+or
 
+```
 pnpm install
-
-````
+```
 
 ### 2. Environment Setup (Optional)
 
@@ -89,7 +91,7 @@ Create a `.env.local` file in the root directory:
 ```env
 GITHUB_TOKEN=your_github_personal_access_token_here
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-````
+```
 
 #### Getting a GitHub Token
 
