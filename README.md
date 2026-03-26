@@ -56,6 +56,41 @@ npm run fetch-docs
 npm run fetch-docs:cache
 ```
 
+##### Filtering by Plugin and/or Version
+
+Pass `--plugin` and `--version` flags (directly via `tsx`) or use the `FETCH_PLUGIN` / `FETCH_VERSION` environment variables (recommended on Windows, where `npm run -- ` does not forward args correctly).
+
+**PowerShell (Windows) — use env vars:**
+```powershell
+# Single plugin (all versions)
+$env:FETCH_PLUGIN='simple-contact-form'; npm run fetch-docs
+
+# Single plugin, single version
+$env:FETCH_PLUGIN='simple-contact-form'; $env:FETCH_VERSION='2.x'; npm run fetch-docs
+
+# Multiple plugins (comma-separated)
+$env:FETCH_PLUGIN='filament-tree,filament-firewall'; npm run fetch-docs
+
+# Combined with cache-only
+$env:FETCH_PLUGIN='simple-contact-form'; npm run fetch-docs:cache
+```
+
+**bash / macOS / Linux — env vars also work:**
+```bash
+FETCH_PLUGIN=simple-contact-form npm run fetch-docs
+FETCH_PLUGIN=simple-contact-form FETCH_VERSION=2.x npm run fetch-docs
+FETCH_PLUGIN=filament-tree,filament-firewall npm run fetch-docs
+```
+
+**Or call `tsx` directly (works everywhere):**
+```bash
+npx tsx scripts/fetch-docs.ts --plugin=simple-contact-form
+npx tsx scripts/fetch-docs.ts --plugin=simple-contact-form --version=2.x
+npx tsx scripts/fetch-docs.ts --plugin=filament-tree --plugin=filament-firewall
+```
+
+> **Note:** `npm run fetch-docs -- --plugin=...` does **not** work on Windows because npm strips args after `--` on that platform. Use the env var or direct `tsx` approach instead.
+
 #### Build & Deploy
 
 Since GitHub Actions may hit API limits easily, we recommend building locally and pushing the static site.
@@ -349,8 +384,12 @@ npm run build:cache      # Build using cached documentation (faster)
 npm run build:static     # Build for static export (used by GitHub Actions)
 
 # Documentation Management
-npm run fetch-docs       # Fetch documentation from GitHub
-npm run fetch-docs:cache # Use cached docs, skip GitHub fetch
+npm run fetch-docs                                                      # Fetch all documentation from GitHub
+npm run fetch-docs:cache                                                # Use cached docs, skip GitHub fetch
+$env:FETCH_PLUGIN='<id>'; npm run fetch-docs                           # PowerShell: single plugin
+$env:FETCH_PLUGIN='<id>'; $env:FETCH_VERSION='<ver>'; npm run fetch-docs  # PowerShell: plugin + version
+FETCH_PLUGIN=<id> npm run fetch-docs                                    # bash: single plugin
+npx tsx scripts/fetch-docs.ts --plugin=<id> --version=<ver>            # Direct tsx (all platforms)
 
 # Type Checking
 npm run types:check      # Run TypeScript type checking

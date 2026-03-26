@@ -11,14 +11,49 @@ const octokit = new Octokit({
 });
 
 // Parse command line arguments
-// Usage: tsx scripts/fetch-docs.ts [--cache-only|--offline]
-// --cache-only: Skip fetching from GitHub and use only cached content
+// Usage: tsx scripts/fetch-docs.ts [--cache-only|--offline] [--plugin=<id>] [--version=<ver>]
+// --cache-only / --offline : Skip fetching from GitHub and use only cached content
+// --plugin=<id>            : Only fetch docs for the plugin with this id (can repeat)
+// --version=<ver>          : Only fetch docs for this version string (can repeat)
+//
+// Examples:
+//   tsx scripts/fetch-docs.ts --plugin=filament-tree
+//   tsx scripts/fetch-docs.ts --plugin=filament-tree --version=4.x
+//   tsx scripts/fetch-docs.ts --plugin=filament-tree --plugin=filament-firewall
 const args = process.argv.slice(2);
 const cacheOnly = args.includes('--cache-only') || args.includes('--offline');
 
-if (cacheOnly) {
-  console.log('🔌 Running in cache-only mode. Will not fetch from GitHub.');
+// Collect repeated --plugin and --version values (supports both --plugin=id and --plugin id)
+function parseRepeatedArg(argName: string, argv: string[]): string[] {
+  const values: string[] = [];
+  const prefix = `--${argName}=`;
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i].startsWith(prefix)) {
+      values.push(argv[i].slice(prefix.length));
+    } else if (argv[i] === `--${argName}` && i + 1 < argv.length) {
+      values.push(argv[++i]);
+    }
+  }
+  return values;
 }
+
+// CLI args take priority; fall back to env vars (FETCH_PLUGIN / FETCH_VERSION).
+// Env vars support comma-separated values: FETCH_PLUGIN=filament-tree,filament-firewall
+function splitEnvList(val: string | undefined): string[] {
+  return val ? val.split(',').map(s => s.trim()).filter(Boolean) : [];
+}
+
+const filterPlugins  = parseRepeatedArg('plugin',  args).length
+  ? parseRepeatedArg('plugin',  args)
+  : splitEnvList(process.env.FETCH_PLUGIN);
+
+const filterVersions = parseRepeatedArg('version', args).length
+  ? parseRepeatedArg('version', args)
+  : splitEnvList(process.env.FETCH_VERSION);
+
+if (cacheOnly)             console.log('🔌 Running in cache-only mode. Will not fetch from GitHub.');
+if (filterPlugins.length)  console.log(`🔍 Filtering plugins:  ${filterPlugins.join(', ')}`);
+if (filterVersions.length) console.log(`🔍 Filtering versions: ${filterVersions.join(', ')}`);
 
 function getCachePath(owner: string, repo: string, ref: string, path: string): string {
   // Use a Safe path structure: .cache/raw/owner/repo/ref/path
@@ -374,7 +409,17 @@ async function fetchPluginDocs() {
   const rootMetaPages: string[] = [];
   const rootMetaTitles: Record<string, string> = {};
 
-  for (const plugin of config.plugins) {
+  const plugins = filterPlugins.length
+    ? config.plugins.filter(p => filterPlugins.includes(p.id))
+    : config.plugins;
+
+  if (filterPlugins.length && plugins.length === 0) {
+    console.error(`❌ No plugins matched: ${filterPlugins.join(', ')}`);
+    console.error(`   Available ids: ${config.plugins.map(p => p.id).join(', ')}`);
+    process.exit(1);
+  }
+
+  for (const plugin of plugins) {
     const [owner, repoName] = plugin.repo.split('/');
 
     const pluginDir = join('content', 'docs', plugin.id);
@@ -397,7 +442,16 @@ async function fetchPluginDocs() {
     };
     writeFileSync(join(pluginDir, 'meta.json'), JSON.stringify(rootMeta, null, 2));
 
-    for (const version of plugin.versions) {
+    const versions = filterVersions.length
+      ? plugin.versions.filter(v => filterVersions.includes(v.version))
+      : plugin.versions;
+
+    if (filterVersions.length && versions.length === 0) {
+      console.warn(`⚠️  No versions matched for ${plugin.id}: ${filterVersions.join(', ')} — skipping plugin.`);
+      continue;
+    }
+
+    for (const version of versions) {
       const versionDir = join('content', 'docs', plugin.id, version.version);
       mkdirSync(versionDir, { recursive: true });
 
