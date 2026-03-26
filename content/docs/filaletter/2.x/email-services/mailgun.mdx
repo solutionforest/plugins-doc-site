@@ -1,0 +1,45 @@
+---
+title: Mailgun
+description: Modern self-hosted email marketing platform built specifically for Filament Admin Panel with subscriber management, email campaigns, and automation features.
+lastUpdated: 2026-03-26T10:47:10.900Z
+---
+
+# Mailgun
+
+## Sending Emails
+
+When you first begin, Mailgun will automatically create a sandbox domain that you can use for sending. To send using your own domain, you'll need to create a custom domain. Select **Sending** then **Domains** from the menu on the left-hand side, then click **Add New Domain** (you'll need to add credit card details before this button appears).
+
+<img src="/filaletter/public/images/4-email-service-image/4-mailgun/mailgun-1.png" alt="Mailgun Step 1"  />
+
+Enter the domain name, choose whichever region makes the most sense for you, and click **Add Domain**.
+
+<img src="/filaletter/public/images/4-email-service-image/4-mailgun/mailgun-2.png" alt="Mailgun Step 2"  />
+
+You'll now need to visit the site that you use to manage DNS for the domain provided (usually the domain registrar). The steps to do this are beyond the scope of this documentation as they vary from provider to provider, but you will need to create a TXT entry for the relevant domain and paste in the strings from the **Hostname** and **Enter This Value** columns. Once you've added these, click **Verify DNS Settings**.
+
+<img src="/filaletter/public/images/4-email-service-image/4-mailgun/mailgun-3.png" alt="Mailgun Step 3"  />
+
+You'll now need to copy the Private API Key from **Settings > API Keys**.
+
+<img src="/filaletter/public/images/4-email-service-image/4-mailgun/mailgun-4.png" alt="Mailgun Step 4"  />
+
+Then paste this into your SendPortal provider configuration.
+
+<img src="/filaletter/public/images/4-email-service-image/4-mailgun/mailgun-5.png" alt="Mailgun Step 5"  />
+
+## Tracking
+
+To enable tracking, select **Sending** then **Webhooks** from the menu and click the **Add Webhook** button.
+
+<img src="/filaletter/public/images/4-email-service-image/4-mailgun/mailgun-6.png" alt="Mailgun Step 6"  />
+
+The URL depends on your domain but must end with `/api/v1/webhooks/mailgun`. For example, if Filaletter is installed at `https://campaigns.marketing.com`, then each webhook should point to `https://campaigns.marketing.com/api/v1/webhooks/mailgun`.
+
+<img src="/filaletter/public/images/4-email-service-image/4-mailgun/mailgun-7.png" alt="Mailgun Step 7"  />
+
+You'll need to add an entry for each type of event you want to track, but the URL is the same for each of them.
+
+<img src="/filaletter/public/images/4-email-service-image/4-mailgun/mailgun-8.png" alt="Mailgun Step 8"  />
+
+That's it! You're now set up to send and track emails using Mailgun.

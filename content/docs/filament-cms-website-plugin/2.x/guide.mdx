@@ -1,5 +1,5 @@
 ---
-title: Guide | 2.x
+title: Guide
 description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
 lastUpdated: 2026-03-25T10:52:22.220Z
 ---
@@ -358,9 +358,9 @@ View:
 @endphp
 
 <x-dynamic-component
-    component="filament-cms::\{\{$theme\}\}.page"
+    component="filament-cms::{{$theme}}.page"
     :layout="$layout">
-    <div class="note">Let all your things have their places; let each part of your business have its time. - Benjamin Franklin</div>
+    <!-- Let all your things have their places; let each part of your business have its time. - Benjamin Franklin -->
 </x-dynamic-component>
 ```
 

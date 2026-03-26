@@ -1,0 +1,13 @@
+{
+  "title": "API",
+  "pages": [
+    "introduction",
+    "authentication",
+    "templates",
+    "subscribers",
+    "segments",
+    "segment-subscribers",
+    "subscriber-segments",
+    "campaigns"
+  ]
+}

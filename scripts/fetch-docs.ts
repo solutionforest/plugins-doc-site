@@ -184,7 +184,7 @@ async function downloadImage(owner: string, repo: string, imagePath: string, ref
   return false;
 }
 
-async function processImages(content: string, owner: string, repo: string, branch: string, docsPath: string, localImagesDir: string, fileDir: string, pluginId: string, cacheOnly: boolean = false): Promise<string> {
+async function processImages(content: string, owner: string, repo: string, branch: string, docsPath: string, localImagesDir: string, fileDir: string, pluginId: string, cacheOnly: boolean = false, repoFileDir: string = ''): Promise<string> {
   // Run cleanup cleanupContent before processing images
   let processedContent = cleanupContent(content);
 
@@ -211,11 +211,14 @@ async function processImages(content: string, owner: string, repo: string, branc
     // The image path in repo is relative to the docs root
     let repoImagePath = imagePath;
     let cleanImagePath = imagePath;
-    if (imagePath.startsWith('../')) {
-      // Resolve .. relative to docsPath
-      const docsParts = docsPath.split('/').filter(Boolean);
+    if (imagePath.startsWith('../') || imagePath.startsWith('./')) {
+      // Resolve the relative path starting from the file's own directory in the repo
+      // (not just the docs root). For example, if the file is at
+      // "filaletter/public/docs/2-features/foo.md" and the image is "../../images/x.png",
+      // the correct result is "filaletter/public/images/x.png", not "filaletter/images/x.png".
+      const baseParts = (repoFileDir || docsPath).split('/').filter(Boolean);
       const imageParts = imagePath.split('/').filter(Boolean);
-      const resolvedParts = [...docsParts];
+      const resolvedParts = [...baseParts];
 
       for (const part of imageParts) {
         if (part === '..') {
@@ -231,43 +234,48 @@ async function processImages(content: string, owner: string, repo: string, branc
       cleanImagePath = repoImagePath;
     }
 
-    // Local path in public/{pluginId}/... for use in content
-    const localImagePath = join(pluginId, imagePath, cleanImagePath);
-    const localImageDir = join(pluginId, imagePath, cleanImagePath.substring(0, cleanImagePath.lastIndexOf('/')));
+    // cleanImagePath is the resolved repo-relative path, e.g. "filaletter/images/capscreens/capscreen-14.png"
+    // Local filesystem path under public/, e.g. "public/filaletter/images/capscreens/capscreen-14.png"
+    const localImagePath = join('public', cleanImagePath);
+    const localImageDir = join('public', cleanImagePath.substring(0, cleanImagePath.lastIndexOf('/')));
     console.debug(`💠 Processing image ${imagePath}`, { repoPath: repoImagePath, cleanImagePath, localPath: localImagePath, localImageDir });
     mkdirSync(localImageDir, { recursive: true });
 
+    // Public URL served from Next.js, e.g. "/filaletter/images/capscreens/capscreen-14.png"
+    // IMPORTANT: Must use cleanImagePath (the resolved path), NOT the raw relative imagePath.
+    // Using path.join('/', pluginId, imagePath) would let path.join normalize away '../..' and
+    // strip the plugin prefix, producing the wrong path like "/images/capscreens/capscreen-14.png".
+    const publicUrl = '/' + cleanImagePath.replace(/\\/g, '/');
+    const escapedImagePath = imagePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
     try {
       const success = await downloadImage(owner, repo, repoImagePath, branch, localImagePath, cacheOnly);
-      
       if (!success) {
-        // Create a placeholder image to prevent build errors
-        // 1x1 transparent PNG
-        const placeholder = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
-        mkdirSync(localImageDir, { recursive: true });
-        writeFileSync(localImagePath, placeholder);
-        console.warn(`⚠️ Created placeholder for missing image: ${imagePath}`);
+        console.warn(`⚠️ Image not available (cache miss or download failed): ${imagePath} → ${localImagePath}`);
       }
 
-      // Use absolute path for public images, format: /src="/{pluginId}/path/to/image"
-      const relativePath = join('/', pluginId, imagePath).replace(/\\/g, '/');
-      const escapedImagePath = imagePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      console.debug(`🖊️ Rewriting image path ${imagePath} to ${relativePath} in content...`, {escapedImagePath});
-      
-      // Use a more robust regex that handles optional title and different attribute orders if possible, 
-      // but primarily ensures we replace the path inside the parens of markdown image syntax.
-      // And also handling HTML img tags if they were mixed in.
-      
-      // Replace markdown images: ![alt](path)
-      processedContent = processedContent.replace(new RegExp(`!\\[([^\\]]*)\\]\\(${escapedImagePath}\\)`, 'g'), `![$1](${relativePath})`);
-      
-      // Replace html images: <img src="path" ... />
-      processedContent = processedContent.replace(new RegExp(`src=["']${escapedImagePath}["']`, 'g'), `src="${relativePath}"`);
-      
+      console.debug(`🖊️ Rewriting image path ${imagePath} to ${publicUrl} in content...`);
+
+      // Replace markdown images ![alt](path) with <img> JSX tags.
+      // Reason: fumadocs/Next.js converts markdown ![]() into static `import` statements at
+      // build time. If the file is missing from public/, the build fails with "Module not found".
+      // Using <img src="..."> is plain JSX — no import is generated — so a missing image only
+      // produces a broken image at runtime (warning) instead of a hard build error.
+      processedContent = processedContent.replace(
+        new RegExp(`!\\[([^\\]]*)\\]\\(${escapedImagePath}\\)`, 'g'),
+        `<img src="${publicUrl}" alt="$1" />`
+      );
+
+      // Replace HTML img src attributes
+      processedContent = processedContent.replace(new RegExp(`src=["']${escapedImagePath}["']`, 'g'), `src="${publicUrl}"`);
+
     } catch (error) {
-      console.error(`Failed to process image ${imagePath}, replacing with placeholder`);
-      // Replace with a placeholder text
-      processedContent = processedContent.replace(new RegExp(`!\\[([^\\]]*)\\]\\(${imagePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)`, 'g'), '*[Image: $1 not available]*');
+      console.warn(`⚠️ Failed to process image ${imagePath}, leaving as broken image tag`);
+      // Convert to <img> with the best-effort URL so the build still succeeds
+      processedContent = processedContent.replace(
+        new RegExp(`!\\[([^\\]]*)\\]\\(${escapedImagePath}\\)`, 'g'),
+        `<img src="${publicUrl}" alt="$1" />`
+      );
     }
   }
 
@@ -280,19 +288,39 @@ async function processImages(content: string, owner: string, repo: string, branc
 function cleanupContent(source: string): string {
   let parsedSource = source;
 
+  // Replace invalid ```env blocks with ```plaintext (must run before code block protection)
+  parsedSource = parsedSource.replace(/```env/g, '```plaintext');
+
+  // Protect fenced code blocks from transformations — stash them as placeholders.
+  // This prevents {{}} escaping, array<T> encoding, style conversion, etc. from
+  // corrupting code examples.
+  const codeBlocks: string[] = [];
+  parsedSource = parsedSource.replace(/```[^\n]*\n[\s\S]*?```/g, (match) => {
+    codeBlocks.push(match);
+    return `\x00CODE_BLOCK_${codeBlocks.length - 1}\x00`;
+  });
+
+  // Protect inline code spans from transformations
+  const inlineCodes: string[] = [];
+  parsedSource = parsedSource.replace(/`[^`\n]+`/g, (match) => {
+    inlineCodes.push(match);
+    return `\x00INLINE_CODE_${inlineCodes.length - 1}\x00`;
+  });
+
   // Fix: <a xxx><img></a> - convert img to self-closing and keep anchor
   parsedSource = parsedSource.replace(
     /<a([^>]+)>(<img[^>]+)><\/a>/g,
     "<a$1>$2/></a>",
   );
 
-  // Replace <!-- xxx --> with <div class="note">xxx</div>
+  // Replace <!-- xxx --> with <div className="note">xxx</div>
+  // NOTE: must use className (not class) — MDX is JSX and class is invalid
   parsedSource = parsedSource.replace(
-    /<!--\s*(.*?)\s*-->/g,
-    '<div class="note">$1</div>',
+    /<!--\s*(.*?)\s*-->/gs,
+    '<div className="note">$1</div>',
   );
 
-  // Fix type annotations
+  // Fix type annotations (outside code blocks)
   parsedSource = parsedSource.replace(
     /array<([^>]+)>/g,
     'array&lt;$1&gt;',
@@ -310,7 +338,16 @@ function cleanupContent(source: string): string {
     '$1: `$2`$3',
   );
 
-  // Replace "style="xx" as mdx format
+  // Replace "{{xxx}}" -> "\{\{xxx\}\}" (Blade/template syntax that breaks MDX).
+  // Must run BEFORE the style conversion so the newly-generated style={{ }} JSX
+  // objects are not accidentally escaped by this rule.
+  parsedSource = parsedSource.replace(
+    /{{\s*(.*?)\s*}}/g,
+    '\\{\\{$1\\}\\}',
+  );
+
+  // Replace style="xx" as MDX/JSX format.
+  // Runs AFTER the {{}} escaping so its output (style={{ }}) is never re-escaped.
   parsedSource = parsedSource.replace(
     /style\s*=\s*"([^"]+)"/g,
     (match: string, styleValue: string): string => {
@@ -333,49 +370,37 @@ function cleanupContent(source: string): string {
     }
   );
 
-  // Replace "{{xxx}}" -> "\{\{xxx\}\}"
+  // Convert GitHub callouts to MDX Callout components.
+  // Uses multiline flag (m) so ^ matches line starts.
+  // Content group only matches lines that begin with '>' so it never
+  // accidentally swallows non-blockquote content (headings, paragraphs, etc.)
+  // that follows immediately without a blank line separating them.
   parsedSource = parsedSource.replace(
-    /{{\s*(.*?)\s*}}/g,
-    '\\{\\{$1\\}\\}',
-  );
-
-  // Replace invalid ```env blocks with ```plaintext
-  parsedSource = parsedSource.replace(
-    /```env/g,
-    '```plaintext',
-  );
-
-  // Convert GitHub callouts to MDX Callout components
-  parsedSource = parsedSource.replace(
-    /> \[!(NOTE|IMPORTANT|WARNING|CAUTION|TIP)\]\s*\n([\s\S]*?)(?=\n\n|$)/g,
+    /^> \[!(NOTE|IMPORTANT|WARNING|CAUTION|TIP)\]\s*\n((?:>[ \t]?[^\n]*\n?)*)/gm,
     (match: string, type: string, content: string): string => {
       const calloutType = type.toLowerCase();
       let mdxType = 'info'; // default
 
       switch (calloutType) {
-        case 'note':
-          mdxType = 'info';
-          break;
-        case 'important':
-          mdxType = 'warn';
-          break;
+        case 'note':      mdxType = 'info';  break;
+        case 'important': mdxType = 'warn';  break;
         case 'warning':
-        case 'caution':
-          mdxType = 'error';
-          break;
-        case 'tip':
-          mdxType = 'idea';
-          break;
+        case 'caution':   mdxType = 'error'; break;
+        case 'tip':       mdxType = 'idea';  break;
       }
 
       // Clean up the content (remove leading/trailing whitespace and blockquote markers)
       const cleanContent = content
-        .replace(/^>\s*/gm, '') // Remove blockquote markers
+        .replace(/^>[ \t]?/gm, '') // Remove blockquote markers
         .trim();
 
-      return `<Callout type="${mdxType}">\n${cleanContent}\n</Callout>`;
+      return `<Callout type="${mdxType}">\n${cleanContent}\n</Callout>\n`;
     }
   );
+
+  // Restore protected inline code and fenced code blocks
+  parsedSource = parsedSource.replace(/\x00INLINE_CODE_(\d+)\x00/g, (_, i) => inlineCodes[parseInt(i)]);
+  parsedSource = parsedSource.replace(/\x00CODE_BLOCK_(\d+)\x00/g, (_, i) => codeBlocks[parseInt(i)]);
 
   return parsedSource;
 }
@@ -463,12 +488,53 @@ async function fetchPluginDocs() {
       const assetsDir = join('public', plugin.id);
       mkdirSync(assetsDir, { recursive: true });
 
-      // Create version meta.json with explicitly ordered pages
+      // Build version meta.json and per-folder meta.json files.
+      // Slugs may be flat ("overview") or nested ("getting-started/introduction").
+      // Top-level pages list contains flat slugs and folder names (de-duped, ordered).
+      // Each folder gets its own meta.json inside its subdirectory.
+      const topLevelPages: string[] = [];
+      const folderGroups = new Map<string, string[]>(); // folder slug -> ordered page slugs
+
+      // Helper: convert a folder slug to a display title, e.g. "getting-started" -> "Getting Started"
+      const folderSlugToTitle = (slug: string): string =>
+        (version.folder_titles?.[slug]) ??
+        slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+      for (const file of files) {
+        const slashIdx = file.slug.indexOf('/');
+        if (slashIdx === -1) {
+          // Top-level page (e.g. "overview")
+          topLevelPages.push(file.slug);
+        } else {
+          // Nested page: split into folder + page slug (e.g. "getting-started/installation")
+          const folder = file.slug.slice(0, slashIdx);
+          const pageSlug = file.slug.slice(slashIdx + 1);
+          if (!folderGroups.has(folder)) {
+            folderGroups.set(folder, []);
+            topLevelPages.push(folder); // add folder name once, in order
+          }
+          folderGroups.get(folder)!.push(pageSlug);
+        }
+      }
+
+      // Write version-level meta.json (top-level pages + folder names only)
       const versionMeta = {
-        title: `${version.version}`, // Use title from config for proper casing
-        pages: files.map(f => f.slug), // This array defines the exact order in sidebar
+        title: `${version.version}`,
+        pages: topLevelPages,
       };
       writeFileSync(join(versionDir, 'meta.json'), JSON.stringify(versionMeta, null, 2));
+
+      // Write a meta.json inside each subfolder
+      for (const [folder, pages] of folderGroups.entries()) {
+        const subfolderDir = join(versionDir, folder);
+        mkdirSync(subfolderDir, { recursive: true });
+        const subMeta = {
+          title: folderSlugToTitle(folder),
+          pages,
+        };
+        writeFileSync(join(subfolderDir, 'meta.json'), JSON.stringify(subMeta, null, 2));
+        console.log(`  📁 Generated meta.json for ${plugin.id} ${version.version}/${folder}`);
+      }
 
       if (version.assets) {
         for (const asset of version.assets) {
@@ -491,10 +557,12 @@ async function fetchPluginDocs() {
           // Process images
           console.debug(`=== Processing content for file ${file.name} ===`);
           const docsPath = version.docs_path || ''; // Base path in repo for resolving images
-          content = await processImages(content, owner, repoName, branch, docsPath, assetsDir, versionDir, plugin.id, cacheOnly);
+          // Pass the file's own directory in the repo so relative image paths (../../) resolve correctly.
+          const repoFileDir = dirname(file.name).replace(/\\/g, '/');
+          content = await processImages(content, owner, repoName, branch, docsPath, assetsDir, versionDir, plugin.id, cacheOnly, repoFileDir);
 
           const mdxContent = `---
-title: ${file.title} | ${version.version}
+title: ${file.title}
 description: ${plugin.description}
 lastUpdated: ${lastUpdated}
 ---

@@ -1,0 +1,12 @@
+{
+  "title": "Email Services",
+  "pages": [
+    "aws",
+    "postmark",
+    "sendgrid",
+    "mailgun",
+    "mailjet",
+    "smtp",
+    "smtp-with-tracking"
+  ]
+}

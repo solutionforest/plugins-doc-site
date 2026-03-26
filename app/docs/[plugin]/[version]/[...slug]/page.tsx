@@ -84,8 +84,9 @@ export async function generateStaticParams() {
 export async function generateMetadata(props: CurrentPageProps): Promise<Metadata> {
   const params = await props.params;
   const pluginName = params.plugin;
+  const version = params.version;
 
-  return generateMetadataForPlugin(pluginName) ?? notFound();
+  return generateMetadataForPlugin(pluginName, version) ?? notFound();
   // const page = source.getPage([pluginName, version, ...slugs]);
   // if (!page) notFound();
 

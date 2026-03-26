@@ -1,5 +1,5 @@
 ---
-title: Navigation | 4.x
+title: Navigation
 description: A complete website content management plugin for Filament, allowing you to manage pages, media, and website content with ease.
 lastUpdated: 2026-03-25T10:52:23.069Z
 ---
@@ -127,14 +127,14 @@ $mainMenu = \SolutionForest\FilamentCms\Facades\FilamentCms::getNavigations('mai
 
 // Example usage in Blade template
 @foreach($mainMenu as $item)
-    <a href="\{\{$item->url\}\}" class="nav-link">
-        \{\{$item->title\}\}
+    <a href="{{ $item->url }}" class="nav-link">
+        {{ $item->title }}
     </a>
     
     @if($item->children->count() > 0)
         <ul class="dropdown">
             @foreach($item->children as $child)
-                <li><a href="\{\{$child->url\}\}">\{\{$child->title\}\}</a></li>
+                <li><a href="{{ $child->url }}">{{ $child->title }}</a></li>
             @endforeach
         </ul>
     @endif
