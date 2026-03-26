@@ -222,13 +222,16 @@ const mdxComponents = {
         : parseInt(props.height) || defaultHeight
       : defaultHeight;
 
-    let url = props.src;
-    
-    // Add base path for local public images if needed
-    // If url starts with / and not //, prepend base path if in production mode
-    // But we don't have access to runtime config easily here.
-    // Ideally, use Next.js Image which handles basePath automatically.
-    
+    // Prepend NEXT_PUBLIC_BASE_PATH for local public images (src starts with /).
+    // Next.js does NOT automatically prepend basePath to plain <img> or ImageZoom src strings —
+    // only its own <Image> component gets that treatment. Since fetch-docs writes
+    // <img src="/filaletter/..." /> with absolute paths, we must add the prefix here.
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+    let url: string =
+      typeof src === "string" && src.startsWith("/") && !src.startsWith("//")
+        ? basePath + src
+        : (src as string);
+
     return (
       <ImageZoom
         src={url}
