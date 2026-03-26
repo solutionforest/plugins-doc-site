@@ -61,6 +61,7 @@ npm run fetch-docs:cache
 Pass `--plugin` and `--version` flags (directly via `tsx`) or use the `FETCH_PLUGIN` / `FETCH_VERSION` environment variables (recommended on Windows, where `npm run -- ` does not forward args correctly).
 
 **PowerShell (Windows) — use env vars:**
+
 ```powershell
 # Single plugin (all versions)
 $env:FETCH_PLUGIN='simple-contact-form'; npm run fetch-docs
@@ -76,6 +77,7 @@ $env:FETCH_PLUGIN='simple-contact-form'; npm run fetch-docs:cache
 ```
 
 **bash / macOS / Linux — env vars also work:**
+
 ```bash
 FETCH_PLUGIN=simple-contact-form npm run fetch-docs
 FETCH_PLUGIN=simple-contact-form FETCH_VERSION=2.x npm run fetch-docs
@@ -83,6 +85,7 @@ FETCH_PLUGIN=filament-tree,filament-firewall npm run fetch-docs
 ```
 
 **Or call `tsx` directly (works everywhere):**
+
 ```bash
 npx tsx scripts/fetch-docs.ts --plugin=simple-contact-form
 npx tsx scripts/fetch-docs.ts --plugin=simple-contact-form --version=2.x

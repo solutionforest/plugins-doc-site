@@ -1,7 +1,7 @@
 ---
 title: Overview | 2.x
 description: A straightforward contact form plugin with spam protection and email notifications for Filament applications.
-lastUpdated: 2025-09-22T16:27:02Z
+lastUpdated: 2026-03-26T07:33:58Z
 ---
 
 ![Simple-Contact-Form](https://github.com/user-attachments/assets/302127a9-fada-404c-ade9-d7658a3bfa8c)
@@ -38,7 +38,7 @@ A lightweight, customizable contact form plugin for FilamentPHP that provides an
 | Filament Version | Plugin Version |
 | ---------------- | -------------- |
 | v3               | 0.0.6          |
-| v4               | 2.0.2          |
+| v4/v5            | >=2.0.0        |
 
 ## Installation
 
@@ -46,12 +46,6 @@ You can install the package via composer:
 
 ```bash
 composer require solution-forest/simple-contact-form
-```
-
-For Filament v4, use the v2.0.1 version:
-
-```bash
-composer require solution-forest/simple-contact-form:^2.0.2
 ```
 
 You can publish and run the migrations with:
@@ -88,7 +82,7 @@ Simple Contact Form provides a Filament form that can be used outside the Filame
     php artisan vendor:publish --tag="simple-contact-form-assets"
     ```
 
-3. **Filament v4 (expects Tailwind v4):**  
+3. **Filament v4/v5 :**  
    Add the following to your `app.css` or your stylesheet:
 
     ```css
