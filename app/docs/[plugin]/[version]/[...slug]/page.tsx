@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { createCustomRelativeLink } from '@/lib/mdx-link';
 import Link from 'next/link';
 import { ViewOptions, generateMetadataForPlugin } from '@/app/docs/components';
+import { Footer } from '@/app/docs/components/footer'
 
 type CurrentPageProps = PageProps<'/docs/[plugin]/[version]/[...slug]'>;
 
@@ -36,7 +37,7 @@ export default async function Page(props: CurrentPageProps) {
   const latestUpdate = page.data.lastUpdated ? new Date(page.data.lastUpdated) : null;
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage toc={page.data.toc} full={page.data.full} footer={{ component: <Footer /> }}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       {latestUpdate || githubRepoUrl ? (
@@ -101,3 +102,4 @@ export async function generateMetadata(props: CurrentPageProps): Promise<Metadat
   //   },
   // };
 }
+
