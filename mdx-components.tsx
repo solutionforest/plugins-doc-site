@@ -139,6 +139,42 @@ const mdxComponents = {
   Tab,
   Check,
   Cross: X,
+  // DocImage is used by the rehypeDocImage plugin which renames explicit <img> JSX tags
+  // to <DocImage> so they go through this components map and get ImageZoom wrapping.
+  // The src it receives already has basePath prepended by the rehype plugin.
+  DocImage: (props: any) => {
+    const src = typeof props.src === 'object' && props.src !== null && 'src' in props.src ? props.src.src : props.src;
+
+    if (
+      !src ||
+      (typeof src === 'string' && (
+        src.endsWith('.svg') ||
+        src.startsWith('data:') ||
+        src.includes('img.shields.io')
+      ))
+    ) {
+      return <img {...props} src={src} />;
+    }
+
+    const defaultHeight = 300;
+    const defaultWidth = 700;
+    const width = props.width ? (typeof props.width === 'number' ? props.width : parseInt(props.width) || defaultWidth) : defaultWidth;
+    const height = props.height ? (typeof props.height === 'number' ? props.height : parseInt(props.height) || defaultHeight) : defaultHeight;
+
+    console.debug('Rendering DocImage with src:', src, 'width:', width, 'height:', height);
+    
+    return (
+      <ImageZoom
+        src={src}
+        alt={props.alt || ''}
+        height={height}
+        width={width}
+        // unoptimized
+        loading="lazy"
+        className="rounded-lg"
+      />
+    );
+  },
   img: (props: any) => {
     // Resolve src if it's an object (static import)
     const src = typeof props.src === 'object' && props.src !== null && 'src' in props.src ? props.src.src : props.src;
