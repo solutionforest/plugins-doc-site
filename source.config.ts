@@ -20,17 +20,39 @@ export const docs = defineDocs({
 });
 
 // Rehype plugin that prepends basePath to local <img src="/..."> paths.
-// Raw HTML <img> tags in MDX bypass the mdx-components.tsx `img` override and are
-// emitted as literal HTML, so Next.js never gets a chance to apply basePath automatically.
-// We rewrite them here at MDX compile time instead.
+// In MDX, <img> tags are parsed as JSX (mdxJsxFlowElement / mdxJsxTextElement),
+// NOT as rehype `element` nodes. Their attributes live in node.attributes[],
+// not node.properties — so we must handle both node types.
 function rehypePrependBasePath() {
   const basePath =
     process.env.NEXT_PUBLIC_BASE_PATH ||
     (process.env.NODE_ENV === 'production' ? '/plugins-doc-site' : '');
-
+ 
   if (!basePath) return (tree: any) => tree;
 
   function walk(node: any) {
+    // MDX JSX nodes: mdxJsxFlowElement / mdxJsxTextElement
+    if (
+      (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') &&
+      node.name === 'img' &&
+      Array.isArray(node.attributes)
+    ) {
+      for (const attr of node.attributes) {
+        if (
+          attr.type === 'mdxJsxAttribute' &&
+          attr.name === 'src' &&
+          typeof attr.value === 'string'
+        ) {
+          const src: string = attr.value;
+          if (src.startsWith('/') && !src.startsWith('//') && !src.startsWith(basePath)) {
+            attr.value = basePath + src;
+            console.debug('MDX img src after basePath:', attr.value);
+          }
+        }
+      }
+    }
+
+    // Standard rehype element nodes (fallback)
     if (
       node.type === 'element' &&
       node.tagName === 'img' &&
@@ -41,6 +63,7 @@ function rehypePrependBasePath() {
         node.properties.src = basePath + src;
       }
     }
+
     if (Array.isArray(node.children)) {
       for (const child of node.children) walk(child);
     }
