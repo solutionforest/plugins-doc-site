@@ -144,55 +144,6 @@ const mdxComponents = {
     const src = typeof props.src === 'object' && props.src !== null && 'src' in props.src ? props.src.src : props.src;
 
     // Skip using ImageZoom for SVG, data URLs, img.shields.io, and if no src
-    if (
-      !src ||
-      (typeof src === 'string' && (
-        src.endsWith(".svg") ||
-        src.startsWith("data:") ||
-        src.includes("img.shields.io")
-      ))
-    ) {
-      // If props.src is an object (static import), pass it to next/image, otherwise standard img
-      if (typeof props.src === 'object') {
-         // We can't use standard <img> for object src, 
-         // but if we are skipping ImageZoom, we likely want raw <img> behavior?
-         // Actually, if it's an object, it's likely a standard image format (png/jpg) 
-         // that we might want to Zoom, unless explicit opt-out?
-         // But if we are here, strict check failed.
-         // Wait, if it's an object, src.endsWith('.svg') is false (since src is contents).
-         // So we proceed to ImageZoom below.
-      } else {
-         return <img {...props} />;
-      }
-    }
-    
-    // If it's a static import (object), we proceed to use ImageZoom.
-    // ImageZoom from fumadocs-ui handles static imports?
-    // Let's assume yes. Or fallback to Next.js Image.
-    
-    // ...
-    // Wait, the original code had:
-    /*
-    if (
-      !props.src ||
-      props.src.endsWith(".svg") || ...
-    ) { return <img ... /> }
-    */
-    
-    // With my new check:
-    /*
-    const src = ...
-    if (!src || (typeof src === 'string' && (...))) {
-       return <img {...props} />;
-    }
-    */
-    
-    // If props.src is object: src is string (url).
-    // If url ends with .svg, we enter block.
-    // <img src={object} /> is INVALID in HTML.
-    // <img src={object.src} /> is valid.
-    
-    // So distinct handling is needed.
     
     if (
        !src ||
@@ -202,11 +153,11 @@ const mdxComponents = {
          src.includes("img.shields.io")
        ))
      ) {
-        if (typeof props.src === 'object') {
-            return <img {...props} src={src} />;
-        }
-       return <img {...props} />;
-     }
+      if (typeof props.src === 'object') {
+          return <img {...props} src={src} />;
+      }
+      return <img {...props} />;
+    }
 
     const defaultHeight = 300;
     const defaultWidth = 700;
@@ -222,15 +173,10 @@ const mdxComponents = {
         : parseInt(props.height) || defaultHeight
       : defaultHeight;
 
-    // Prepend NEXT_PUBLIC_BASE_PATH for local public images (src starts with /).
-    // Next.js does NOT automatically prepend basePath to plain <img> or ImageZoom src strings —
-    // only its own <Image> component gets that treatment. Since fetch-docs writes
-    // <img src="/filaletter/..." /> with absolute paths, we must add the prefix here.
-    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-    let url: string =
-      typeof src === "string" && src.startsWith("/") && !src.startsWith("//")
-        ? basePath + src
-        : (src as string);
+    // Next.js <Image> (used by ImageZoom) automatically prepends basePath to local paths,
+    // so we pass src directly — no manual basePath prefix needed here.
+    // (assetPrefix only applies to webpack JS/CSS bundles, not public/ static files.)
+    const url: string = src as string;
 
     return (
       <ImageZoom
