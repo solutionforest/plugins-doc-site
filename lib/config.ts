@@ -393,6 +393,13 @@ export const config: Config = {
   ],
   products: [
     {
+      id: 'vxero-neo',
+      title: 'Vxero Neo',
+      description: 'Vxero Neo - Deploy to any VPS from your terminal.',
+      link: 'https://neo.vxero.dev/',
+      badge: { text: 'Deployment', color: 'blue' },
+    },
+    {
       id: 'inspirecms',
       title: 'InspireCMS',
       description: 'A full-featured Laravel CMS with everything you need out of the box. Build smarter, ship faster with our complete content management solution.',
