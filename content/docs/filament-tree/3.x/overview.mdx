@@ -1,7 +1,7 @@
 ---
 title: Overview
 description: A powerful tree structure management plugin for Filament with drag-and-drop functionality and hierarchical data organization.
-lastUpdated: 2026-02-02T09:44:09Z
+lastUpdated: 2026-04-20T10:04:11Z
 ---
 
 <Callout type="warn">
@@ -61,9 +61,9 @@ We only provide updates for versions 3.x, excluding bug fixes for older versions
 
 4. **For custom themes:** Add to your `tailwind.config.js`:
    ```css
-   @import '<path-to-vendor>/solution-forest/filament-tree/resources/css/jquery.nestable.css';
-   @import '<path-to-vendor>/solution-forest/filament-tree/resources/css/button.css';
-   @import '<path-to-vendor>/solution-forest/filament-tree/resources/css/custom-nestable-item.css';
+   @import "<path-to-vendor>/solution-forest/filament-tree/resources/css/jquery.nestable.css";
+   @import "<path-to-vendor>/solution-forest/filament-tree/resources/css/button.css";
+   @import "<path-to-vendor>/solution-forest/filament-tree/resources/css/custom-nestable-item.css";
    @source '<path-to-vendor>/solution-forest/filament-tree/resources/**/*.blade.php';
    ```
 
@@ -368,12 +368,11 @@ protected function getViewFormSchema(): array { /* ... */ }
 
 ### Translation Support
 
-Integration with [Spatie Laravel Translatable](https://github.com/spatie/laravel-translatable):
+1. Follow the instruction from [Translatable Plugin](https://larazeus.com/docs/spatie-translatable/v1/getting-started/installation).
 
-**1. Setup your model:**
+2. Setup your model:
 
 ```php
-use Filament\Actions\LocaleSwitcher;
 use SolutionForest\FilamentTree\Concern\ModelTree;
 use Spatie\Translatable\HasTranslations;
 
@@ -385,9 +384,10 @@ class Category extends Model
 }
 ```
 
-**2. Configure your tree page:**
+3. Configure your tree page:
 
 ```php
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 use SolutionForest\FilamentTree\Concern\TreeRecords\Translatable;
 
 class CategoryTree extends TreePage
