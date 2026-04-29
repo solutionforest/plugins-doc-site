@@ -6,14 +6,14 @@ lastUpdated: 2025-09-16T07:29:50Z
 
 ## About Solution Forest
 
-[Solution Forest](https://solutionforest.com) Web development agency based in Hong Kong. We help customers to solve their problems. We Love Open Soruces.
+[Solution Forest](https://solutionforest.com) Web development agency based in Hong Kong. We help customers to solve their problems. We Love Open Sources.
 
 We have built a collection of best-in-class products:
 
--   [VantagoAds](https://vantagoads.com): A self manage Ads Server, Simplify Your Advertising Strategy.
--   [GatherPro.events](https://gatherpro.events): A Event Photos management tools, Streamline Your Event Photos.
--   [Website CMS Management](https://filamentphp.com/plugins/solution-forest-cms-website): Website CMS Management - Filament CMS Plugin
--   [Filaletter](https://filaletter.solutionforest.net): Filaletter - Filament Newsletter Plugin
+- [VantagoAds](https://vantagoads.com): A self manage Ads Server, Simplify Your Advertising Strategy.
+- [GatherPro.events](https://gatherpro.events): A Event Photos management tools, Streamline Your Event Photos.
+- [Website CMS Management](https://filamentphp.com/plugins/solution-forest-cms-website): Website CMS Management - Filament CMS Plugin
+- [Filaletter](https://filaletter.solutionforest.net): Filaletter - Filament Newsletter Plugin
 
 # Filament Field Group
 
@@ -34,28 +34,28 @@ Filament Field Group is a powerful Laravel package that enhances Filament's form
 ## Installation
 
 1. You can install the package via composer:
-    ```bash
-    composer require solution-forest/filament-field-group
-    ```
+   ```bash
+   composer require solution-forest/filament-field-group
+   ```
 2. Register the plugin in your Panel provider
 
-    ```php
-     use SolutionForest\FilamentFieldGroup\FilamentFieldGroupPlugin;
+   ```php
+    use SolutionForest\FilamentFieldGroup\FilamentFieldGroupPlugin;
 
-     class AdminPanelProvider extends PanelProvider
-     {
-         public function panel(Panel $panel): Panel
-         {
-             return $panel
-                 ->plugin(FilamentFieldGroupPlugin::make());
-         }
-     }
-    ```
+    class AdminPanelProvider extends PanelProvider
+    {
+        public function panel(Panel $panel): Panel
+        {
+            return $panel
+                ->plugin(FilamentFieldGroupPlugin::make());
+        }
+    }
+   ```
 
 3. Then execute the following commands:
-    ```bash
-    php artisan filament-field-group:install
-    ```
+   ```bash
+   php artisan filament-field-group:install
+   ```
 
 ## Publish Config, View, Translation and Migration
 
@@ -120,13 +120,12 @@ $panel
 ![Filament Field Group](https://github.com/solutionforest/filament-field-group/raw/1.x/docs-assets/images/initial-resource.png)
 
 3. Create field groups and fields, for example:
-
-    - Navigate to the Field Group resource in your Filament admin panel.
-    - Create a new field group (e.g., "User Basic Info").
-    - Add fields to the group (e.g., name, email, etc.).
-      ![Create Field Group and Field](https://github.com/solutionforest/filament-field-group/raw/1.x/docs-assets/images/add-field-1.png)
-      ![Create Field Group and Field](https://github.com/solutionforest/filament-field-group/raw/1.x/docs-assets/images/add-field-2.png)
-      ![Create Field Group and Field](https://github.com/solutionforest/filament-field-group/raw/1.x/docs-assets/images/add-field-3.png)
+   - Navigate to the Field Group resource in your Filament admin panel.
+   - Create a new field group (e.g., "User Basic Info").
+   - Add fields to the group (e.g., name, email, etc.).
+     ![Create Field Group and Field](https://github.com/solutionforest/filament-field-group/raw/1.x/docs-assets/images/add-field-1.png)
+     ![Create Field Group and Field](https://github.com/solutionforest/filament-field-group/raw/1.x/docs-assets/images/add-field-2.png)
+     ![Create Field Group and Field](https://github.com/solutionforest/filament-field-group/raw/1.x/docs-assets/images/add-field-3.png)
 
 4. Apply field groups to your form schema:
 
@@ -151,19 +150,19 @@ public static function form(Form $form): Form
 
 Currently, this package provides the following components:
 
--   Text
--   TextArea
--   Email
--   Password
--   Number
--   Url
--   Select
--   Toggle
--   Radio
--   File
--   Image
--   Color Picker
--   DateTime Picker
+- Text
+- TextArea
+- Email
+- Password
+- Number
+- Url
+- Select
+- Toggle
+- Radio
+- File
+- Image
+- Color Picker
+- DateTime Picker
 
 More components can be added in the future. Feel free to submit a pull request if you have ideas for additional components!
 
@@ -322,10 +321,9 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
--   [alan](https://github.com/solutionforest)
--   [All Contributors](../../contributors)
+- [alan](https://github.com/solutionforest)
+- [All Contributors](../../contributors)
 
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-

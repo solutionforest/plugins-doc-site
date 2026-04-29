@@ -17,17 +17,17 @@ A lightweight, customizable contact form plugin for FilamentPHP that provides an
 
 ## Features
 
--   🚀 **Easy Installation** - Get up and running in minutes
--   📝 **Basic Form Management** - Create and manage contact forms
--   📧 **Email Notifications** - Receive form submissions via email
--   📱 **Responsive Design** - Mobile-friendly forms out of the box
+- 🚀 **Easy Installation** - Get up and running in minutes
+- 📝 **Basic Form Management** - Create and manage contact forms
+- 📧 **Email Notifications** - Receive form submissions via email
+- 📱 **Responsive Design** - Mobile-friendly forms out of the box
 
-## [Pro Version (Click me)](https://filamentphp.com/plugins/solution-forest-simple-contact-form-pro) 
+## [Pro Version (Click me)](https://filamentphp.com/plugins/solution-forest-simple-contact-form-pro)
 
--   📁 **File Upload** - Support for file attachments in forms
--   🪝 **Form Hooks** - Before/after submit hooks for custom logic
--   ⚙️ **Configuration Options** - Adjustable settings for forms
--   💾 **Submission Storage** - Save and manage form submissions
+- 📁 **File Upload** - Support for file attachments in forms
+- 🪝 **Form Hooks** - Before/after submit hooks for custom logic
+- ⚙️ **Configuration Options** - Adjustable settings for forms
+- 💾 **Submission Storage** - Save and manage form submissions
 
 ## Try Pro Version Now
 
@@ -78,25 +78,25 @@ Simple Contact Form provides a Filament form that can be used outside the Filame
 2. **Filament v3 with Tailwind v4:**  
    Publish the built-in CSS assets with the following command:
 
-    ```bash
-    php artisan vendor:publish --tag="simple-contact-form-assets"
-    ```
+   ```bash
+   php artisan vendor:publish --tag="simple-contact-form-assets"
+   ```
 
 3. **Filament v4/v5 :**  
    Add the following to your `app.css` or your stylesheet:
 
-    ```css
-    @import '../../vendor/filament/filament/resources/css/theme.css';
+   ```css
+   @import "../../vendor/filament/filament/resources/css/theme.css";
 
-    @source '../../app/Filament/**/*';
-    @source '../../resources/views/filament/**/*';
-    ```
+   @source '../../app/Filament/**/*';
+   @source '../../resources/views/filament/**/*';
+   ```
 
-    Then build your assets:
+   Then build your assets:
 
-    ```bash
-    npm run build
-    ```
+   ```bash
+   npm run build
+   ```
 
 ## Configuration
 
@@ -149,18 +149,18 @@ MAIL_FROM_NAME="${APP_NAME}"
 1. Navigate to the "Contact Forms" section in your Filament admin panel
 2. Click "Create Form"
 3. Configure the basic form settings:
-    - Form Name
-    - Email Content
-    - Success Message
-    - Error Message
-    - Email Subject
+   - Form Name
+   - Email Content
+   - Success Message
+   - Error Message
+   - Email Subject
 4. Add fields using the form builder:
-    - Text Input
-    - Email Input
-    - Textarea
-    - Select Dropdown
-    - Radio Buttons
-    - Checkboxes
+   - Text Input
+   - Email Input
+   - Textarea
+   - Select Dropdown
+   - Radio Buttons
+   - Checkboxes
 
 ### Displaying Forms
 
@@ -177,16 +177,21 @@ Use the Blade component with form id in your views:
 ![image](https://github.com/user-attachments/assets/a8ca1358-2fac-41fa-a513-eab73d5fd015)
 ![image](https://github.com/user-attachments/assets/b79934f5-070e-4e82-a9cc-1cf0a0fc8501)
 ![image](https://github.com/user-attachments/assets/b92d9f24-431e-4acc-98c5-a6c4961b0231)
-<img width="647" alt="image" src="https://github.com/user-attachments/assets/639b0333-ee95-45a1-b002-764f23904083"  />
+
+<img
+  width="647"
+  alt="image"
+  src="https://github.com/user-attachments/assets/639b0333-ee95-45a1-b002-764f23904083"
+/>
 
 ### Common Issues
 
 **Emails not sending:**
 
--   Check your mail configuration in `.env`
--   Verify SMTP credentials
--   Check Laravel log files
--   smtp doc
+- Check your mail configuration in `.env`
+- Verify SMTP credentials
+- Check Laravel log files
+- smtp doc
 
 ## Testing
 
@@ -208,22 +213,28 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
--   [hayward](https://github.com/solutionforest)
--   [All Contributors](../../contributors)
+- [hayward](https://github.com/solutionforest)
+- [All Contributors](../../contributors)
 
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
-<p align="center"><a href="https://solutionforest.com" target="_blank"><img src="https://github.com/solutionforest/.github/blob/main/docs/images/sf.png?raw=true" width="150" /></a></p>
+<p align="center">
+  <a href="https://solutionforest.com" target="_blank">
+    <img
+      src="https://github.com/solutionforest/.github/blob/main/docs/images/sf.png?raw=true"
+      width="150"
+    />
+  </a>
+</p>
 
 ## About Solution Forest
 
-[Solution Forest](https://solutionforest.com) Web development agency based in Hong Kong. We help customers to solve their problems. We Love Open Soruces. 
+[Solution Forest](https://solutionforest.com) Web development agency based in Hong Kong. We help customers to solve their problems. We Love Open Sources.
 
 We have built a collection of best-in-class products:
 
 - [InspireCMS](https://inspirecms.net): A full-featured Laravel CMS with everything you need out of the box. Build smarter, ship faster with our complete content management solution.
 - [Filaletter](https://filaletter.solutionforest.net): Filaletter - Filament Newsletter Plugin
 - [Website CMS Management](https://filamentphp.com/plugins/solution-forest-cms-website): A hands-on Filament CMS plugin for those who prefer more manual control over their website content management.
-

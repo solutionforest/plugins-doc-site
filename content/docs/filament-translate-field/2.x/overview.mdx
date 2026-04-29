@@ -39,12 +39,12 @@ php artisan optimize
 
 ## Important
 
--   There's a conflict with the Translatable trait in the [filament/spatie-laravel-translatable-plugin](https://filamentphp.com/plugins/filament-spatie-translatable) when used on the EditPage. Avoid using Translatable while editing.
+- There's a conflict with the Translatable trait in the [filament/spatie-laravel-translatable-plugin](https://filamentphp.com/plugins/filament-spatie-translatable) when used on the EditPage. Avoid using Translatable while editing.
 
 ## Configuration:
 
--   Define translatable fields in your model using a translatable package (e.g., "spatie/laravel-translatable" or "dimsav/laravel-translatable").
--   Configure translatable fields in the model's _$translatable_ property.
+- Define translatable fields in your model using a translatable package (e.g., "spatie/laravel-translatable" or "dimsav/laravel-translatable").
+- Configure translatable fields in the model's _$translatable_ property.
 
 ## Setup
 
@@ -294,16 +294,16 @@ Without exclude
 
 ```json
 {
-    "title": {
-        "en": "Dump",
-        "es": "Dump",
-        "fr": "Dump"
-    },
-    "description": {
-        "en": null,
-        "es": null,
-        "fr": null
-    }
+  "title": {
+    "en": "Dump",
+    "es": "Dump",
+    "fr": "Dump"
+  },
+  "description": {
+    "en": null,
+    "es": null,
+    "fr": null
+  }
 }
 ```
 
@@ -311,12 +311,12 @@ With Exclude
 
 ```json
 {
-    "title": {
-        "en": "Dump",
-        "es": "Dump",
-        "fr": "Dump"
-    },
-    "description": null
+  "title": {
+    "en": "Dump",
+    "es": "Dump",
+    "fr": "Dump"
+  },
+  "description": null
 }
 ```
 
@@ -476,9 +476,9 @@ In resources/lang/en.json:
 
 ```json
 {
-    "title": "Title",
-    "short_desc": "Short description",
-    "description": "Description"
+  "title": "Title",
+  "short_desc": "Short description",
+  "description": "Description"
 }
 ```
 
@@ -486,9 +486,9 @@ In resources/lang/es.json:
 
 ```json
 {
-    "title": "Título",
-    "short_desc": "Breve descripción",
-    "description": "Descripción"
+  "title": "Título",
+  "short_desc": "Breve descripción",
+  "description": "Descripción"
 }
 ```
 
@@ -496,9 +496,9 @@ In resources/lang/fr.json:
 
 ```json
 {
-    "title": "Titre",
-    "short_desc": "Brève description",
-    "description": "Description"
+  "title": "Titre",
+  "short_desc": "Brève description",
+  "description": "Description"
 }
 ```
 
@@ -506,22 +506,22 @@ In the given example, when you save the model, the data will be stored in the fo
 
 ```json
 {
-    "id": 1,
-    "title": {
-        "en": "Dump",
-        "es": "Dump",
-        "fr": "Dump"
-    },
-    "short_desc": {
-        "en": null,
-        "es": null,
-        "fr": null
-    },
-    "description": {
-        "en": null,
-        "es": null,
-        "fr": null
-    }
+  "id": 1,
+  "title": {
+    "en": "Dump",
+    "es": "Dump",
+    "fr": "Dump"
+  },
+  "short_desc": {
+    "en": null,
+    "es": null,
+    "fr": null
+  },
+  "description": {
+    "en": null,
+    "es": null,
+    "fr": null
+  }
 }
 ```
 
@@ -545,22 +545,28 @@ If you discover any security related issues, please email info+package@solutionf
 
 ## Credits
 
--   [Carly]
--   [All Contributors](../../contributors)
+- [Carly]
+- [All Contributors](../../contributors)
 
 ## License
 
 Filament Tree is open-sourced software licensed under the [MIT license](LICENSE.md).
 
-<p align="center"><a href="https://solutionforest.com" target="_blank"><img src="https://github.com/solutionforest/.github/blob/main/docs/images/sf.png?raw=true" width="150" /></a></p>
+<p align="center">
+  <a href="https://solutionforest.com" target="_blank">
+    <img
+      src="https://github.com/solutionforest/.github/blob/main/docs/images/sf.png?raw=true"
+      width="150"
+    />
+  </a>
+</p>
 
 ## About Solution Forest
 
-[Solution Forest](https://solutionforest.com) Web development agency based in Hong Kong. We help customers to solve their problems. We Love Open Soruces.
+[Solution Forest](https://solutionforest.com) Web development agency based in Hong Kong. We help customers to solve their problems. We Love Open Sources.
 
 We have built a collection of best-in-class products:
 
--   [InspireCMS](https://inspirecms.net): A full-featured Laravel CMS with everything you need out of the box. Build smarter, ship faster with our complete content management solution.
--   [Filaletter](https://filaletter.solutionforest.net): Filaletter - Filament Newsletter Plugin
--   [Website CMS Management](https://filamentphp.com/plugins/solution-forest-cms-website): A hands-on Filament CMS plugin for those who prefer more manual control over their website content management.
-
+- [InspireCMS](https://inspirecms.net): A full-featured Laravel CMS with everything you need out of the box. Build smarter, ship faster with our complete content management solution.
+- [Filaletter](https://filaletter.solutionforest.net): Filaletter - Filament Newsletter Plugin
+- [Website CMS Management](https://filamentphp.com/plugins/solution-forest-cms-website): A hands-on Filament CMS plugin for those who prefer more manual control over their website content management.
