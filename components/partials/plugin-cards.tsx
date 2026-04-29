@@ -8,14 +8,20 @@ import React from 'react';
 import { Badge } from '../badge';
 
 export const PluginCards = () => {
+  const plugins = config.plugins
+    .filter((plugin) => !plugin.hidden)
+    .sort((a, b) => (a.archived ? 1 : 0) - (b.archived ? 1 : 0));
+
   return (
     <Cards className="md:grid-cols-2 lg:grid-cols-3">
-      {config.plugins.filter((plugin) => !plugin.hidden).map((plugin) => (
+      {plugins.map((plugin) => (
         <Card
           key={`plugin_${plugin.id}`}
           title={plugin.title}
+          badge={plugin.badge}
           description={plugin.description}
           href={`/docs/${plugin.id}`}
+          className={plugin.archived ? 'opacity-60' : undefined}
         >
           <div className="flex items-center justify-between">
             <Badge color="primary" size="lg">

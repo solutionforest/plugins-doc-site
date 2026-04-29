@@ -7,12 +7,12 @@
     "filament-tab-plugin",
     "filament-simple-lightbox",
     "filament-panzoom",
-    "filament-scaffold",
     "simple-contact-form",
     "filament-firewall",
     "filament-translate-field",
     "filament-field-group",
     "filament-email-2fa",
-    "filament-access-management"
+    "filament-access-management",
+    "filament-scaffold"
   ]
 }

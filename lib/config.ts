@@ -56,6 +56,11 @@ export interface Plugin {
   // docs_path?: string;
   sections?: PluginSection[];
   hidden?: boolean;
+  archived?: boolean;
+  badge?: {
+    text: string;
+    color: string;
+  };
 }
 
 export interface Config {
@@ -309,17 +314,6 @@ export const config: Config = {
       ],
     },
     {
-      id: 'filament-scaffold',
-      title: 'Filament Scaffold',
-      description: 'Rapidly generate Filament resources, pages, and components with this powerful scaffolding tool.',
-      repo: 'solutionforest/filament-scaffold',
-      latestVersion: '1.x',
-      versions: [
-        { version: '1.x', github_branch: 'main', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
-        { version: '0.x', github_branch: 'main', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
-      ],
-    },
-    {
       id: 'simple-contact-form',
       title: 'Simple Contact Form',
       description: 'A straightforward contact form plugin with spam protection and email notifications for Filament applications.',
@@ -388,6 +382,19 @@ export const config: Config = {
       versions: [
         { version: '2.x', github_branch: '2.x', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
         { version: '1.x', github_branch: '1.x', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
+      ],
+    },
+    {
+      id: 'filament-scaffold',
+      title: 'Filament Scaffold',
+      description: 'Rapidly generate Filament resources, pages, and components with this powerful scaffolding tool.',
+      repo: 'solutionforest/filament-scaffold',
+      latestVersion: '1.x',
+      archived: true,
+      badge: { text: 'Archived', color: 'amber' },
+      versions: [
+        { version: '1.x', github_branch: 'main', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
+        { version: '0.x', github_branch: 'main', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
       ],
     },
   ],
