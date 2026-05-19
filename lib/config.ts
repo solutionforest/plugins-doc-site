@@ -84,6 +84,25 @@ export const config: Config = {
       ],
     },
     {
+      id: 'filament-nestable-tree',
+      title: 'Filament Nestable Tree',
+      description: 'A nestable drag-and-drop tree component for Filament. Supports Eloquent models (including kalnoy/nestedset), static record arrays, per-node actions, multi-tree pages, cross-tree drag-and-drop, lazy loading, and async child loading.',
+      repo: 'solutionforest/filament-nestable-tree',
+      latestVersion: '1.x',
+      versions: [
+        { 
+          version: '1.x', 
+          github_branch: '1.x', 
+          limited_files: [
+            { name: 'README.md', title: 'Overview', slug: 'overview' }
+          ],
+          assets: [
+            { from: 'assets', to: 'assets' },
+          ],
+        },
+      ],
+    },
+    {
       id: 'filaletter',
       name: 'Filaletter',
       title: 'Filaletter',

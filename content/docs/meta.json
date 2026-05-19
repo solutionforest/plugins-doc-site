@@ -2,6 +2,7 @@
   "title": "Plugins",
   "pages": [
     "filament-tree",
+    "filament-nestable-tree",
     "filaletter",
     "filament-cms-website-plugin",
     "filament-tab-plugin",

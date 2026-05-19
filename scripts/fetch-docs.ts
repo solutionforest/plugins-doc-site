@@ -291,6 +291,32 @@ function cleanupContent(source: string): string {
   // Replace invalid ```env blocks with ```plaintext (must run before code block protection)
   parsedSource = parsedSource.replace(/```env/g, '```plaintext');
 
+  // Convert GitHub callouts to MDX Callout components BEFORE protecting code blocks.
+  // This ensures that `> ` blockquote prefixes on code-fence lines inside a callout
+  // are stripped now, so the resulting plain code blocks are correctly protected below.
+  parsedSource = parsedSource.replace(
+    /^> \[!(NOTE|IMPORTANT|WARNING|CAUTION|TIP)\]\s*\n((?:>[ \t]?[^\n]*\n?)*)/gm,
+    (match: string, type: string, content: string): string => {
+      const calloutType = type.toLowerCase();
+      let mdxType = 'info'; // default
+
+      switch (calloutType) {
+        case 'note':      mdxType = 'info';  break;
+        case 'important': mdxType = 'warn';  break;
+        case 'warning':
+        case 'caution':   mdxType = 'error'; break;
+        case 'tip':       mdxType = 'idea';  break;
+      }
+
+      // Remove blockquote markers from every line (including code fence lines)
+      const cleanContent = content
+        .replace(/^>[ \t]?/gm, '')
+        .trim();
+
+      return `<Callout type="${mdxType}">\n${cleanContent}\n</Callout>\n`;
+    }
+  );
+
   // Protect fenced code blocks from transformations — stash them as placeholders.
   // This prevents {{}} escaping, array<T> encoding, style conversion, etc. from
   // corrupting code examples.
@@ -370,34 +396,6 @@ function cleanupContent(source: string): string {
     }
   );
 
-  // Convert GitHub callouts to MDX Callout components.
-  // Uses multiline flag (m) so ^ matches line starts.
-  // Content group only matches lines that begin with '>' so it never
-  // accidentally swallows non-blockquote content (headings, paragraphs, etc.)
-  // that follows immediately without a blank line separating them.
-  parsedSource = parsedSource.replace(
-    /^> \[!(NOTE|IMPORTANT|WARNING|CAUTION|TIP)\]\s*\n((?:>[ \t]?[^\n]*\n?)*)/gm,
-    (match: string, type: string, content: string): string => {
-      const calloutType = type.toLowerCase();
-      let mdxType = 'info'; // default
-
-      switch (calloutType) {
-        case 'note':      mdxType = 'info';  break;
-        case 'important': mdxType = 'warn';  break;
-        case 'warning':
-        case 'caution':   mdxType = 'error'; break;
-        case 'tip':       mdxType = 'idea';  break;
-      }
-
-      // Clean up the content (remove leading/trailing whitespace and blockquote markers)
-      const cleanContent = content
-        .replace(/^>[ \t]?/gm, '') // Remove blockquote markers
-        .trim();
-
-      return `<Callout type="${mdxType}">\n${cleanContent}\n</Callout>\n`;
-    }
-  );
-
   // Restore protected inline code and fenced code blocks
   parsedSource = parsedSource.replace(/\x00INLINE_CODE_(\d+)\x00/g, (_, i) => inlineCodes[parseInt(i)]);
   parsedSource = parsedSource.replace(/\x00CODE_BLOCK_(\d+)\x00/g, (_, i) => codeBlocks[parseInt(i)]);
@@ -405,23 +403,47 @@ function cleanupContent(source: string): string {
   return parsedSource;
 }
 
-async function getLastUpdated(owner: string, repo: string, path: string, ref: string, cacheOnly: boolean = false): Promise<string> {
-  const cachePath = getCachePath(owner, repo, ref, path);
-  if (cacheOnly) {
-    // Try to get file stat from cache if exists
-    if (existsSync(cachePath)) {
-        // We can't trust file system mtime as it reflects when we downloaded it, not when it was committed.
-        // But running in cache-only mode means we accept some staleness.
-        // Using current date is safer than misleading old date, but let's suppress the warning if we have content.
-        return new Date().toISOString(); 
+function getTimestampCachePath(owner: string, repo: string, ref: string, filePath: string): string {
+  const safeRef = ref.replace(/[\/\\?%*:|"<>]/g, '-');
+  return join(process.cwd(), '.cache', 'timestamps', owner, repo, safeRef, filePath + '.json');
+}
+
+function readExistingLastUpdated(mdxPath: string): string {
+  try {
+    if (existsSync(mdxPath)) {
+      const src = readFileSync(mdxPath, 'utf-8');
+      const m = src.match(/^lastUpdated:\s*(.+)$/m);
+      if (m) return m[1].trim();
     }
-    console.warn(`⚠️ Skipping last updated fetch for ${path} in cache-only mode. Using current date.`);
-    return new Date().toISOString();
+  } catch {
+    // ignore
+  }
+  return '';
+}
+
+async function getLastUpdated(owner: string, repo: string, path: string, ref: string, cacheOnly: boolean = false): Promise<string> {
+  const timestampCachePath = getTimestampCachePath(owner, repo, ref, path);
+
+  // Cache-only mode: use stored timestamp cache; fallback handled at callsite
+  if (cacheOnly) {
+    if (existsSync(timestampCachePath)) {
+      try {
+        const cached = JSON.parse(readFileSync(timestampCachePath, 'utf-8'));
+        if (cached.lastUpdated) return cached.lastUpdated;
+      } catch {
+        // fall through to signal no cache
+      }
+    }
+    return ''; // signal: no cached timestamp available
   }
 
+  // Online mode: fetch from GitHub, persist to cache
   try {
     const commits = await octokit.repos.listCommits({ owner, repo, path, sha: ref, per_page: 1 });
-    return commits.data[0]?.commit?.committer?.date || new Date().toISOString();
+    const date = commits.data[0]?.commit?.committer?.date || new Date().toISOString();
+    mkdirSync(dirname(timestampCachePath), { recursive: true });
+    writeFileSync(timestampCachePath, JSON.stringify({ lastUpdated: date }, null, 2));
+    return date;
   } catch (error: any) {
     if (error.status === 403 && error.message.includes('rate limit')) {
       console.warn(`⚠️ GitHub API rate limit exceeded while fetching last updated date for ${path}. Using current date.`);
@@ -431,7 +453,28 @@ async function getLastUpdated(owner: string, repo: string, path: string, ref: st
 }
 
 async function fetchPluginDocs() {
-  const rootMetaPages: string[] = [];
+  // When filtering, seed rootMetaPages from the existing meta.json so unprocessed
+  // plugins are preserved and not wiped from the sidebar navigation.
+  const existingRootMetaPath = join('content', 'docs', 'meta.json');
+  let existingRootMetaPages: string[] = [];
+  if (existsSync(existingRootMetaPath)) {
+    try {
+      const existing = JSON.parse(readFileSync(existingRootMetaPath, 'utf-8'));
+      if (Array.isArray(existing.pages)) {
+        existingRootMetaPages = existing.pages;
+      }
+    } catch {
+      // ignore malformed meta.json
+    }
+  }
+
+  // Start from the full config order so newly added plugins get the right position.
+  // Existing entries not in config are appended at the end (safety net).
+  const allConfigIds = config.plugins.map(p => p.id);
+  const rootMetaPages: string[] = [
+    ...allConfigIds,
+    ...existingRootMetaPages.filter(id => !allConfigIds.includes(id)),
+  ];
   const rootMetaTitles: Record<string, string> = {};
 
   const plugins = filterPlugins.length
@@ -448,7 +491,27 @@ async function fetchPluginDocs() {
     const [owner, repoName] = plugin.repo.split('/');
 
     const pluginDir = join('content', 'docs', plugin.id);
-    
+
+    // Before wiping the directory, seed any missing timestamp caches from existing MDX frontmatter.
+    // This ensures fetch-docs:cache (cache-only) won't lose stable timestamps even on first run
+    // after the timestamp cache directory is new.
+    if (existsSync(pluginDir)) {
+      for (const version of plugin.versions) {
+        const files = version.limited_files || [{ name: 'README.md', title: plugin.title, slug: 'index' }];
+        for (const file of files) {
+          const tsCachePath = getTimestampCachePath(owner, repoName, version.github_branch, file.name);
+          if (!existsSync(tsCachePath)) {
+            const existingMdxPath = join(pluginDir, version.version, `${file.slug}.mdx`);
+            const existing = readExistingLastUpdated(existingMdxPath);
+            if (existing) {
+              mkdirSync(dirname(tsCachePath), { recursive: true });
+              writeFileSync(tsCachePath, JSON.stringify({ lastUpdated: existing }, null, 2));
+            }
+          }
+        }
+      }
+    }
+
     // Clean up existing directory to remove stale files
     if (existsSync(pluginDir)) {
       rmSync(pluginDir, { recursive: true, force: true });
@@ -456,8 +519,6 @@ async function fetchPluginDocs() {
     
     mkdirSync(pluginDir, { recursive: true });
 
-    // Add to root meta
-    rootMetaPages.push(plugin.id);
     rootMetaTitles[plugin.id] = plugin.title;
 
     // Create plugin meta.json
@@ -481,7 +542,6 @@ async function fetchPluginDocs() {
       mkdirSync(versionDir, { recursive: true });
 
       const branch = version.github_branch;
-      let lastUpdated = await getLastUpdated(owner, repoName, 'README.md', branch, cacheOnly);
 
       // Handle simple README-based docs
       const files = version.limited_files || [{ name: 'README.md', title: plugin.title, slug: 'index' }];
@@ -552,6 +612,16 @@ async function fetchPluginDocs() {
       }
 
       for (const file of files) {
+        const mdxPath = join(versionDir, `${file.slug}.mdx`);
+        let lastUpdated = await getLastUpdated(owner, repoName, file.name, branch, cacheOnly);
+        if (!lastUpdated) {
+          // No timestamp cache yet — preserve the existing MDX date to keep it stable
+          lastUpdated = readExistingLastUpdated(mdxPath);
+          if (!lastUpdated) {
+            console.warn(`⚠️ No cached timestamp for ${file.name} (${owner}/${repoName}@${branch}). Using current date.`);
+            lastUpdated = new Date().toISOString();
+          }
+        }
         let content = await fetchFileContent(owner, repoName, file.name, branch, cacheOnly);
         if (content) {
           // Process images
@@ -569,7 +639,6 @@ lastUpdated: ${lastUpdated}
 
 ${content}
 `;
-          const mdxPath = join(versionDir, `${file.slug}.mdx`);
           mkdirSync(dirname(mdxPath), { recursive: true });
           writeFileSync(mdxPath, mdxContent);
         }
