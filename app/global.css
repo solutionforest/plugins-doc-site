@@ -25,11 +25,8 @@
   gap: 0.25rem;
   margin: 0px;
 
-  & a {
-    line-height: 15px;
-    img {
-      margin-top: 0px;
-      margin-bottom: 0px;
-    }
+  & a img {
+    margin-top: 0px;
+    margin-bottom: 0px;
   }
 }
