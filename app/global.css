@@ -16,3 +16,20 @@
   --fd-layout-width: 1600px;
   --color-fd-primary: #007c90;
 }
+
+/* Ensure flex for those badges */
+.prose > h1 ~ p:has(a) {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0px;
+
+  & a {
+    line-height: 15px;
+    img {
+      margin-top: 0px;
+      margin-bottom: 0px;
+    }
+  }
+}

@@ -141,16 +141,22 @@ async function downloadAssets(owner: string, repo: string, folder: string, ref: 
   }
 }
 
+function saveImage(localPath: string, cachePath: string, buffer: Buffer): void {
+  mkdirSync(dirname(localPath), { recursive: true });
+  writeFileSync(localPath, buffer);
+  mkdirSync(dirname(cachePath), { recursive: true });
+  writeFileSync(cachePath, buffer);
+}
+
 async function downloadImage(owner: string, repo: string, imagePath: string, ref: string, localPath: string, cacheOnly: boolean = false): Promise<boolean> {
-  if (existsSync(localPath)) {
+  if (existsSync(localPath) && readFileSync(localPath).length > 0) {
     return true;
   }
 
   // Try to find image in cache first
   const cachePath = getCachePath(owner, repo, ref, imagePath);
-  if (existsSync(cachePath)) {
+  if (existsSync(cachePath) && readFileSync(cachePath).length > 0) {
     const content = readFileSync(cachePath);
-    // Ensure directory exists
     mkdirSync(dirname(localPath), { recursive: true });
     writeFileSync(localPath, content);
     return true;
@@ -163,16 +169,13 @@ async function downloadImage(owner: string, repo: string, imagePath: string, ref
 
   try {
     const response = await octokit.repos.getContent({ owner, repo, path: imagePath, ref });
-    if ('content' in response.data) {
+    if ('content' in response.data && response.data.content) {
       const buffer = Buffer.from(response.data.content, 'base64');
-      writeFileSync(localPath, buffer);
-      
-      // Save to cache
-      console.debug(`🎨 Caching image ${imagePath} to ${cachePath}...`);
-      mkdirSync(dirname(cachePath), { recursive: true });
-      writeFileSync(cachePath, buffer);
-      
-      return true;
+      if (buffer.length > 0) {
+        console.debug(`🎨 Caching image ${imagePath} to ${cachePath}...`);
+        saveImage(localPath, cachePath, buffer);
+        return true;
+      }
     }
   } catch (error: any) {
     if (error.status === 403 && error.message.includes('rate limit')) {
@@ -181,72 +184,144 @@ async function downloadImage(owner: string, repo: string, imagePath: string, ref
     }
     console.error(`Failed to download image ${imagePath}:`, error);
   }
+
+  // The contents API omits file bodies over 1MB. Raw download covers that and API failures.
+  try {
+    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${encodeURIComponent(ref)}/${imagePath.split('/').map(encodeURIComponent).join('/')}`;
+    const raw = await fetch(rawUrl);
+    if (raw.ok) {
+      const buffer = Buffer.from(await raw.arrayBuffer());
+      if (buffer.length > 0) {
+        console.debug(`🎨 Caching image ${imagePath} from raw URL to ${cachePath}...`);
+        saveImage(localPath, cachePath, buffer);
+        return true;
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to download image ${imagePath} from raw URL:`, error);
+  }
   return false;
 }
 
-async function processImages(content: string, owner: string, repo: string, branch: string, docsPath: string, localImagesDir: string, fileDir: string, pluginId: string, cacheOnly: boolean = false, repoFileDir: string = ''): Promise<string> {
+type AssetMapping = { from: string; to: string };
+
+// `to` is stored under public/<plugin id>/. A `to` that already starts with the
+// plugin id would create public/<plugin id>/<plugin id>/...
+function normalizeAssetTo(pluginId: string, to: string): string {
+  const normalized = to.replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+  if (normalized === pluginId) return '';
+  if (normalized.startsWith(`${pluginId}/`)) return normalized.slice(pluginId.length + 1);
+  return normalized;
+}
+
+// JSX attribute text. Quotes inside alt (for example The "+" menu) must not
+// terminate the attribute, or the MDX parser treats the next character as a new attribute.
+function jsxAttribute(value: string): string {
+  if (!/["&<>{}\\]/.test(value)) {
+    return `"${value}"`;
+  }
+  const escaped = value
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n');
+  return `{"${escaped}"}`;
+}
+
+function resolveRepoImagePath(imagePath: string, docsPath: string, repoFileDir: string): { repoImagePath: string; retarget: boolean } {
+  if (imagePath.startsWith('../') || imagePath.startsWith('./')) {
+    // Resolve from the file's own directory in the repo.
+    // "filaletter/public/docs/2-features/foo.md" + "../../images/x.png"
+    // => "filaletter/public/images/x.png".
+    const baseParts = (repoFileDir || docsPath).split('/').filter(Boolean);
+    const imageParts = imagePath.split('/').filter(Boolean);
+    const resolvedParts = [...baseParts];
+
+    for (const part of imageParts) {
+      if (part === '..') {
+        resolvedParts.pop();
+      } else if (part !== '.') {
+        resolvedParts.push(part);
+      }
+    }
+    // Keep the historical URL for ./ and ../ images (filaletter, nestable-tree).
+    return { repoImagePath: resolvedParts.join('/'), retarget: false };
+  }
+
+  // "docs/guide.md" + "images/foo.png" => "docs/images/foo.png".
+  if (repoFileDir && repoFileDir !== '.') {
+    const resolved = [...repoFileDir.split('/').filter(Boolean), ...imagePath.split('/').filter(Boolean)].join('/');
+    return { repoImagePath: resolved, retarget: true };
+  }
+
+  return {
+    repoImagePath: join(docsPath, imagePath).replace(/\\/g, '/'),
+    retarget: true,
+  };
+}
+
+function toPublicImagePath(repoImagePath: string, pluginId: string, assets: AssetMapping[] | undefined, retarget: boolean): string {
+  const normalized = repoImagePath.replace(/\\/g, '/');
+  if (!retarget || !assets || normalized.startsWith(`${pluginId}/`)) {
+    return normalized;
+  }
+
+  for (const asset of assets) {
+    const from = asset.from.replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+    if (normalized !== from && !normalized.startsWith(`${from}/`)) continue;
+    const to = normalizeAssetTo(pluginId, asset.to);
+    const rest = normalized === from ? '' : normalized.slice(from.length + 1);
+    return [pluginId, to, rest].filter(Boolean).join('/');
+  }
+
+  return normalized.replace(/^\.\//, '');
+}
+
+async function processImages(content: string, owner: string, repo: string, branch: string, docsPath: string, localImagesDir: string, fileDir: string, pluginId: string, cacheOnly: boolean = false, repoFileDir: string = '', assets: AssetMapping[] = []): Promise<string> {
   // Run cleanup cleanupContent before processing images
   let processedContent = cleanupContent(content);
 
-  const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
-  const images: string[] = [];
-
+  const imagePaths = new Set<string>();
+  const markdownImageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
   let match;
-  while ((match = imageRegex.exec(processedContent)) !== null) {
-    images.push(match[2]);
+  while ((match = markdownImageRegex.exec(processedContent)) !== null) {
+    imagePaths.add(match[2]);
+  }
+  const htmlImageRegex = /<img\b[^>]*\ssrc=["']([^"']+)["']/gi;
+  while ((match = htmlImageRegex.exec(processedContent)) !== null) {
+    imagePaths.add(match[1]);
   }
 
-  for (const imagePath of images) {
-    if (imagePath.startsWith('http')) {
-      // For external images, ensure they're properly formatted but don't try to download them
+  for (const imagePath of imagePaths) {
+    if (imagePath.startsWith('http') || imagePath.startsWith('/')) {
       continue;
     }
 
-    // Resolve relative path from the file location
-    const fileRelativeDir = fileDir.replace(join('content', 'docs'), '').split('/').filter(Boolean);
-    const relativeDepth = fileRelativeDir.length;
-    const upDirs = '../'.repeat(relativeDepth);
-    console.debug(`Resolving image path ${imagePath} from file directory ${fileDir} with docsPath ${docsPath}...`, {fileRelativeDir});
+    console.debug(`Resolving image path ${imagePath} from file directory ${fileDir} with docsPath ${docsPath}...`);
 
-    // The image path in repo is relative to the docs root
-    let repoImagePath = imagePath;
-    let cleanImagePath = imagePath;
-    if (imagePath.startsWith('../') || imagePath.startsWith('./')) {
-      // Resolve the relative path starting from the file's own directory in the repo
-      // (not just the docs root). For example, if the file is at
-      // "filaletter/public/docs/2-features/foo.md" and the image is "../../images/x.png",
-      // the correct result is "filaletter/public/images/x.png", not "filaletter/images/x.png".
-      const baseParts = (repoFileDir || docsPath).split('/').filter(Boolean);
-      const imageParts = imagePath.split('/').filter(Boolean);
-      const resolvedParts = [...baseParts];
+    const { repoImagePath, retarget } = resolveRepoImagePath(imagePath, docsPath, repoFileDir);
+    const cleanImagePath = toPublicImagePath(repoImagePath, pluginId, assets, retarget);
 
-      for (const part of imageParts) {
-        if (part === '..') {
-          resolvedParts.pop();
-        } else if (part !== '.') {
-          resolvedParts.push(part);
-        }
-      }
-      repoImagePath = resolvedParts.join('/');
-      cleanImagePath = repoImagePath;
-    } else {
-      repoImagePath = join(docsPath, imagePath).replace(/\\/g, '/');
-      cleanImagePath = repoImagePath;
-    }
-
-    // cleanImagePath is the resolved repo-relative path, e.g. "filaletter/images/capscreens/capscreen-14.png"
-    // Local filesystem path under public/, e.g. "public/filaletter/images/capscreens/capscreen-14.png"
+    // Local filesystem path under public/, e.g. "public/filament-flow-builder/docs/images/foo.png"
     const localImagePath = join('public', cleanImagePath);
     const localImageDir = join('public', cleanImagePath.substring(0, cleanImagePath.lastIndexOf('/')));
     console.debug(`💠 Processing image ${imagePath}`, { repoPath: repoImagePath, cleanImagePath, localPath: localImagePath, localImageDir });
-    mkdirSync(localImageDir, { recursive: true });
+    if (localImageDir && localImageDir !== 'public') {
+      mkdirSync(localImageDir, { recursive: true });
+    }
 
-    // Public URL served from Next.js, e.g. "/filaletter/images/capscreens/capscreen-14.png"
-    // IMPORTANT: Must use cleanImagePath (the resolved path), NOT the raw relative imagePath.
-    // Using path.join('/', pluginId, imagePath) would let path.join normalize away '../..' and
-    // strip the plugin prefix, producing the wrong path like "/images/capscreens/capscreen-14.png".
+    // Public URL served from Next.js. Images that live in a configured asset folder
+    // are served from /<plugin id>/<asset to>/ so they are not also copied to a second path.
     const publicUrl = '/' + cleanImagePath.replace(/\\/g, '/');
     const escapedImagePath = imagePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    const rewrite = () => {
+      processedContent = processedContent.replace(
+        new RegExp(`!\\[([^\\]]*)\\]\\(${escapedImagePath}\\)`, 'g'),
+        (_full, alt: string) => `<img src="${publicUrl}" alt=${jsxAttribute(alt)} />`
+      );
+      processedContent = processedContent.replace(new RegExp(`src=["']${escapedImagePath}["']`, 'g'), `src="${publicUrl}"`);
+    };
 
     try {
       const success = await downloadImage(owner, repo, repoImagePath, branch, localImagePath, cacheOnly);
@@ -261,21 +336,10 @@ async function processImages(content: string, owner: string, repo: string, branc
       // build time. If the file is missing from public/, the build fails with "Module not found".
       // Using <img src="..."> is plain JSX — no import is generated — so a missing image only
       // produces a broken image at runtime (warning) instead of a hard build error.
-      processedContent = processedContent.replace(
-        new RegExp(`!\\[([^\\]]*)\\]\\(${escapedImagePath}\\)`, 'g'),
-        `<img src="${publicUrl}" alt="$1" />`
-      );
-
-      // Replace HTML img src attributes
-      processedContent = processedContent.replace(new RegExp(`src=["']${escapedImagePath}["']`, 'g'), `src="${publicUrl}"`);
-
+      rewrite();
     } catch (error) {
-      console.warn(`⚠️ Failed to process image ${imagePath}, leaving as broken image tag`);
-      // Convert to <img> with the best-effort URL so the build still succeeds
-      processedContent = processedContent.replace(
-        new RegExp(`!\\[([^\\]]*)\\]\\(${escapedImagePath}\\)`, 'g'),
-        `<img src="${publicUrl}" alt="$1" />`
-      );
+      console.warn(`⚠️ Failed to process image ${imagePath}, leaving as broken image tag`, error);
+      rewrite();
     }
   }
 
@@ -598,7 +662,7 @@ async function fetchPluginDocs() {
 
       if (version.assets) {
         for (const asset of version.assets) {
-          const localAssetPath = join(assetsDir, asset.to);
+          const localAssetPath = join(assetsDir, normalizeAssetTo(plugin.id, asset.to));
           console.debug(`📦 Processing asset ${asset.from} to be saved at ${localAssetPath}...`);
           mkdirSync(dirname(localAssetPath), { recursive: true });
           // The asset.from is relative to the docs root in the repo
@@ -629,7 +693,7 @@ async function fetchPluginDocs() {
           const docsPath = version.docs_path || ''; // Base path in repo for resolving images
           // Pass the file's own directory in the repo so relative image paths (../../) resolve correctly.
           const repoFileDir = dirname(file.name).replace(/\\/g, '/');
-          content = await processImages(content, owner, repoName, branch, docsPath, assetsDir, versionDir, plugin.id, cacheOnly, repoFileDir);
+          content = await processImages(content, owner, repoName, branch, docsPath, assetsDir, versionDir, plugin.id, cacheOnly, repoFileDir, version.assets);
 
           const mdxContent = `---
 title: ${file.title}

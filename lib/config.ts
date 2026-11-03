@@ -381,6 +381,26 @@ export const config: Config = {
       ],
     },
     {
+      id: "filament-login-screen",
+      title: "Filament Login Screen",
+      description: "Filament Login Screen - Just give us a easy to implement a different \"login\" screen design",
+      repo: "solutionforest/FilamentLoginScreen",
+      latestVersion: '0.x',
+      versions: [
+        { version: '0.x', github_branch: 'main', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
+      ],
+    },
+    {
+      id: 'filament-loginguard',
+      title: 'Filament Login Guard',
+      description: 'Enterprise-grade login protection and session management for Filament panels and Laravel applications.',
+      repo: 'solutionforest/filament-loginguard',
+      latestVersion: '0.x',
+      versions: [
+        { version: '0.x', github_branch: 'main', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
+      ],
+    },
+    {
       id: 'filament-email-2fa',
       name: 'Filament Email 2FA',
       title: 'Filament Email 2FA',
@@ -424,6 +444,13 @@ export const config: Config = {
       description: 'Vxero Neo - Deploy to any VPS from your terminal.',
       link: 'https://neo.vxero.dev/',
       badge: { text: 'Deployment', color: 'blue' },
+    },
+    {
+      id: 'banyan',
+      title: 'Banyan',
+      description: '',
+      link: 'https://banyan-demo-production-7ykqwk.laravel.cloud/admin/login',
+      badge: { text: 'CMS', color: 'orange' },
     },
     {
       id: 'inspirecms',

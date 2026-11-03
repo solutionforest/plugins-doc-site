@@ -39,6 +39,11 @@ Filament Tree is a plugin for Filament Admin that creates hierarchical tree mana
 We only provide updates for versions 3.x, excluding bug fixes for older versions.
 </Callout>
 
+## Which Package Should I Use?
+
+- Need a simple tree solution with quick setup? Use this package (`filament-tree`).
+- Need to handle heavy-load menus or large, complex trees? Consider [filament-nestable-tree](https://github.com/solutionforest/filament-nestable-tree).
+
 ## Installation
 
 1. **Install the package:**
@@ -61,9 +66,9 @@ We only provide updates for versions 3.x, excluding bug fixes for older versions
 
 4. **For custom themes:** Add to your `tailwind.config.js`:
    ```css
-   @import "<path-to-vendor>/solution-forest/filament-tree/resources/css/jquery.nestable.css";
-   @import "<path-to-vendor>/solution-forest/filament-tree/resources/css/button.css";
-   @import "<path-to-vendor>/solution-forest/filament-tree/resources/css/custom-nestable-item.css";
+   @import '<path-to-vendor>/solution-forest/filament-tree/resources/css/jquery.nestable.css';
+   @import '<path-to-vendor>/solution-forest/filament-tree/resources/css/button.css';
+   @import '<path-to-vendor>/solution-forest/filament-tree/resources/css/custom-nestable-item.css';
    @source '<path-to-vendor>/solution-forest/filament-tree/resources/**/*.blade.php';
    ```
 

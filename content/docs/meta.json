@@ -12,8 +12,11 @@
     "filament-firewall",
     "filament-translate-field",
     "filament-field-group",
+    "filament-login-screen",
+    "filament-loginguard",
     "filament-email-2fa",
     "filament-access-management",
-    "filament-scaffold"
+    "filament-scaffold",
+    "filament-flow-builder"
   ]
 }
