@@ -2,8 +2,6 @@
 import { Card as CardPrimitive, Cards as CardsPrimitive } from 'fumadocs-ui/components/card';
 import { cn } from '@/lib/utils';
 import { config } from '@/lib/config';
-import { GithubIcon } from 'lucide-react';
-import { getPluginGithubRepoUrl } from '@/lib/source';
 import React from 'react';
 import { Badge } from '../badge';
 

@@ -8,9 +8,9 @@ export function baseOptions(): BaseLayoutProps {
       // title: 'Solution Forest Plugins',
       title: (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+          {/* <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">SF</span>
-          </div>
+          </div> */}
           <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
             Solution Forest Plugins
           </h1>

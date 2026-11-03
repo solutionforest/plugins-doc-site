@@ -67,10 +67,10 @@ export default async function Page(props: CurrentPageProps) {
         <MDX
           components={getMDXComponents({
             // this allows you to link to other pages with relative file paths
-            a: ({ href, ...props }: { href: string }) => {
-              // console.log('Link href in MDX:', { href });
-              const resolvedHref = createCustomRelativeLink(page)(href);
-              // console.log('Resolved link href in MDX:', { resolvedHref });
+            a: ({ href, ...props }) => {
+              const resolvedHref = createCustomRelativeLink(page)(
+                typeof href === 'string' ? href : '',
+              );
               return <Link href={resolvedHref} {...props} />;
             },
           })}

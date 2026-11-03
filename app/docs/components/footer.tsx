@@ -7,7 +7,6 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { type ComponentProps, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { useI18n } from 'fumadocs-ui/contexts/i18n';
 import { config } from '@/lib/config';
 import { Badge } from '@/components/badge';
 
@@ -60,7 +59,6 @@ export function Footer({ items, children, className, ...props }: FooterProps) {
 }
 
 function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
-  const { text } = useI18n();
   const Icon = index === 0 ? ChevronLeft : ChevronRight;
 
   return (
@@ -91,7 +89,7 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
         
       </div>
       <p className="text-fd-muted-foreground truncate">
-        {item.description ?? (index === 0 ? text.previousPage : text.nextPage)}
+        {item.description ?? (index === 0 ? 'Previous Page' : 'Next Page')}
       </p>
     </Link>
   );
