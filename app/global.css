@@ -8,8 +8,8 @@
 @source '../node_modules/fumadocs-ui/dist/**/*.js';
 
 @theme {
-  --default-font-family: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --default-font-family: var(--font-sans);
+  --font-mono: var(--font-ibm-plex-mono); /* was: var(--font-jetbrains-mono) */
   --color-primary: var(--color-fd-primary);
 }
 
