@@ -3,7 +3,7 @@ import Script from 'next/script';
 import { Provider } from '@/components/provider';
 import './global.css';
 
-const GA_ID = 'G-SXP08364GL';
+const GA_ID = 'G-S1T8DCK1Q7';
 
 const inter = Inter({
   subsets: ['latin'],
