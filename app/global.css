@@ -19,7 +19,8 @@
 }
 
 /* Ensure flex for those badges */
-.prose > h1 ~ p:has(a) {
+.prose > h1 ~ p:has(a),
+.prose > h1 ~ p:has(img) {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;

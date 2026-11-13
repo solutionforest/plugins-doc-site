@@ -11,10 +11,11 @@
     "simple-contact-form",
     "filament-firewall",
     "filament-translate-field",
-    "filament-field-group",
     "filament-login-screen",
     "filament-loginguard",
+    "ai-kit-filament",
     "filament-email-2fa",
+    "filament-field-group",
     "filament-access-management",
     "filament-scaffold",
     "filament-flow-builder"
