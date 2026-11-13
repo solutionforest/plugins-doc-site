@@ -1,4 +1,4 @@
-import { OtherProducts, PluginCards } from '@/components/partials/plugin-cards';
+import { OpenSourceApps, OtherProducts, PluginCards } from '@/components/partials/plugin-cards';
 import { Metadata } from 'next';
 
 export default function HomePage() {
@@ -14,6 +14,11 @@ export default function HomePage() {
       <section id="products">
         <h2 className="text-3xl font-bold text-center mb-8">Other Products</h2>
         <OtherProducts />
+      </section>
+
+      <section id="open-source">
+        <h2 className="text-3xl font-bold text-center mb-8">Open Source Applications</h2>
+        <OpenSourceApps />
       </section>
     </div>
   );

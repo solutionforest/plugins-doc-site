@@ -56,6 +56,27 @@ export const OtherProducts = () => {
   )
 };
 
+export const OpenSourceApps = () => {
+  return (
+    <Cards>
+      {config.openSourceApps.filter((app) => !app.hidden).map((app) => (
+        <Card
+          key={`oss_${app.id}`}
+          title={app.title}
+          badge={app.badge}
+          description={app.description}
+          href={app.link}
+          external
+        >
+          <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+            View on GitHub →
+          </div>
+        </Card>
+      ))}
+    </Cards>
+  )
+};
+
 const Cards = ({
   className,
   ...props

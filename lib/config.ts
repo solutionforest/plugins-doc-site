@@ -66,6 +66,7 @@ export interface Plugin {
 export interface Config {
   plugins: Plugin[];
   products: Product[];
+  openSourceApps: Product[];
 }
 
 export const config: Config = {
@@ -489,6 +490,22 @@ export const config: Config = {
       description: 'Complete website content management system built on Filament, perfect for managing website content, pages, and media.',
       link: 'https://filamentphp.com/plugins/solution-forest-cms-website',
       badge: { text: 'CMS', color: 'orange' },
+    },
+  ],
+  openSourceApps: [
+    {
+      id: 'forgedesk',
+      title: 'ForgeDesk',
+      description: 'Zero-config developer tools. One click to install. One click to run.',
+      link: 'https://github.com/solutionforest/ForgeDesk',
+      badge: { text: 'Developer Tools', color: 'cyan' },
+    },
+    {
+      id: 'watchdog',
+      title: 'Watchdog',
+      description: 'A Uptime monitor, Desktop Application.',
+      link: 'https://github.com/solutionforest/Watchdog',
+      badge: { text: 'Uptime Monitor', color: 'rose' },
     },
   ],
 };

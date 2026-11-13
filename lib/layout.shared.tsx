@@ -40,6 +40,17 @@ export function baseOptions(): BaseLayoutProps {
           icon: <SquareArrowOutUpRightIcon />,
         })),
       },
+      {
+        type: 'menu',
+        text: 'Open Source',
+        items: sourceConfig.openSourceApps.map((app) => ({
+          text: app.title,
+          description: app.description,
+          url: app.link,
+          external: true,
+          icon: <SquareArrowOutUpRightIcon />,
+        })),
+      },
     ]
   };
 }
