@@ -390,6 +390,16 @@ export const config: Config = {
       ],
     },
     {
+      id: 'filament-drilldown-nav',
+      title: 'Filament Drilldown Nav',
+      description: 'Drill down sidebar navigation for Filament v5: one left sidebar, one level at a time, a Back link, any depth — and a menu per record (click an project, get that project\'s own menu).',
+      repo: 'solutionforest/filament-drilldown-nav',
+      latestVersion: '0.x',
+      versions: [
+        { version: '0.x', github_branch: 'main', limited_files: [{ name: 'README.md', title: 'Overview', slug: 'overview' }] },
+      ],
+    },
+    {
       id: 'ai-kit-filament',
       title: 'AI kit',
       description: 'Filament v5 admin panel, manage knowledge bases & documents, ingest files/URLs, conversation logs with token usage, playground, analytics dashboard.',

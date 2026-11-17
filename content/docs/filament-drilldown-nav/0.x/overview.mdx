@@ -1,0 +1,226 @@
+---
+title: Overview
+description: "Drill down sidebar navigation for Filament v5: one left sidebar, one level at a time, a Back link, any depth — and a menu per record (click an project, get that project's own menu)."
+lastUpdated: 2026-11-17T08:02:50Z
+---
+
+<div style={{ textAlign: "center" }}>
+  <img
+    src="/filament-drilldown-nav/00-banner.png"
+    alt="Filament Drilldown Nav: one sidebar, one level at a time, a menu for every record"
+    width="100%"
+  />
+</div>
+
+<h1 style={{ textAlign: "center" }}>Filament Drilldown Nav</h1>
+
+<div style={{ textAlign: "center" }}>
+  Drill-down sidebar navigation for <strong>Filament v5</strong> panels: one
+  level at a time, a <strong>menu for every record</strong>, any depth.
+</div>
+
+<div style={{ textAlign: "center" }}>
+  <a href="https://github.com/solutionforest/filament-drilldown-nav/releases">
+    <img
+      alt="Latest release"
+      src="https://img.shields.io/github/v/release/solutionforest/filament-drilldown-nav?logo=github&label=release&color=f59e0b"
+    />
+  </a>
+  <a href="https://github.com/solutionforest/filament-drilldown-nav/actions/workflows/tests.yml">
+    <img
+      alt="Tests"
+      src="https://img.shields.io/github/actions/workflow/status/solutionforest/filament-drilldown-nav/tests.yml?branch=main&label=tests&logo=githubactions&logoColor=white"
+    />
+  </a>
+  <a href="https://packagist.org/packages/solutionforest/filament-drilldown-nav">
+    <img
+      alt="Packagist version"
+      src="https://img.shields.io/packagist/v/solutionforest/filament-drilldown-nav?logo=packagist&logoColor=white&color=f28d1a"
+    />
+  </a>
+  <a href="https://packagist.org/packages/solutionforest/filament-drilldown-nav/stats">
+    <img
+      alt="Total downloads"
+      src="https://img.shields.io/packagist/dt/solutionforest/filament-drilldown-nav?logo=composer&logoColor=white"
+    />
+  </a>
+  <img
+    alt="PHPStan level 10"
+    src="https://img.shields.io/badge/PHPStan-level%2010-brightgreen?logo=php&logoColor=white"
+  />
+  <img
+    alt="Filament v5 only"
+    src="https://img.shields.io/badge/Filament-v5%20only-FDAE4B"
+  />
+  <img
+    alt="PHP 8.3+"
+    src="https://img.shields.io/badge/PHP-8.3%2B-777BB4?logo=php&logoColor=white"
+  />
+  <img
+    alt="Laravel 13"
+    src="https://img.shields.io/badge/Laravel-13-FF2D20?logo=laravel&logoColor=white"
+  />
+  <img
+    alt="Livewire 4"
+    src="https://img.shields.io/badge/Livewire-4-FB70A9?logo=livewire&logoColor=white"
+  />
+  <img
+    alt="Octane: RoadRunner, Swoole, FrankenPHP"
+    src="https://img.shields.io/badge/Octane-RoadRunner%20%7C%20Swoole%20%7C%20FrankenPHP-FF2D20?logo=laravel&logoColor=white"
+  />
+  <img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue" />
+  <img
+    alt="Status: before 1.0"
+    src="https://img.shields.io/badge/status-before%201.0-orange"
+  />
+</div>
+
+<div style={{ textAlign: "center" }}>
+  <a href="docs/README.md">📚 Documentation</a> ·
+  <a href="docs/usage.md">🚀 Usage guide</a> ·
+  <a href="docs/api-reference.md">🧩 API reference</a> ·
+  <a href="docs/support.md">✅ Support matrix</a> ·
+  <a href="docs/demo.md">🎬 Demo</a> ·<a href="CHANGELOG.md">📝 Changelog</a>
+</div>
+
+---
+
+## ✨ Features
+
+|     | Feature                           |                                                                                                                                                                                |
+| --- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🧭  | **Drill-down levels**             | Click an item and the sidebar shows _its_ menu, with a **Back** link and the section title. Any depth.                                                                         |
+| 🗂️  | **A menu per record**             | Click a project, client or order and get **that record's** menu: `->record()`, or built automatically from the resource's pages with `->recordPages()`. Nested resources work. |
+| ➕  | **Expand in place**               | `->inline()` sections with guide lines, nesting, an accordion mode, and an open/closed state that is rendered on the server (no flash).                                        |
+| 🔌  | **Reuses Filament's navigation**  | `NavItem::fromFilamentNavigation()` imports your existing groups, parent items, badges, sorting and access checks. Clusters keep working.                                      |
+| 🔎  | **Search**                        | Filters the menu as you type, can search **all levels** (even unopened ones), and focuses with the `/` key.                                                                    |
+| 📌  | **Recent and pinned pages**       | In the browser, or stored **in the database** per user, panel and tenant.                                                                                                      |
+| 🔢  | **Live badges**                   | `pollBadges('30s')` and the `refresh-sidebar` event keep counts such as "Unpaid 3" fresh.                                                                                      |
+| 🪝  | **Render hooks**                  | Six [Filament render hooks](docs/render-hooks.md) around the menu: add content without publishing views.                                                                       |
+| 📱  | **Responsive**                    | Collapsed icon rail, mobile drawer, dark mode.                                                                                                                                 |
+| 🌍  | **11 languages, right to left**   | English, 简体中文, 繁體中文 (TW, HK), 日本語, 한국어, Español, العربية, עברית, فارسی, اردو.                                                                                    |
+| ⚡  | **Octane-safe**                   | Per-request state. Verified on real RoadRunner, Swoole and FrankenPHP workers, including under parallel load.                                                                  |
+| 🏢  | **Multi-panel, tenancy, domains** | Each panel has its own tree; URLs come from Filament, so tenants and domains just work.                                                                                        |
+| ♿  | **Accessible**                    | `aria-current`, `aria-expanded`, focus moves to the new level, reduced-motion support.                                                                                         |
+| 🛡️  | **No view overrides**             | Nothing to re-publish after a Filament upgrade; works with a strict Content-Security-Policy.                                                                                   |
+
+## 🧭 Why
+
+Filament nests everything in the sidebar and shows a cluster's or page's sub-navigation as a _second_ menu beside the content. That is fine for two levels. It gets awkward when a record has its own area with its own sub-menus (3 or 4 levels) and you want it all in **one** place.
+
+| You want                                       | Filament alone                  | This plugin                         |
+| ---------------------------------------------- | ------------------------------- | ----------------------------------- |
+| A menu for one record                          | build a sub-navigation per page | `->record(fn ($record) => [...])`   |
+| 3–4 levels in the left sidebar                 | groups + one parent level       | any depth                           |
+| One menu location                              | sidebar **and** sub-navigation  | the sidebar                         |
+| Keep `$navigationGroup`, badges, `canAccess()` | n/a                             | `NavItem::fromFilamentNavigation()` |
+
+> If two levels are enough, Filament's own groups, parent items and clusters are simpler: [this plugin or Filament's navigation?](docs/vs-filament-native.md)
+
+## 📸 Screenshots
+
+| Root menu | A record's menu | Four levels deep |
+| --- | --- | --- |
+| <img src="/filament-drilldown-nav/01-main-menu.png" alt="Root menu" /> | <img src="/filament-drilldown-nav/02-record-menu.png" alt="A record's own menu" /> | <img src="/filament-drilldown-nav/03-four-levels-deep.png" alt="Four levels deep" /> |
+
+| Search | Files inside a record | Mobile drawer |
+| --- | --- | --- |
+| <img src="/filament-drilldown-nav/05-search.png" alt="Search across levels" /> | <img src="/filament-drilldown-nav/04-dark-mode.png" alt="Files inside a record" /> | <img src="/filament-drilldown-nav/06-mobile.png" alt="Mobile drawer" /> |
+
+| Right to left | Pinned pages | Collapsed sidebar |
+| --- | --- | --- |
+| <img src="/filament-drilldown-nav/07-rtl-arabic.png" alt="Arabic right-to-left menu" /> | <img src="/filament-drilldown-nav/08-pinned.png" alt="Pinned pages" /> | <img src="/filament-drilldown-nav/09-collapsed.png" alt="Collapsed icon sidebar" /> |
+
+## ✅ Requirements
+
+> **Filament v5 only.** Filament v3 and v4 are not supported.
+
+|                        | Supported                                                            |
+| ---------------------- | -------------------------------------------------------------------- |
+| **Filament**           | `^5.7`: the oldest version (5.7.0) and the latest 5.x both run in CI |
+| **PHP**                | `^8.3`                                                               |
+| **Laravel / Livewire** | 13 / 4 (the versions CI runs)                                        |
+| **Octane**             | RoadRunner, Swoole, FrankenPHP                                       |
+
+The full, maintained table (and what each row means) is in **[docs/support.md](docs/support.md)**. Run a patched Filament: versions below 5.8.3 have published security advisories, which Composer blocks by default.
+
+## 📦 Installation
+
+Install it with Composer from [Packagist](https://packagist.org/packages/solutionforest/filament-drilldown-nav):
+
+```bash
+composer require solutionforest/filament-drilldown-nav
+php artisan filament:assets      # publishes the stylesheet (`php artisan filament:upgrade` does it too)
+```
+
+## 🚀 Quick start
+
+```php
+use SolutionForest\DrilldownNav\DrilldownNavPlugin;
+use SolutionForest\DrilldownNav\Tree\NavItem;
+
+$panel->plugin(DrilldownNavPlugin::make()->items(fn () => [
+    NavItem::page(Dashboard::class),                 // label, icon, URL and access from the class
+
+    NavItem::resource(ProjectResource::class)        // the list is a normal Filament table
+        ->recordPages(),                             // the menu INSIDE one project, built from its pages
+
+    ...NavItem::fromFilamentNavigation(),            // everything else Filament would show
+]));
+```
+
+Prefer to write a record's menu yourself, nest levels, add search, pins, badges or hooks? Everything is in the **[usage guide](docs/usage.md)**.
+
+> In the sidebar, the plugin's menu replaces Filament's own list: **only items returned from `items()` are shown there.** Everywhere else Filament's navigation is untouched (`->topNavigation()` still shows the native menu in the top bar).
+
+## 📚 Documentation
+
+|     | Page                                                                   | What is in it                                                                        |
+| --- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| 🚀  | [Usage guide](docs/usage.md)                                           | Pages, resources, nested levels, record menus, native navigation, visibility, badges |
+| ➕  | [Modern navigation](docs/modern-navigation.md)                         | Expand in place, accordion, headings, the collapsed sidebar, accessibility           |
+| 🔎  | [Large menus](docs/large-menus.md)                                     | Search, shortcuts, recent and pinned pages, long lists, live badges                  |
+| 🪝  | [Render hooks](docs/render-hooks.md)                                   | Add your own content around the menu                                                 |
+| 🏢  | [Panels, workers, tenants, languages](docs/multi-panel-octane-i18n.md) | Multi-panel, Octane, tenancy, translations, right-to-left                            |
+| 🧩  | [API reference](docs/api-reference.md)                                 | Every public method (generated from the code)                                        |
+| 🔒  | [API stability](docs/api-stability.md)                                 | What is public, what may change, and what 1.0 needs                                  |
+| ✅  | [Support matrix](docs/support.md)                                      | Filament, PHP, Laravel, Livewire, Octane                                             |
+| 🔌  | [Works with other plugins](docs/compatibility.md)                      | Checked next to five popular plugins                                                 |
+| 🧠  | [How it works](docs/how-it-works.md)                                   | The problem, the request flow, diagrams                                              |
+| ⚖️  | [This plugin or Filament's navigation?](docs/vs-filament-native.md)    | A decision guide                                                                     |
+| 🎬  | [The demo app](docs/demo.md)                                           | A realistic client portal with roles and 3,000 rows                                  |
+| 🧪  | [Testing and quality](docs/testing-and-quality.md)                     | What is tested and how to run it                                                     |
+| ❓  | [FAQ and troubleshooting](docs/faq.md)                                 | Empty menu, missing styles, record menus that do not appear                          |
+| ⬆️  | [Upgrading](docs/upgrading.md)                                         | Notes for each release                                                               |
+| 🤖  | [AGENTS.md](AGENTS.md) · [SKILLS.md](SKILLS.md)                        | For people and AI agents changing this repository / adding the plugin to an app      |
+
+## 🧪 Quality
+
+|                                   |                                                                                                                                 |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 🔬 **PHPStan level 10**           | the strictest level, no ignores, no baseline                                                                                    |
+| 🧪 **Pest + feature tests**       | the package, and a demo app that renders the real panels (100+ tests)                                                           |
+| 📉 **Oldest and newest Filament** | the whole suite runs on `5.7.0` and on the latest 5.x                                                                           |
+| ⚡ **Real Octane servers**        | RoadRunner, Swoole and FrankenPHP, one worker and four workers under parallel requests                                          |
+| 📖 **Docs are tested too**        | a test keeps `composer.json`, the support matrix, the README, CI and the generated API reference in step, and checks every link |
+
+```bash
+composer check                   # Pint + PHPStan 10 + Pest
+(cd demo && php artisan test)    # feature tests against the real panels
+```
+
+## 🗺️ Status and limits
+
+The plugin is feature-complete for 1.0, but the API is not frozen yet: see [API stability](docs/api-stability.md). Things to know:
+
+- In the sidebar only the items you list (or import with `fromFilamentNavigation()`) are shown.
+- Levels come from the URL (plus `activeOn()` / `activeWhen()`), so a record's pages should live under the record's URL.
+- Pinned pages stored in the browser are per browser; use `pinnable(database: true)` to sync them across devices.
+- Hebrew, Persian and Urdu strings are machine-written and welcome a native-speaker review.
+
+## 🤝 Contributing, security, license
+
+- **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md).
+- **Security:** please report vulnerabilities privately: [SECURITY.md](SECURITY.md).
+- **Changelog:** [CHANGELOG.md](CHANGELOG.md).
+- **License:** [MIT](LICENSE). Made by [Solution Forest](https://github.com/solutionforest).

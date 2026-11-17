@@ -696,8 +696,8 @@ async function fetchPluginDocs() {
           content = await processImages(content, owner, repoName, branch, docsPath, assetsDir, versionDir, plugin.id, cacheOnly, repoFileDir, version.assets);
 
           const mdxContent = `---
-title: ${file.title}
-description: ${plugin.description}
+title: ${JSON.stringify(file.title)}
+description: ${JSON.stringify(plugin.description)}
 lastUpdated: ${lastUpdated}
 ---
 
