@@ -32,3 +32,17 @@
     margin-bottom: 0px;
   }
 }
+
+.filament-drilldown-nav
+  img[alt="Filament Drilldown Nav: one sidebar, one level at a time, a menu for every record"] {
+  width: 100%;
+}
+
+.filament-drilldown-nav .prose > h1 ~ div:has(a),
+.filament-drilldown-nav .prose > h1 ~ div:has(img) {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0px;
+}

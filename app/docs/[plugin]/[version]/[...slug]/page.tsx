@@ -41,7 +41,7 @@ export default async function Page(props: CurrentPageProps) {
   const pluginConfig = config.plugins.find((p) => p.id === pluginName);
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full} footer={{ component: <Footer /> }}>
+    <DocsPage className={pluginName} toc={page.data.toc} full={page.data.full} footer={{ component: <Footer /> }}>
       {pluginConfig?.archived && (
         <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
           <ArchiveIcon className="mt-0.5 size-4 shrink-0" />
